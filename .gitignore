@@ -1,0 +1,6 @@
+# PyInstaller output
+build/
+dist/
+dist_v2/
+__pycache__/
+*.pyc

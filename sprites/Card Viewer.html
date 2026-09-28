@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card Viewer</title>
+<link href="../fonts/fonts.css" rel="stylesheet">
+<style>
+  :root {
+    --felt: #561824; --felt-deep: #22080e; --brass: #e0b45a; --brass-hi: #f7dc9a; --text: #f7ecd9; --muted: #d6bca2;
+    --font: "Fraunces", Georgia, serif; --z: 4; color-scheme: dark;
+  }
+  :root[data-theme="light"] { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; font-family: var(--font); color: var(--text);
+    background: radial-gradient(90% 60% at 50% 30%, var(--felt), var(--felt-deep)); background-color: var(--felt-deep); background-attachment: fixed; }
+  header { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; padding: 16px 28px;
+    background: rgba(20,5,9,.88); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(224,180,90,.3); }
+  h1 { margin: 0 auto 0 0; font-size: 1.9rem; font-weight: 900; font-style: italic; letter-spacing: -.02em; }
+  h1 small { font-size: .95rem; font-weight: 600; font-style: normal; color: var(--muted); margin-left: 10px; letter-spacing: 0; }
+  .ctl { display: flex; align-items: center; gap: 8px; font-size: .95rem; color: var(--muted); }
+  .seg { display: flex; border: 1.5px solid var(--brass); border-radius: 999px; overflow: hidden; }
+  .seg button { font: inherit; font-weight: 700; font-size: .9rem; border: 0; background: transparent; color: var(--muted); padding: 6px 12px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid rgba(224,180,90,.45); }
+  .seg button[aria-pressed="true"] { background: var(--brass); color: #3a1209; }
+  .btn { font: inherit; font-weight: 700; font-size: .9rem; border: 1.5px solid var(--brass); border-radius: 999px; background: transparent; color: var(--brass-hi); padding: 6px 14px; cursor: pointer; }
+  .btn:hover { background: rgba(224,180,90,.15); }
+  main { padding: 22px 28px 60px; }
+  .hint { margin: 0 0 18px; color: var(--muted); font-size: .98rem; }
+  .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin-bottom: 26px; }
+  .row h2 { width: 100%; margin: 0 0 2px; font-size: 1.2rem; font-weight: 700; color: var(--brass); }
+  figure { margin: 0; display: grid; justify-items: center; gap: 6px; cursor: pointer; }
+  figure .frame { padding: 6px; border-radius: 8px; background: var(--bg, transparent); outline: 2px solid transparent; transition: outline-color .12s, transform .12s; }
+  figure:hover .frame { outline-color: rgba(247,220,154,.6); transform: translateY(-3px); }
+  figure.pinned .frame { outline-color: var(--brass-hi); }
+  figure img { display: block; width: calc(var(--w) * var(--z) * 1px); height: calc(var(--h) * var(--z) * 1px); image-rendering: pixelated; object-fit: contain; }
+  figure img.hd { image-rendering: auto; }
+  figure.missing .frame { width: calc(var(--w) * var(--z) * 1px + 12px); height: calc(var(--h) * var(--z) * 1px + 12px); display: grid; place-items: center; border: 2px dashed rgba(247,236,217,.3); color: var(--muted); font-size: .8rem; }
+  figcaption { font-size: .78rem; color: var(--muted); text-align: center; line-height: 1.2; }
+  figcaption b { display: block; font-size: .7rem; color: #ffb0a4; font-weight: 700; }
+  body.bg-white { --bg: #fff; } body.bg-black { --bg: #000; } body.bg-check { --bg: repeating-conic-gradient(#bbb 0 25%, #eee 0 50%) 0 0 / 12px 12px; }
+  #compare { position: sticky; bottom: 0; display: none; gap: 18px; align-items: flex-end; padding: 16px 28px; overflow-x: auto;
+    background: rgba(20,5,9,.94); border-top: 1px solid rgba(224,180,90,.4); }
+  #compare.on { display: flex; }
+  #compare .lbl { color: var(--brass); font-weight: 700; white-space: nowrap; align-self: center; }
+  #compare figure img { height: min(calc(var(--h) * var(--cz) * 1px), 34vh); width: auto; }
+</style>
+</head>
+<body class="bg-none">
+<header>
+  <h1>Card Viewer <small id="count"></small></h1>
+  <div class="ctl">Zoom <div class="seg" id="zoom"><button data-v="1">1×</button><button data-v="2">2×</button><button data-v="4">4×</button><button data-v="6">6×</button><button data-v="8">8×</button></div></div>
+  <div class="ctl">Behind <div class="seg" id="bgs"><button data-v="none">Table</button><button data-v="white">White</button><button data-v="black">Black</button><button data-v="check">Checker</button></div></div>
+  <button class="btn" id="refresh" type="button">Refresh images</button>
+</header>
+<main>
+  <p class="hint">Every card in <code>cards/</code>, shown at the same zoom so you can compare them. Click cards to pin them in the strip at the bottom for a close side-by-side look. Save a new PNG over a card file, then press Refresh.</p>
+  <div id="rows"></div>
+</main>
+<div id="compare"><span class="lbl">Compare</span><div id="pins" style="display:flex;gap:18px;align-items:flex-end"></div><button class="btn" id="clearPins" type="button">Clear</button></div>
+<script>
+  const SUITS = [['spades', 'Spades'], ['hearts', 'Hearts'], ['diamonds', 'Diamonds'], ['clubs', 'Clubs']];
+  const RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'jack', 'queen', 'king', 'ace'];
+  const LABEL = { jack: 'J', queen: 'Q', king: 'K', ace: 'A' };
+  const files = [];
+  SUITS.forEach(([s, n]) => RANKS.forEach(r => files.push({ file: `${r}_of_${s}.png`, label: `${LABEL[r] || r} of ${n}`, row: n })));
+  files.push({ file: 'card_back.png', label: 'Card back', row: 'Back' });
+  const pins = new Set();
+  let stamp = Date.now(), sizes = {};
+  const get = k => { try { return localStorage.getItem('cv-' + k); } catch (e) { return null; } };
+  const put = (k, v) => { try { localStorage.setItem('cv-' + k, v); } catch (e) {} };
+
+  function fig(f, forCompare) {
+    const el = document.createElement('figure');
+    el.dataset.file = f.file;
+    el.innerHTML = `<div class="frame"><img alt="${f.label}" src="cards/${f.file}?t=${stamp}"></div><figcaption>${f.label}<b></b></figcaption>`;
+    const img = el.querySelector('img');
+    img.onload = () => {
+      sizes[f.file] = img.naturalWidth + '×' + img.naturalHeight;
+      flagSizes();
+    };
+    img.onerror = () => { el.classList.add('missing'); el.style.setProperty('--w', 25); el.style.setProperty('--h', 35); el.querySelector('.frame').textContent = 'missing'; };
+    if (!forCompare) el.addEventListener('click', () => { pins.has(f.file) ? pins.delete(f.file) : pins.add(f.file); renderPins(); });
+    else el.addEventListener('click', () => { pins.delete(f.file); renderPins(); });
+    el.style.setProperty('--w', 25); el.style.setProperty('--h', 35);
+    return el;
+  }
+  // point out any card whose pixel size differs from the most common one
+  function flagSizes() {
+    const counts = {}; Object.values(sizes).forEach(s => counts[s] = (counts[s] || 0) + 1);
+    const common = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+    const [cw, ch] = (common || '33×48').split('×').map(Number);
+    // every card is shown at the common size so different-sized art can still be compared;
+    // art much bigger than that is scaled smoothly instead of as hard pixels
+    document.querySelectorAll('figure').forEach(el => {
+      el.style.setProperty('--w', cw); el.style.setProperty('--h', ch);
+      const s = sizes[el.dataset.file], img = el.querySelector('img');
+      if (img) img.classList.toggle('hd', !!img.naturalWidth && img.naturalWidth > cw * 2);
+      const b = el.querySelector('figcaption b'); if (b) b.textContent = s && s !== common ? s : '';
+    });
+    document.getElementById('count').textContent = `${files.length} cards · ${common || ''} px`;
+  }
+  function render() {
+    const rows = document.getElementById('rows'); rows.innerHTML = ''; sizes = {};
+    [...new Set(files.map(f => f.row))].forEach(r => {
+      const d = document.createElement('section'); d.className = 'row'; d.innerHTML = `<h2>${r}</h2>`;
+      files.filter(f => f.row === r).forEach(f => { const el = fig(f); if (pins.has(f.file)) el.classList.add('pinned'); d.append(el); });
+      rows.append(d);
+    });
+    renderPins();
+  }
+  function renderPins() {
+    const box = document.getElementById('pins'); box.innerHTML = '';
+    document.querySelectorAll('#rows figure').forEach(el => el.classList.toggle('pinned', pins.has(el.dataset.file)));
+    files.filter(f => pins.has(f.file)).forEach(f => box.append(fig(f, true)));
+    document.getElementById('compare').classList.toggle('on', pins.size > 0);
+  }
+  function seg(id, key, def, apply) {
+    const el = document.getElementById(id), v0 = get(key) || def;
+    const set = v => { el.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v))); put(key, v); apply(v); };
+    el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) set(b.dataset.v); });
+    set(v0);
+  }
+  seg('zoom', 'zoom', '4', v => { document.documentElement.style.setProperty('--z', v); document.documentElement.style.setProperty('--cz', Math.max(8, v * 2)); });
+  seg('bgs', 'bg', 'none', v => { document.body.className = 'bg-' + v; });
+  document.getElementById('refresh').addEventListener('click', () => { stamp = Date.now(); render(); });
+  document.getElementById('clearPins').addEventListener('click', () => { pins.clear(); renderPins(); });
+  render();
+</script>
+</body>
+</html>
