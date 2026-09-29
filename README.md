@@ -1,15 +1,21 @@
 # War: The Long March
 
-A roguelike built on the card game War. Fight nine battles to reach the King with one life. Both sides flip a card and the higher card hits for the difference in rank. Ties start a war: three cards down, one up, and the winner hits 3 harder per war. Win battles to grow your deck and collect relics.
+A roguelike built on the card game War. March through three acts to reach the King with one life. Both sides flip a card and the higher card hits for the difference in rank. Ties start a war: three cards down, one up. The winner hits 3 harder per war and takes the loser's best card for good.
 
 Originally made as a phone web app, then ported to PC as a standalone Windows app.
 
 ## Features
 
+- Branching map, new every run: pick your route through battle spots and store spots across three acts (The Border, The Wilds, The Capital), each ending in a boss with a gimmick
+- Every battle shows its prize on the map (gold, a card, a charm, or a relic from bosses)
+- Stores between battles: relics, cards, charms, healing and deck upgrades for gold
+- Card charms: Gilded (+1 gold when the card wins), Keen (+2 damage) and Mending (heal 1)
+- Wars with real stakes: the winner captures the loser's best card from the pile
 - Opening pack at the start of every run: 18 random cards, with a 1 in 5 chance of a rare face card or Ace
-- 3 save slots, with Continue, New Run and Load Run from the main menu
+- Hover any relic or charm to see what it does
+- 3 save slots, with Continue, New Run and Saved Runs from the main menu
 - Widescreen layout that scales to any window size, plus fullscreen
-- Synthesized music (menu, battle and boss tracks) and sound effects
+- Synthesized music (menu, battle, boss and store tracks) and sound effects
 - Options: volume, table colour, animation speed, screen shake, particles, key hints
 - Custom card art: cards in `sprites/cards/` replace the built-in drawn cards
 
@@ -36,7 +42,9 @@ python -m PyInstaller --noconfirm --onefile --windowed --distpath dist_v2 --name
 | Space / F | Flip |
 | B | Burn the next card |
 | D | View deck |
-| 1 2 3 | Pick a reward |
+| 1 2 3 / arrows | Pick a path on the map, or a reward |
+| Enter | Go to the selected spot |
+| 1 – 6 | Buy in the store |
 | S | Skip reward |
 | Esc | Options |
 | F11 | Fullscreen |
