@@ -1,0 +1,2172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a0a11">
+<title>War: The Long March</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,600;1,9..144,900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --felt: #621c28; --felt-deep: #2a0a11; --ivory: #fffaf0; --paper: #f4ead6; --ink: #1c1718; --red: #b01e2c;
+    --brass: #e0b45a; --brass-hi: #f7dc9a; --brass-dark: #8d6a26; --navy: #1a2544; --navy-hi: #2c3d6b;
+    --foe: #e0574f; --heal: #86d494; --text: #f7ecd9; --muted: #d6bca2;
+    --cwb: min(22vw, 13dvh, 104px);
+    --cw: var(--cwb);
+    --font: "Fraunces", Georgia, "Times New Roman", serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: dark;
+  }
+  @supports not (height: 1dvh) { :root { --cwb: min(22vw, 13vh, 104px); } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --felt: #561824; --felt-deep: #22080e; } }
+  :root[data-theme="dark"] { --felt: #561824; --felt-deep: #22080e; }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    height: 100%; margin: 0; overflow: hidden; font-family: var(--font); color: var(--text);
+    background:
+      radial-gradient(140% 90% at 50% 40%, transparent 40%, rgba(0,0,0,.55) 100%),
+      radial-gradient(90% 60% at 50% 48%, var(--felt) 0%, var(--felt-deep) 100%);
+    background-color: var(--felt-deep);
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .22; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  button { font: inherit; color: inherit; touch-action: manipulation; cursor: pointer; }
+  button:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
+  [hidden] { display: none !important; }
+  h1, h2, h3 { font-weight: 900; font-style: italic; letter-spacing: -0.02em; line-height: 1; margin: 0; }
+  p { line-height: 1.5; }
+
+  .screen { position: relative; height: 100%; max-width: 520px; margin: 0 auto; padding: 0 16px; }
+  .screen.enter { animation: enter .42s cubic-bezier(.2,.7,.2,1); }
+  @keyframes enter { from { opacity: 0; transform: translateY(14px); } }
+  .scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+  .primary {
+    position: relative; width: 100%; min-height: 58px; border: none; border-radius: 16px; overflow: hidden;
+    background: linear-gradient(180deg, var(--brass-hi) 0%, var(--brass) 45%, #c99a3e 100%);
+    color: #3a1209; font-size: 1.25rem; font-weight: 800; letter-spacing: .01em;
+    box-shadow: 0 4px 0 var(--brass-dark), 0 10px 22px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.6);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .primary:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--brass-dark), 0 4px 10px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.6); }
+  .primary:disabled { filter: saturate(.4) brightness(.75); }
+  .secondary {
+    min-height: 58px; border-radius: 16px; padding: 0 18px; font-size: 1.05rem; font-weight: 700;
+    background: rgba(0,0,0,.18); border: 2px solid var(--brass); color: var(--brass-hi);
+  }
+  .secondary:active { background: rgba(224,180,90,.2); }
+  .secondary:disabled { opacity: .35; }
+  .ghost {
+    background: rgba(0,0,0,.18); border: 1.5px solid rgba(247,236,217,.35); border-radius: 999px;
+    padding: 6px 14px; min-height: 38px; font-size: .95rem;
+  }
+  .icon-btn { width: 38px; padding: 0; display: inline-grid; place-items: center; font-size: 1rem; }
+  .link { background: none; border: none; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; padding: 10px; font-size: .95rem; }
+
+  /* medallions */
+  .med {
+    width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none;
+    background: radial-gradient(circle at 35% 30%, #3b4c7c, var(--navy) 70%);
+    box-shadow: 0 0 0 2px var(--brass), 0 0 0 4px rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.4);
+    color: var(--brass-hi); font-size: 1.5rem; line-height: 1;
+  }
+  .med.big { width: 64px; height: 64px; font-size: 2.3rem; }
+  .med.huge { width: 110px; height: 110px; font-size: 4rem; }
+
+  /* title */
+  .title { display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+  .fan { --cw: min(19vw, 84px); position: relative; height: calc(var(--cw) * 2.05); margin-bottom: 4px; }
+  .fan .card { position: absolute; left: 50%; bottom: 0; margin-left: calc(var(--cw) * -.5); transform-origin: 50% 135%;
+    transform: rotate(var(--r)); animation: fanIn .9s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d); }
+  @keyframes fanIn { from { transform: rotate(0deg) translateY(40px); } }
+  .title h1 { font-size: clamp(4.6rem, 25vw, 7.5rem); text-shadow: 0 4px 0 rgba(0,0,0,.35); }
+  .title .sub { font-size: 1.35rem; font-weight: 600; font-style: italic; margin: -12px 0 0; color: var(--brass); }
+  .title .rules { margin: 0; color: var(--muted); max-width: 36ch; font-size: .98rem; }
+  .title .btns { display: grid; gap: 12px; }
+  .title .rec { margin: 0; font-size: .92rem; color: var(--muted); }
+  .title .corner-btn { position: absolute; top: 14px; right: 16px; }
+
+  /* hp bars */
+  .hp { position: relative; height: 22px; border-radius: 11px; overflow: hidden;
+    background: linear-gradient(180deg, #111a33, #1d2a4f); box-shadow: inset 0 2px 4px rgba(0,0,0,.5), 0 0 0 1.5px rgba(0,0,0,.35); }
+  .hp .ghostbar, .hp .fill { position: absolute; inset: 0 auto 0 0; width: 100%; border-radius: 11px; }
+  .hp .ghostbar { background: #fff3d6; transition: width .6s ease .35s; }
+  .hp .fill { background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, #b88a33); transition: width .3s ease; }
+  .hp.foe .fill { background: linear-gradient(180deg, #ff9a8c, var(--foe) 55%, #b43a33); }
+  .hp b { position: relative; display: block; text-align: center; font-size: .85rem; line-height: 22px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+  .hp.healflash .fill { animation: healflash .6s; }
+  @keyframes healflash { 50% { filter: brightness(1.5) saturate(1.4); } }
+
+  /* map */
+  .map { display: grid; grid-template-rows: auto 1fr auto; }
+  .map-top { padding: 14px 0 12px; display: grid; gap: 10px; }
+  .map-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .map-head h2 { font-size: 2rem; }
+  .map-head .tools { display: flex; gap: 8px; }
+  .relics { display: flex; flex-wrap: wrap; gap: 6px; }
+  .relics span { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: rgba(0,0,0,.22); box-shadow: inset 0 0 0 1px rgba(224,180,90,.35); font-size: 1.05rem; }
+  .march { position: relative; min-height: 0; list-style: none; margin: 0; padding: 4px 0 12px; display: grid; gap: 2px; align-content: start; }
+  .march::before { content: ""; position: absolute; left: 32px; top: 30px; bottom: 36px; width: 2px;
+    background: repeating-linear-gradient(180deg, rgba(224,180,90,.55) 0 6px, transparent 6px 12px); }
+  .march li { position: relative; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: center; padding: 8px 10px; border-radius: 14px; }
+  .march b { font-size: 1.08rem; font-weight: 600; display: block; line-height: 1.25; }
+  .march small { display: block; color: var(--muted); font-size: .84rem; line-height: 1.4; }
+  .march li.done .med { background: var(--brass); color: #3a1209; font-size: 1.2rem; }
+  .march li.done > div { opacity: .5; }
+  .march li.locked .med { filter: grayscale(.6) brightness(.8); }
+  .march li.now { background: linear-gradient(90deg, rgba(224,180,90,.2), rgba(224,180,90,.04)); box-shadow: inset 0 0 0 1.5px rgba(224,180,90,.7); }
+  .march li.now .med { animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 2px var(--brass), 0 0 0 9px rgba(224,180,90,.18), 0 4px 10px rgba(0,0,0,.4); } }
+  .march li.boss b { font-style: italic; font-weight: 900; font-size: 1.25rem; color: var(--brass-hi); }
+  .map-foot { padding: 8px 0 14px; display: grid; gap: 2px; justify-items: center; }
+
+  /* battle */
+  .battle { display: grid; grid-template-rows: auto 1fr auto auto; padding-top: 10px; }
+  .foe-head { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+  .foe-head small { color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; display: block; }
+  .foe-head h2 { font-size: 1.7rem; margin-top: 2px; }
+  .foe-head .tools { display: flex; gap: 6px; align-self: start; }
+  .quirk { margin: 8px 0 8px; font-size: .86rem; color: var(--muted); font-style: italic; min-height: 1.3em; line-height: 1.35; }
+  .med.hit { animation: medhit .45s; }
+  @keyframes medhit { 20% { transform: translateX(-5px) rotate(-6deg); box-shadow: 0 0 0 2px var(--foe), 0 0 20px var(--foe); } 60% { transform: translateX(4px) rotate(4deg); } }
+  .med.dead { animation: meddead 1s forwards; }
+  @keyframes meddead { 30% { transform: scale(1.2); } 100% { transform: scale(.9) rotate(-14deg); filter: grayscale(1) brightness(.6); } }
+
+  .field { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: 0; }
+  .field::before { content: ""; position: absolute; inset: 8% -16px; pointer-events: none;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(255,210,150,.10), transparent 70%); }
+  .row { position: relative; display: grid; grid-template-columns: calc(var(--cwb) * .62) 1fr calc(var(--cwb) * .62); align-items: center; gap: 10px; }
+  .side-slot { display: grid; justify-items: center; gap: 4px; font-size: .74rem; color: var(--muted); text-align: center; line-height: 1.2; }
+  .side-slot .empty-slot { width: calc(var(--cwb) * .62); height: calc(var(--cwb) * .62 * 1.4); }
+  .pilebtn { background: none; border: none; padding: 0; display: grid; justify-items: center; gap: 4px; color: var(--muted); font-size: .74rem; }
+  .pile { position: relative; }
+  .pile .card:not(:last-child) { position: absolute; left: 0; top: 0; }
+  .lane { height: calc(var(--cwb) * 1.4); display: flex; justify-content: center; align-items: center; overflow-x: clip; overflow-y: visible; perspective: 900px; }
+  .lane:empty::before {
+    content: ""; width: var(--cwb); height: calc(var(--cwb) * 1.4); border-radius: calc(var(--cwb) * .09);
+    border: 2px dashed rgba(247,236,217,.16); background: rgba(0,0,0,.08);
+  }
+  .msg { min-height: 3.2em; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 1rem; line-height: 1.3; padding: 0 4px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  .msg .dmg { color: var(--brass-hi); font-weight: 800; }
+  .msg .hurt { color: #ffb0a4; font-weight: 800; }
+  .you-panel { display: grid; gap: 8px; padding: 8px 0 8px; }
+  .controls { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 4px 0 14px; }
+  .shake { animation: shake .4s; }
+  @keyframes shake { 15% { transform: translate(-6px, 2px); } 35% { transform: translate(5px, -3px); } 55% { transform: translate(-4px, 1px); } 75% { transform: translate(3px, 0); } }
+  .fallen { transition: filter 1.4s; filter: grayscale(.85) brightness(.7); }
+
+  .pop { position: absolute; left: 50%; top: 50%; pointer-events: none; z-index: 5; font-size: 2.8rem; font-weight: 900; font-style: italic;
+    color: #fff4d8; -webkit-text-stroke: 1px rgba(80,20,10,.6); text-shadow: 0 3px 0 rgba(0,0,0,.45), 0 0 22px rgba(255,180,80,.55);
+    animation: pop 1.1s cubic-bezier(.2,.8,.2,1) forwards; }
+  .pop.hurt { color: #ffc2b8; text-shadow: 0 3px 0 rgba(0,0,0,.45), 0 0 22px rgba(255,60,40,.6); }
+  .pop.heal { color: var(--heal); font-size: 1.7rem; text-shadow: 0 2px 0 rgba(0,0,0,.4); }
+  @keyframes pop { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.4); } 18% { opacity: 1; transform: translate(-50%, -55%) scale(1.25); } 30% { transform: translate(-50%, -55%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -140%) scale(.95); } }
+
+  .banner { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 30; }
+  .banner span { font-size: clamp(4rem, 26vw, 8rem); font-weight: 900; font-style: italic; letter-spacing: -.03em; color: var(--brass-hi);
+    -webkit-text-stroke: 2px #5a2a0a; text-shadow: 0 6px 0 #3a1209, 0 0 40px rgba(255,190,90,.6); animation: stamp 1.2s cubic-bezier(.2,.9,.2,1) forwards; }
+  .banner.red span { color: #ffb3a6; text-shadow: 0 6px 0 #3a0a09, 0 0 40px rgba(255,70,50,.6); }
+  .banner::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(255,200,110,.35), transparent 60%); animation: flash 1.2s forwards; }
+  .banner.red::before { background: radial-gradient(circle, rgba(200,30,30,.4), transparent 65%); }
+  @keyframes stamp { 0% { transform: scale(2.6) rotate(-8deg); opacity: 0; } 22% { transform: scale(.95) rotate(-4deg); opacity: 1; } 32% { transform: scale(1.03) rotate(-4deg); } 75% { transform: scale(1) rotate(-4deg); opacity: 1; } 100% { transform: scale(1.1) rotate(-4deg); opacity: 0; } }
+  @keyframes flash { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+  .spark { position: fixed; width: 7px; height: 7px; border-radius: 50%; pointer-events: none; z-index: 40; box-shadow: 0 0 8px currentColor; }
+
+  /* cards */
+  .card { width: var(--cw); height: calc(var(--cw) * 1.4); flex: none; position: relative; transform-style: preserve-3d; border-radius: calc(var(--cw) * .09); }
+  .card.down { transform: rotateY(180deg); }
+  .fc { position: absolute; inset: 0; border-radius: inherit; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden;
+    box-shadow: 0 1px 0 rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.4); }
+  .front {
+    background: linear-gradient(155deg, #fffdf7 0%, var(--paper) 100%); color: var(--ink);
+    box-shadow: inset 0 0 0 calc(var(--cw) * .035) #fffdf7, inset 0 0 0 calc(var(--cw) * .045) rgba(170,125,50,.45), 0 1px 0 rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.4);
+  }
+  .front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(125deg, rgba(255,255,255,.55) 0%, transparent 30%); pointer-events: none; }
+  .red .front { color: var(--red); }
+  .backf {
+    transform: rotateY(180deg);
+    background:
+      repeating-linear-gradient(45deg, transparent 0 calc(var(--cw) * .06), rgba(224,180,90,.5) calc(var(--cw) * .06) calc(var(--cw) * .07)),
+      repeating-linear-gradient(-45deg, transparent 0 calc(var(--cw) * .06), rgba(224,180,90,.5) calc(var(--cw) * .06) calc(var(--cw) * .07)),
+      radial-gradient(circle at 50% 50%, var(--navy-hi), var(--navy) 70%);
+    box-shadow: inset 0 0 0 calc(var(--cw) * .05) var(--ivory), inset 0 0 0 calc(var(--cw) * .07) var(--brass), 0 1px 0 rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.4);
+  }
+  .backf::after { content: "W"; position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * .36); height: calc(var(--cw) * .36);
+    transform: translate(-50%, -50%) rotate(45deg); background: var(--navy); border: calc(var(--cw) * .025) solid var(--brass);
+    box-shadow: 0 0 0 calc(var(--cw) * .025) var(--navy); display: grid; place-items: center;
+    color: var(--brass-hi); font-weight: 900; font-style: italic; font-size: calc(var(--cw) * .2); }
+  .backf::before { content: ""; position: absolute; inset: 0; background: linear-gradient(125deg, rgba(255,255,255,.18), transparent 35%); }
+  .corner { position: absolute; font-weight: 800; text-align: center; line-height: .92; font-size: calc(var(--cw) * .17); width: 1.3em; z-index: 1; }
+  .corner small { display: block; font-size: .9em; }
+  .corner.tl { top: 5%; left: 4%; }
+  .corner.br { bottom: 5%; right: 4%; transform: rotate(180deg); }
+  .pips { position: absolute; inset: 15% 23%; }
+  .pips i { position: absolute; font-style: normal; transform: translate(-50%, -50%); font-size: calc(var(--cw) * .2); line-height: 1; }
+  .pips i.v { transform: translate(-50%, -50%) rotate(180deg); }
+  .ace { position: absolute; inset: 0; display: grid; place-items: center; font-size: calc(var(--cw) * .62); line-height: 1; }
+  .ace span { filter: drop-shadow(0 2px 1px rgba(0,0,0,.2)); }
+  .ace.spade::before { content: ""; position: absolute; width: 64%; aspect-ratio: 1; border-radius: 50%; border: calc(var(--cw) * .018) solid rgba(170,125,50,.55); box-shadow: inset 0 0 0 calc(var(--cw) * .03) rgba(170,125,50,.12); }
+  .court { position: absolute; inset: 15% 19%; border-radius: calc(var(--cw) * .05); border: calc(var(--cw) * .018) solid currentColor;
+    background: repeating-linear-gradient(135deg, transparent 0 4px, rgba(170,125,50,.14) 4px 5px), linear-gradient(180deg, rgba(224,180,90,.22), rgba(224,180,90,.05));
+    display: grid; place-items: center; overflow: hidden; }
+  .court .g { font-size: calc(var(--cw) * .5); line-height: 1; filter: drop-shadow(0 2px 0 rgba(0,0,0,.15)); }
+  .court .s { position: absolute; font-size: calc(var(--cw) * .14); }
+  .court .s.a { top: 5%; right: 8%; } .court .s.b { bottom: 5%; left: 8%; transform: rotate(180deg); }
+  .simple { position: absolute; inset: 0; display: grid; place-items: center; font-size: calc(var(--cw) * .5); font-weight: 800; line-height: 1; padding-top: 8%; }
+  .simple.letter { font-style: italic; font-size: calc(var(--cw) * .5); }
+  .mini { --cw: calc(var(--cwb) * .62); }
+  .tiny { --cw: 44px; }
+  .mini .corner.br, .tiny .corner.br { display: none; }
+  .lane .card + .card { margin-left: calc(var(--cw) * -.6); }
+  .lane .card.down + .card.down { margin-left: calc(var(--cw) * -.84); }
+  .lane.won .card:not(.down):last-child .front { box-shadow: inset 0 0 0 calc(var(--cw) * .035) #fffdf7, inset 0 0 0 calc(var(--cw) * .045) rgba(170,125,50,.45), 0 0 0 3px var(--brass), 0 0 26px rgba(255,200,100,.7); }
+  .lane.lost .fc { filter: brightness(.62) saturate(.7); transition: filter .3s; }
+  .card.gone { visibility: hidden; }
+  .burning .front { animation: burn .6s ease-in forwards; }
+  @keyframes burn { 0% { } 35% { filter: sepia(1) saturate(4) hue-rotate(-20deg) brightness(1.2); box-shadow: 0 0 24px 6px rgba(255,120,30,.8); } 100% { filter: sepia(1) saturate(5) brightness(.3) blur(3px); opacity: 0; transform: translateY(-30%) scale(.8); } }
+
+  /* reward */
+  .reward { display: grid; grid-template-rows: auto 1fr auto; }
+  .reward-top { padding: 22px 0 14px; display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+  .reward-top h2 { font-size: 2.1rem; }
+  .reward-top p { margin: 6px 0 0; color: var(--muted); }
+  .offers { display: grid; gap: 12px; align-content: start; padding: 2px 2px 12px; }
+  .offer {
+    display: grid; grid-template-columns: 100px 1fr; gap: 14px; align-items: center; text-align: left; position: relative; overflow: hidden;
+    background: linear-gradient(160deg, rgba(40,10,16,.75), rgba(20,5,9,.6));
+    border: 1.5px solid rgba(224,180,90,.5); border-radius: 18px; padding: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.06);
+    animation: dealOffer .55s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d);
+    transition: transform .2s, opacity .3s, border-color .2s;
+  }
+  @keyframes dealOffer { from { opacity: 0; transform: translateY(30px) rotate(-2deg); } }
+  .offer:active { transform: scale(.98); border-color: var(--brass-hi); }
+  .offer.chosen { transform: scale(1.03); border-color: var(--brass-hi); box-shadow: 0 0 0 2px var(--brass), 0 0 30px rgba(255,200,100,.45); }
+  .offer.faded { opacity: 0; transform: translateX(40px); }
+  .offer .vis { display: flex; justify-content: center; align-items: center; min-height: 70px; perspective: 400px; }
+  .offer .vis .card:nth-child(1) { transform: rotate(-7deg); }
+  .offer .vis .card:nth-child(2) { transform: rotate(4deg) translateY(2px); }
+  .offer .vis .card:nth-child(3) { transform: rotate(12deg) translateY(6px); }
+  .offer .vis .card + .card { margin-left: -26px; }
+  .offer .icon { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-size: 2.1rem;
+    background: radial-gradient(circle at 35% 30%, #3b4c7c, var(--navy) 70%); box-shadow: 0 0 0 2px var(--brass), 0 4px 10px rgba(0,0,0,.4); }
+  .offer .kind { display: block; font-size: .75rem; color: var(--brass); font-weight: 600; margin-bottom: 2px; }
+  .offer b { display: block; font-size: 1.18rem; font-weight: 900; font-style: italic; }
+  .offer span.d { display: block; font-size: .9rem; color: var(--muted); line-height: 1.4; margin-top: 3px; }
+  .reward-foot { padding: 4px 0 14px; display: grid; justify-items: center; }
+
+  /* end */
+  .end { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 16px; }
+  .end h2 { font-size: clamp(2.8rem, 14vw, 4rem); }
+  .end p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+  .end .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+  .end .stats div { background: rgba(0,0,0,.2); border-radius: 12px; padding: 10px; box-shadow: inset 0 0 0 1px rgba(224,180,90,.25); }
+  .end .stats b { display: block; font-size: 1.6rem; font-weight: 900; font-style: italic; color: var(--brass-hi); font-variant-numeric: tabular-nums; }
+  .end .stats span { font-size: .8rem; color: var(--muted); }
+  .end .primary { margin-top: 6px; }
+  .end .med.huge { animation: fanIn .8s cubic-bezier(.2,.8,.2,1) both; }
+
+  /* sheet */
+  .sheet { position: fixed; inset: 0; z-index: 20; display: grid; background: rgba(20,5,9,.86); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade .25s; }
+  @keyframes fade { from { opacity: 0; } }
+  .sheet-in { height: 100%; max-width: 520px; width: 100%; margin: 0 auto; padding: 16px; overflow-y: auto; animation: enter .3s cubic-bezier(.2,.7,.2,1); }
+  .sheet-in header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .sheet-in h3 { font-size: 1.7rem; }
+  .deckgrid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .relic-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .relic-list li { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; }
+  .relic-list .med { width: 38px; height: 38px; font-size: 1.1rem; }
+  .relic-list b { display: block; font-weight: 700; }
+  .relic-list small { color: var(--muted); font-size: .9rem; line-height: 1.4; }
+  .sheet h4 { margin: 0 0 12px; font-size: 1.1rem; font-weight: 700; color: var(--brass); }
+
+  :root[data-table="forest"] { --felt: #1d4a33; --felt-deep: #091b11; }
+  :root[data-table="midnight"] { --felt: #213059; --felt-deep: #090f21; }
+  .corner-btn { display: flex; gap: 8px; }
+
+  /* main menu */
+  .menu { display: grid; gap: 10px; }
+  .menu-btn { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; min-height: 56px; padding: 8px 20px;
+    border-radius: 16px; border: 2px solid rgba(224,180,90,.5); background: rgba(0,0,0,.22); color: var(--brass-hi); font-size: 1.2rem; font-weight: 800;
+    transition: background .15s, transform .12s; }
+  .menu-btn small { font-size: .85rem; font-weight: 600; color: var(--muted); margin-top: 2px; }
+  .menu-btn:active:not(:disabled) { background: rgba(224,180,90,.18); transform: scale(.98); }
+  .menu-btn.main { background: linear-gradient(180deg, var(--brass-hi), var(--brass) 45%, #c99a3e); color: #3a1209; border-color: transparent; min-height: 66px;
+    box-shadow: 0 4px 0 var(--brass-dark), 0 10px 22px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.6); font-size: 1.35rem; }
+  .menu-btn.main small { color: #6a3a12; }
+  .menu-btn:disabled { opacity: .35; }
+
+  /* save slots */
+  .slots { display: grid; grid-template-rows: auto 1fr auto; padding-top: 22px; }
+  .slots-top h2 { font-size: 2.4rem; }
+  .slots-top p { margin: 8px 0 14px; color: var(--muted); }
+  .slot-list { display: grid; gap: 12px; align-content: start; padding-bottom: 8px; }
+  .slot-wrap { display: grid; gap: 0; }
+  .slot { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; text-align: left; padding: 14px 16px;
+    border-radius: 18px; border: 2px solid rgba(224,180,90,.5); color: var(--text);
+    background: linear-gradient(160deg, rgba(40,10,16,.8), rgba(20,5,9,.62)); box-shadow: 0 8px 20px rgba(0,0,0,.3);
+    animation: dealOffer .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d); }
+  .slot:active:not(:disabled) { border-color: var(--brass-hi); transform: scale(.98); }
+  .slot.empty { border-style: dashed; background: rgba(0,0,0,.14); }
+  .slot:disabled { opacity: .38; }
+  .slot.armed { border-color: var(--foe); box-shadow: 0 0 0 2px var(--foe), 0 8px 20px rgba(0,0,0,.35); }
+  .slot-n { font-size: .78rem; font-weight: 700; color: var(--brass); letter-spacing: .12em; text-transform: uppercase; }
+  .slot b { font-size: 1.6rem; font-weight: 900; font-style: italic; line-height: 1; letter-spacing: -.02em; }
+  .slot b.slot-empty { color: var(--muted); }
+  .slot-d { font-size: .92rem; color: var(--muted); line-height: 1.35; }
+  .slot-hp { position: relative; display: block; width: 100%; height: 20px; border-radius: 10px; overflow: hidden; background: linear-gradient(180deg, #111a33, #1d2a4f); box-shadow: inset 0 2px 4px rgba(0,0,0,.5); }
+  .slot-hp > span { position: absolute; inset: 0 auto 0 0; border-radius: 10px; background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, #b88a33); }
+  .slot-hp em { position: relative; display: block; text-align: center; line-height: 20px; font-style: normal; font-weight: 800; font-size: .8rem; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+  .slot-relics { display: flex; flex-wrap: wrap; gap: 4px; font-size: 1.1rem; }
+  .slot-relics:empty { display: none; }
+  .slot-when { font-size: .8rem; color: var(--muted); opacity: .8; }
+  .slot-act { align-self: stretch; text-align: center; padding: 9px; border-radius: 12px; background: rgba(224,180,90,.14); color: var(--brass-hi); font-weight: 800; font-size: 1rem; margin-top: 2px; }
+  .slot.armed .slot-act { background: var(--foe); color: #fff; }
+  .slot-del { justify-self: end; font-size: .88rem; padding: 6px 4px; }
+  .slot-del.armed { color: #ffb0a4; }
+  .slots-foot { padding: 6px 0 14px; }
+
+  /* opening pack */
+  .screen.pack { display: grid; grid-template-rows: auto 1fr auto; padding-top: 22px; }
+  .pack-top { text-align: center; }
+  .pack-top h2 { font-size: 2.3rem; }
+  .pack-top p { margin: 8px 0 0; color: var(--muted); }
+  .pack-stage { position: relative; display: grid; place-items: center; min-height: 0; }
+  .pack-stage button.pack { position: relative; width: 200px; height: 290px; border: 0; border-radius: 12px; padding: 0; display: grid; place-content: center; justify-items: center; gap: 10px;
+    color: var(--brass-hi); overflow: hidden; animation: packFloat 3s ease-in-out infinite;
+    background:
+      linear-gradient(115deg, transparent 30%, rgba(255,255,255,.28) 45%, transparent 60%) 0 0 / 300% 100% no-repeat,
+      repeating-linear-gradient(45deg, transparent 0 11px, rgba(224,180,90,.22) 11px 13px),
+      repeating-linear-gradient(-45deg, transparent 0 11px, rgba(224,180,90,.22) 11px 13px),
+      radial-gradient(circle at 50% 40%, #33477d, #141d3a 75%);
+    box-shadow: inset 0 0 0 5px var(--brass), inset 0 0 0 8px #141d3a, inset 0 0 0 10px rgba(224,180,90,.6), 0 22px 44px rgba(0,0,0,.55); }
+  .pack-stage button.pack::before, .pack-stage button.pack::after { content: ""; position: absolute; left: 0; right: 0; height: 12px;
+    background: linear-gradient(135deg, transparent 50%, #c99a3e 50%) 0 0 / 12px 12px repeat-x, linear-gradient(180deg, var(--brass-hi), var(--brass)); }
+  .pack-stage button.pack::before { top: 0; } .pack-stage button.pack::after { bottom: 0; transform: scaleY(-1); }
+  .pack-emblem { width: 82px; height: 82px; display: grid; place-items: center; transform: rotate(45deg); border: 4px solid var(--brass); background: #141d3a; box-shadow: 0 0 0 4px #141d3a, 0 0 26px rgba(255,200,100,.35); font-size: 0; }
+  .pack-emblem::after { content: "W"; transform: rotate(-45deg); font-size: 3rem; font-weight: 900; font-style: italic; color: var(--brass-hi); }
+  .pack-name { margin-top: 18px; font-size: 1.45rem; font-weight: 900; font-style: italic; }
+  .pack-count { font-size: .9rem; color: var(--muted); font-weight: 600; }
+  @keyframes packFloat { 0%, 100% { transform: translateY(0) rotate(-1.5deg); background-position: 120% 0, 0 0, 0 0, 0 0; } 50% { transform: translateY(-10px) rotate(1.5deg); background-position: -20% 0, 0 0, 0 0, 0 0; } }
+  .pack-stage button.pack.opening { animation: packShake .5s ease-in forwards; }
+  @keyframes packShake { 0% { transform: rotate(0); } 20% { transform: rotate(-4deg) scale(1.03); } 40% { transform: rotate(4deg) scale(1.06); } 60% { transform: rotate(-5deg) scale(1.09); } 80% { transform: rotate(5deg) scale(1.12); } 100% { transform: scale(1.2); filter: brightness(2); } }
+  .pack-stage button.pack.gone { animation: packGone .35s ease-out forwards; pointer-events: none; }
+  @keyframes packGone { from { transform: scale(1.2); filter: brightness(2); opacity: 1; } to { transform: scale(1.6); filter: brightness(3); opacity: 0; } }
+  .pack-cards { position: absolute; inset: 0; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 12px 8px; pointer-events: none; }
+  .pack-cards .pslot { --cw: min(14.5vw, 64px); width: var(--cw); height: calc(var(--cw) * 1.4); perspective: 600px; }
+  .pack-cards .card { transition: transform .42s cubic-bezier(.3,.7,.3,1); }
+  .pack-cards .pslot.rare .card { filter: drop-shadow(0 0 8px rgba(255,210,110,.95)) drop-shadow(0 0 18px rgba(255,180,80,.7)); }
+  .pack-cards .pslot.rare::after { content: "Rare"; display: block; margin-top: 4px; text-align: center; font-size: .8rem; font-weight: 900; font-style: italic; color: var(--brass-hi); text-shadow: 0 0 10px rgba(255,190,90,.8); }
+  .pack-foot { display: grid; justify-items: center; padding: 10px 0 14px; min-height: 86px; align-content: end; }
+
+  /* options */
+  .set-in h4 { margin: 0 0 4px; }
+  .set-group { background: rgba(0,0,0,.22); border-radius: 18px; padding: 16px 16px; box-shadow: inset 0 0 0 1.5px rgba(224,180,90,.3); display: grid; gap: 12px; margin-bottom: 14px; }
+  .set-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; font-size: 1rem; min-height: 44px; }
+  label.set-row { grid-template-columns: 1fr 130px 34px; }
+  .set-row output { text-align: right; font-variant-numeric: tabular-nums; color: var(--brass-hi); font-weight: 700; }
+  .set-row input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 5px; margin: 0;
+    background: linear-gradient(90deg, var(--brass) var(--p, 50%), rgba(0,0,0,.45) var(--p, 50%)); box-shadow: inset 0 0 0 1px rgba(224,180,90,.4); }
+  .set-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--brass-hi); box-shadow: 0 0 0 3px #3a1209, 0 2px 6px rgba(0,0,0,.5); }
+  .set-row input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--brass-hi); border: 3px solid #3a1209; }
+  .tog { min-width: 72px; min-height: 40px; border-radius: 999px; border: 2px solid var(--brass); background: rgba(0,0,0,.25); color: var(--muted); font-weight: 700; font-size: .95rem; }
+  .tog[aria-pressed="true"] { background: linear-gradient(180deg, var(--brass-hi), var(--brass)); color: #3a1209; }
+  .seg { display: flex; border: 2px solid var(--brass); border-radius: 999px; overflow: hidden; }
+  .seg button { border: none; background: rgba(0,0,0,.25); color: var(--muted); padding: 7px 10px; font-size: .85rem; font-weight: 700; min-height: 38px; }
+  .seg button + button { border-left: 1.5px solid rgba(224,180,90,.5); }
+  .seg button[aria-pressed="true"] { background: var(--brass); color: #3a1209; }
+  .set-table { grid-template-columns: 1fr; gap: 8px; }
+  .set-table .seg button { flex: 1; }
+
+  .pk .corner.br { display: none; }
+  /* ===== v1.1: parchment map, store, prizes, charms ===== */
+  .relics .relic-chip { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; border: none; padding: 0; background: rgba(0,0,0,.22); box-shadow: inset 0 0 0 1px rgba(224,180,90,.35); font-size: 1.05rem; }
+  .gold { font-weight: 800; color: var(--brass-hi); font-variant-numeric: tabular-nums; white-space: nowrap; background: rgba(0,0,0,.25); padding: 3px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(224,180,90,.4); font-size: .95rem; }
+  .gold.bump { animation: goldbump .5s; }
+  @keyframes goldbump { 40% { transform: scale(1.25); color: #fff3c4; } }
+  .you-line { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .map-head small { color: var(--muted); font-size: .8rem; display: block; }
+  .map-head h2 { font-size: 1.8rem; }
+  .map-stats { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+  .map-top { padding: 12px 0 8px; gap: 8px; }
+  .parch { position: relative; min-height: 0; border-radius: 14px; margin: 2px 0 6px;
+    background: radial-gradient(120% 70% at 50% 50%, #f3e2bd 0%, #e6cf9f 60%, #c9a46a 100%);
+    box-shadow: inset 0 0 0 2px #8a6232, inset 0 0 34px rgba(90,50,10,.5), 0 10px 24px rgba(0,0,0,.4); }
+  .parch-in { position: relative; }
+  .parch-in::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .35; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55  0 0 0 0 .38  0 0 0 0 .18  0 0 0 .8 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .parch-title { position: absolute; left: 0; right: 0; top: 10px; text-align: center; color: #6b4a22; font-style: italic; font-weight: 900; font-size: .95rem; letter-spacing: .02em; opacity: .75; }
+  .compass { position: absolute; right: 12px; bottom: 12px; width: 46px; height: 46px; opacity: .45; }
+  .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .map-svg line { stroke: #6b4a22; stroke-width: 2.2; stroke-dasharray: 4 6; stroke-linecap: round; opacity: .45; }
+  .map-svg line.open { opacity: .95; stroke-width: 2.6; }
+  .map-svg line.walked { stroke: #9a1f1c; opacity: .9; stroke-dasharray: none; stroke-width: 3.2; }
+  .node { position: absolute; transform: translate(-50%, -50%); background: none; border: none; padding: 0; width: 84px;
+    display: grid; justify-items: center; gap: 3px; color: #4a2e12; font-size: .72rem; font-weight: 700; line-height: 1.1; }
+  .node .med { width: 48px; height: 48px; font-size: 1.55rem; transition: transform .2s, box-shadow .2s; }
+  .node.store .med { background: radial-gradient(circle at 35% 30%, #9a4a34, #561c14 70%); font-size: 1.35rem; }
+  .node.boss .med { width: 66px; height: 66px; font-size: 2.3rem; background: radial-gradient(circle at 35% 30%, #7a2020, #2a0808 72%);
+    box-shadow: 0 0 0 2.5px var(--brass), 0 0 0 5px #5a1010, 0 6px 16px rgba(0,0,0,.45); }
+  .node .lbl { background: rgba(255,246,220,.78); padding: 1px 6px; border-radius: 5px; white-space: nowrap; box-shadow: 0 0 0 1px rgba(138,98,50,.35); }
+  .node .prize { position: absolute; top: 28px; right: 12px; width: 24px; height: 24px; border-radius: 50%; background: #fff6dc;
+    box-shadow: 0 0 0 1.5px #8a6232, 0 2px 4px rgba(0,0,0,.3); display: grid; place-items: center; font-size: .78rem; }
+  .node.boss .prize { top: 40px; right: 4px; }
+  .node.far { opacity: .42; filter: saturate(.4); }
+  .node.done .med { filter: grayscale(.5) brightness(.75); }
+  .node.done::after { content: "✓"; position: absolute; top: 2px; left: 50%; transform: translateX(-50%) rotate(-8deg); width: 30px; height: 30px; border-radius: 50%;
+    border: 2.5px solid #9a1f1c; color: #9a1f1c; font-size: 1.1rem; font-weight: 900; display: grid; place-items: center; background: rgba(255,240,210,.55); }
+  .node.boss.done::after { top: 10px; }
+  .node.can .med { animation: nodepulse 1.6s ease-in-out infinite; }
+  @keyframes nodepulse { 50% { box-shadow: 0 0 0 2px var(--brass), 0 0 0 9px rgba(154,31,28,.25), 0 4px 10px rgba(0,0,0,.4); transform: scale(1.06); } }
+  .node.sel .med { animation: none; transform: scale(1.14); box-shadow: 0 0 0 3px #9a1f1c, 0 0 0 7px rgba(154,31,28,.3), 0 6px 14px rgba(0,0,0,.45); }
+  .node.here::before { content: "🚩"; position: absolute; top: -18px; left: 50%; transform: translateX(-10%); font-size: 1.2rem; z-index: 2; }
+  .map-foot { padding: 2px 0 12px; justify-items: stretch; }
+  .spot-info { min-height: 60px; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .spot-info .med { width: 46px; height: 46px; font-size: 1.5rem; }
+  .spot-info b { font-size: 1.12rem; font-style: italic; font-weight: 900; display: block; }
+  .spot-info small { color: var(--muted); display: block; font-size: .83rem; line-height: 1.35; }
+  .spot-info .pz { color: var(--brass-hi); font-weight: 700; }
+  .map-foot .link { justify-self: center; padding: 6px; }
+
+  /* store */
+  .store { display: grid; grid-template-rows: auto auto auto 1fr auto; }
+  .awning { height: 54px; margin: 0 -16px; position: relative; z-index: 2; transform-origin: 50% 0;
+    background: linear-gradient(180deg, rgba(0,0,0,.18), transparent 40%), repeating-linear-gradient(90deg, #b3202e 0 32px, #f4ead6 32px 64px);
+    box-shadow: 0 6px 12px rgba(0,0,0,.35); }
+  .awning::after { content: ""; position: absolute; left: 0; right: 0; bottom: -15px; height: 16px;
+    background: radial-gradient(circle at 16px 0, #b3202e 15.5px, transparent 16px) 0 0 / 64px 16px repeat-x, radial-gradient(circle at 48px 0, #f4ead6 15.5px, transparent 16px) 0 0 / 64px 16px repeat-x;
+    filter: drop-shadow(0 4px 3px rgba(0,0,0,.3)); }
+  .store.enter .awning { animation: sway 1.2s ease-out; }
+  @keyframes sway { 0% { transform: scaleY(.2); } 40% { transform: scaleY(1.08); } 70% { transform: scaleY(.97); } }
+  .bell { position: absolute; right: 18px; top: 50px; font-size: 1.7rem; z-index: 3; transform-origin: 50% 0; }
+  .bell.ring { animation: ring 1s ease-out; }
+  @keyframes ring { 15% { transform: rotate(24deg); } 35% { transform: rotate(-20deg); } 55% { transform: rotate(12deg); } 75% { transform: rotate(-6deg); } }
+  .store-head { display: flex; justify-content: space-between; align-items: flex-end; padding: 28px 0 2px; }
+  .store-head small { color: var(--muted); font-size: .8rem; display: block; }
+  .store-head h2 { font-size: 2.2rem; }
+  .store-sub { margin: 4px 0 10px; color: var(--muted); font-size: .92rem; }
+  .wares { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; padding: 2px 2px 10px; }
+  .ware { position: relative; display: grid; justify-items: center; align-content: start; text-align: center; gap: 4px; padding: 12px 8px 10px; border-radius: 16px;
+    border: 1.5px solid rgba(224,180,90,.5); background: linear-gradient(160deg, rgba(40,10,16,.8), rgba(20,5,9,.62)); box-shadow: 0 6px 14px rgba(0,0,0,.3);
+    animation: dealOffer .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d); transition: transform .15s, opacity .3s; }
+  .ware:active:not(:disabled) { transform: scale(.97); }
+  .ware .vis { height: 74px; display: flex; align-items: center; justify-content: center; }
+  .ware .vis .card + .card { margin-left: -18px; }
+  .ware .icon, .offer .icon { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-size: 1.9rem;
+    background: radial-gradient(circle at 35% 30%, #3b4c7c, var(--navy) 70%); box-shadow: 0 0 0 2px var(--brass), 0 4px 10px rgba(0,0,0,.4); }
+  .ware b { font-size: 1rem; font-style: italic; font-weight: 900; }
+  .ware small { font-size: .76rem; color: var(--muted); line-height: 1.3; }
+  .price { margin-top: 3px; font-weight: 800; background: linear-gradient(180deg, var(--brass-hi), var(--brass)); color: #3a1209; border-radius: 999px; padding: 3px 12px; font-size: .88rem; }
+  .ware.poor .price { background: rgba(0,0,0,.35); color: #ffb0a4; box-shadow: inset 0 0 0 1px rgba(255,120,100,.5); }
+  .ware.sold { opacity: .5; }
+  .ware.sold::after { content: "Sold"; position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%) rotate(-14deg); font-size: 1.5rem; font-weight: 900; font-style: italic;
+    color: #ff7a6e; border: 3px solid #ff7a6e; padding: 0 10px; border-radius: 8px; background: rgba(30,6,10,.6); }
+  .ware.nope { animation: shake .35s; }
+  .store-foot { padding: 6px 0 14px; }
+
+  /* charms, tooltips, prizes */
+  .charm-badge { position: absolute; right: 5%; top: 4%; z-index: 2; width: max(15px, calc(var(--cw) * .27)); height: max(15px, calc(var(--cw) * .27)); border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #3b4c7c, var(--navy)); box-shadow: 0 0 0 1.5px var(--brass), 0 1px 3px rgba(0,0,0,.4);
+    display: grid; place-items: center; font-size: max(9px, calc(var(--cw) * .15)); line-height: 1; }
+  .deckgrid.pickable { gap: 10px; }
+  .pickcard { background: none; border: none; padding: 0; border-radius: 6px; }
+  .pickcard:active { transform: scale(.94); }
+  .charm-desc { margin: -4px 0 14px; color: var(--muted); }
+  .tip { position: fixed; z-index: 60; max-width: 250px; background: #fff6dc; color: #2a1608; border-radius: 10px; padding: 8px 12px; font-size: .88rem; line-height: 1.35;
+    box-shadow: 0 8px 20px rgba(0,0,0,.45), 0 0 0 1.5px #8a6232; pointer-events: none; animation: fade .15s; }
+  .tip b { display: block; font-style: italic; }
+  .offer.prize-only { grid-template-columns: 110px 1fr; }
+  .reward-top p { font-size: .95rem; }
+  .node.elite .med { background: radial-gradient(circle at 35% 30%, #8a2a2a, #3a0a0a 72%); box-shadow: 0 0 0 2px #e0574f, 0 0 0 4px rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.4); }
+  .node.event .med { background: radial-gradient(circle at 35% 30%, #4d6a4a, #1e3320 72%); font-size: 1.35rem; }
+  .node.rest .med { background: radial-gradient(circle at 35% 30%, #a0602a, #4a2408 72%); font-size: 1.35rem; }
+  .node.chest .med { background: radial-gradient(circle at 35% 30%, #8a7030, #3a2a08 72%); font-size: 1.35rem; }
+  .node { width: 76px; }
+  .node .med { width: 44px; height: 44px; font-size: 1.45rem; }
+  .node .prize { top: 24px; right: 10px; width: 22px; height: 22px; font-size: .72rem; }
+  .node .lbl { font-size: .66rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; justify-content: center; font-size: .72rem; color: var(--muted); margin: 0 0 6px; }
+  .legend span { white-space: nowrap; }
+  /* events */
+  .event { display: grid; grid-template-rows: auto 1fr auto; padding-top: 22px; }
+  .event-top { display: grid; justify-items: center; text-align: center; gap: 10px; }
+  .event-top .med { width: 84px; height: 84px; font-size: 2.7rem; }
+  .event-top h2 { font-size: 2.2rem; }
+  .event-text { margin: 0; color: var(--text); font-style: italic; max-width: 34ch; line-height: 1.5; }
+  .event-body { display: grid; gap: 10px; align-content: start; padding: 16px 2px 10px; }
+  .choice { display: grid; gap: 3px; text-align: left; padding: 14px 16px; border-radius: 16px; border: 1.5px solid rgba(224,180,90,.55);
+    background: linear-gradient(160deg, rgba(40,10,16,.8), rgba(20,5,9,.62)); box-shadow: 0 6px 14px rgba(0,0,0,.3);
+    animation: dealOffer .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d); }
+  .choice b { font-size: 1.12rem; font-style: italic; font-weight: 900; color: var(--brass-hi); }
+  .choice span { font-size: .9rem; color: var(--muted); line-height: 1.35; }
+  .choice:active:not(:disabled) { transform: scale(.98); border-color: var(--brass-hi); }
+  .choice:disabled { opacity: .38; }
+  .event-result { margin: 0; padding: 16px; border-radius: 16px; background: rgba(0,0,0,.25); box-shadow: inset 0 0 0 1.5px rgba(224,180,90,.35); font-size: 1.02rem; line-height: 1.5; animation: enter .4s; }
+  .event-foot { padding: 6px 0 14px; }
+  /* tonics */
+  .tonics { display: flex; gap: 6px; }
+  .tonic { width: 38px; height: 38px; border-radius: 10px; border: 1.5px solid rgba(224,180,90,.6); background: rgba(0,0,0,.3); font-size: 1.2rem; padding: 0; display: grid; place-items: center; }
+  .tonic.armed { border-color: var(--brass-hi); box-shadow: 0 0 0 3px rgba(224,180,90,.35), 0 0 16px rgba(255,200,100,.5); animation: nodepulse 1s infinite; }
+  .tonic:disabled { opacity: .4; }
+  .tonic.empty { border-style: dashed; opacity: .35; }
+  .you-line .right { display: flex; gap: 8px; align-items: center; }
+  .reward-foot { gap: 2px; }
+  .node.gain .med { background: radial-gradient(circle at 35% 30%, #c49a3c, #6a4a12 72%); color: #fff6dc; }
+  .node.util .med { background: radial-gradient(circle at 35% 30%, #4d6a4a, #1e3320 72%); font-size: 1.3rem; }
+  .node.fight.battle .med { background: radial-gradient(circle at 35% 30%, #3b4c7c, var(--navy) 70%); }
+  .node.util.store .med { background: radial-gradient(circle at 35% 30%, #9a4a34, #561c14 70%); }
+  .node.util.event .med { background: radial-gradient(circle at 35% 30%, #5a4a7a, #221a3a 72%); }
+  .reveal { display: flex; gap: 6px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+  .relics .relic-chip.totem { background: rgba(224,180,90,.22); box-shadow: inset 0 0 0 1.5px var(--brass); color: var(--brass-hi); font-weight: 900; }
+  .row-hint { text-align: center; font-size: .75rem; color: var(--muted); margin: 0 0 6px; }
+  .offer .vis .card.down, .offer .vis .card.down:nth-child(1) { transform: rotateY(180deg) rotate(6deg); }
+  @media (prefers-reduced-motion: reduce) {
+    .tonic.armed, .choice, .node.can .med, .awning, .bell, .screen.enter, .fan .card, .pack-stage button.pack, .slot, .offer, .march li.now .med, .end .med.huge, .sheet, .sheet-in { animation: none; }
+    .banner span, .banner::before { animation-duration: .01s; }
+    .pop { animation: none; opacity: 0; }
+    .shake, .med.hit { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<section class="screen title" id="sTitle">
+  <div class="corner-btn"><button class="ghost icon-btn sound-btn" type="button" aria-label="Sound">🔊</button><button class="ghost icon-btn set-btn" type="button" aria-label="Options">⚙️</button></div>
+  <div class="fan" id="fan" aria-hidden="true"></div>
+  <h1>War</h1>
+  <p class="sub">The Long March</p>
+  <p class="rules">Three acts to the King, one life. Both sides flip, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Choose your road: recruits, drafts and trials for new cards, then campfires, totems, altars and strange folk along the way, then a fight. Build your deck as you go.</p>
+  <nav class="menu" aria-label="Main menu">
+    <button class="menu-btn main" id="continueBtn" type="button" hidden><span>Continue</span><small id="continueSub"></small></button>
+    <button class="menu-btn" id="newRunBtn" type="button"><span>New Run</span></button>
+    <button class="menu-btn" id="loadBtn" type="button"><span>Load Run</span></button>
+    <button class="menu-btn" id="optionsBtn" type="button"><span>Options</span></button>
+  </nav>
+
+  <p class="rec" id="record"></p>
+</section>
+
+<section class="screen slots" id="sSlots" hidden>
+  <header class="slots-top"><h2 id="slotsTitle">New run</h2><p id="slotsSub"></p></header>
+  <div class="slot-list scroll" id="slotList"></div>
+  <div class="slots-foot"><button class="secondary" id="slotsBack" type="button" style="width:100%">Back</button></div>
+</section>
+
+<section class="screen pack" id="sPack" hidden>
+  <header class="pack-top"><h2 id="packTitle">Your opening pack</h2><p id="packSub"></p></header>
+  <div class="pack-stage">
+    <button class="pack" id="packBtn" type="button" aria-label="Open the pack">
+      <span class="pack-emblem">W</span><span class="pack-name">Opening Pack</span><span class="pack-count">Tap to open</span>
+    </button>
+    <div class="pack-cards" id="packCards"></div>
+  </div>
+  <div class="pack-foot"><button class="primary" id="packGo" type="button" hidden>March on</button></div>
+</section>
+
+<section class="screen map" id="sMap" hidden>
+  <div class="map-top">
+    <div class="map-head"><div><small id="actLabel"></small><h2 id="actName"></h2></div><div class="tools"><button class="ghost icon-btn sound-btn" type="button" aria-label="Sound">🔊</button><button class="ghost icon-btn set-btn" type="button" aria-label="Options">⚙️</button><button class="ghost" id="mapDeckBtn" type="button">Deck</button></div></div>
+    <div class="map-stats"><div class="hp" id="mapHp" aria-label="Your health"><span class="ghostbar"></span><span class="fill"></span><b></b></div><span class="gold" id="mapGold"></span></div>
+    <div class="relics" id="mapRelics"></div>
+  </div>
+  <div class="parch scroll" id="parch"><div class="parch-in" id="parchIn"></div></div>
+  <div class="map-foot">
+    <div class="spot-info" id="spotInfo" aria-live="polite"></div>
+    <button class="primary" id="goBtn" type="button" disabled>Pick a spot</button>
+    <button class="link" id="abandonBtn" type="button">Abandon run</button>
+  </div>
+</section>
+
+<section class="screen store" id="sStore" hidden>
+  <div class="awning" aria-hidden="true"></div>
+  <span class="bell" id="bell" aria-hidden="true">🔔</span>
+  <div class="store-head"><div><small id="storeAct"></small><h2>The Store</h2></div><span class="gold" id="storeGold"></span></div>
+  <p class="store-sub" id="storeSub"></p>
+  <div class="wares scroll" id="wares"></div>
+  <div class="store-foot"><button class="primary" id="leaveBtn" type="button">Leave the store</button></div>
+</section>
+
+<section class="screen event" id="sEvent" hidden>
+  <div class="event-top"><span class="med" id="evMed"></span><h2 id="evTitle"></h2><p class="event-text" id="evText"></p></div>
+  <div class="event-body scroll"><div id="evChoices" style="display:grid;gap:10px"></div><p class="event-result" id="evResult" hidden></p></div>
+  <div class="event-foot"><button class="primary" id="evGo" type="button" hidden>Continue</button></div>
+</section>
+
+<section class="screen battle" id="sBattle" hidden>
+  <div>
+    <div class="foe-head">
+      <div class="med big" id="foeMed"></div>
+      <div><small id="floorLabel"></small><h2 id="foeName"></h2></div>
+      <div class="tools"><button class="ghost icon-btn sound-btn" type="button" aria-label="Sound">🔊</button><button class="ghost icon-btn set-btn" type="button" aria-label="Options">⚙️</button><button class="ghost" id="battleDeckBtn" type="button">Deck</button></div>
+    </div>
+    <p class="quirk" id="foeQuirk"></p>
+    <div class="hp foe" id="foeHp" aria-label="Enemy health"><span class="ghostbar"></span><span class="fill"></span><b></b></div>
+  </div>
+  <div class="field" id="field">
+    <div class="row" id="foeRow">
+      <div class="side-slot" id="foePile"></div>
+      <div class="lane" id="oLane"></div>
+      <div class="side-slot" id="foePeek"></div>
+    </div>
+    <div class="msg" id="bMsg" aria-live="polite"></div>
+    <div class="row" id="youRow">
+      <button class="pilebtn" id="youPile" type="button" aria-label="Flip your next card"></button>
+      <div class="lane" id="yLane"></div>
+      <div class="side-slot" id="youPeek"></div>
+    </div>
+  </div>
+  <div class="you-panel">
+    <div class="you-line"><div class="relics" id="battleRelics"></div><div class="right"><div class="tonics" id="tonicBox"></div><span class="gold" id="battleGold"></span></div></div>
+    <div class="hp" id="youHp" aria-label="Your health"><span class="ghostbar"></span><span class="fill"></span><b></b></div>
+  </div>
+  <div class="controls">
+    <button class="primary" id="flipBtn" type="button">Flip</button>
+    <button class="secondary" id="burnBtn" type="button">Burn</button>
+  </div>
+</section>
+
+<section class="screen reward" id="sReward" hidden>
+  <div class="reward-top"><div class="med big" id="rewardMed"></div><div><h2 id="rewardTitle"></h2><p id="rewardSub"></p></div></div>
+  <div class="offers scroll" id="offers"></div>
+  <div class="reward-foot"><button class="link" id="skipBtn" type="button">Skip reward</button></div>
+</section>
+
+<section class="screen end" id="sEnd" hidden>
+  <div class="med huge" id="endMed"></div>
+  <h2 id="endTitle"></h2>
+  <p id="endSub"></p>
+  <div class="stats" id="endStats"></div>
+  <button class="primary" id="againBtn" type="button">Start a new run</button>
+  <button class="link" id="homeBtn" type="button">Back to title</button>
+</section>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-in">
+    <header><h3 id="sheetTitle">Your deck</h3><button class="ghost" id="sheetClose" type="button">Close</button></header>
+    <div class="deckgrid" id="deckGrid"></div>
+    <h4>Relics</h4>
+    <ul class="relic-list" id="relicList"></ul>
+  </div>
+</div>
+
+<div class="sheet" id="charmSheet" hidden role="dialog" aria-modal="true" aria-labelledby="charmTitle">
+  <div class="sheet-in">
+    <header><h3 id="charmTitle">Pick a card</h3><button class="ghost" id="pickCancel" type="button">Cancel</button></header>
+    <p class="charm-desc" id="charmDesc"></p>
+    <div class="deckgrid pickable" id="charmGrid"></div>
+  </div>
+</div>
+
+<div class="sheet" id="settings" hidden role="dialog" aria-modal="true" aria-labelledby="setTitle">
+  <div class="sheet-in set-in">
+    <header><h3 id="setTitle">Options</h3><button class="ghost" id="setClose" type="button">Close</button></header>
+    <section class="set-group"><h4>Sound</h4>
+      <label class="set-row"><span>Master volume</span><input type="range" min="0" max="100" step="5" data-set="master"><output></output></label>
+      <label class="set-row"><span>Music</span><input type="range" min="0" max="100" step="5" data-set="music"><output></output></label>
+      <label class="set-row"><span>Sound effects</span><input type="range" min="0" max="100" step="5" data-set="sfx"><output></output></label>
+      <div class="set-row"><span>Mute everything</span><button class="tog" type="button" data-set="muted"></button></div>
+    </section>
+    <section class="set-group"><h4>Graphics</h4>
+      <div class="set-row set-table"><span>Table colour</span><div class="seg" data-set="table"><button type="button" data-v="crimson">Crimson</button><button type="button" data-v="forest">Forest</button><button type="button" data-v="midnight">Midnight</button></div></div>
+      <div class="set-row"><span>Animation speed</span><div class="seg" data-set="speed"><button type="button" data-v="normal">Normal</button><button type="button" data-v="fast">Fast</button></div></div>
+      <div class="set-row"><span>Screen shake</span><button class="tog" type="button" data-set="shake"></button></div>
+      <div class="set-row"><span>Sparks and particles</span><button class="tog" type="button" data-set="particles"></button></div>
+    </section>
+    <section class="set-group"><h4>Game</h4>
+      <div class="set-row" id="menuRow"><span>Save and go to the main menu</span><button class="ghost" type="button" id="toMenu">Main menu</button></div>
+      <div class="set-row"><span>Best-run records</span><button class="ghost" type="button" id="resetRec">Reset</button></div>
+    </section>
+  </div>
+</div>
+
+<script>
+const SUITS = ['S','H','D','C'];
+const RELICS = {
+  whetstone:{n:'Whetstone',i:'🗡️',d:'+1 damage when you win a round.'},
+  buckler:{n:'Buckler',i:'🛡️',d:'Take 1 less damage from every hit.'},
+  locket:{n:'Heart Locket',i:'💗',d:'Hearts heal you 2 when they win.'},
+  spade:{n:'Spade Edge',i:'⚔️',d:'Spades deal +3 damage when they win.'},
+  prism:{n:'Prism',i:'💎',d:'Diamonds count as 2 ranks higher.'},
+  iron:{n:'Iron Club',i:'🔨',d:'When one of your clubs loses, it still hits for 3.'},
+  banner:{n:'War Banner',i:'🚩',d:'Wars you win deal double damage.'},
+  spyglass:{n:'Spyglass',i:'🔭',d:"See the enemy's next card."},
+  satchel:{n:'Satchel',i:'🎒',d:'+2 Burns each battle.'},
+  mirror:{n:'Mirror',i:'🪞',d:'You win every tie.'},
+  bandages:{n:'Bandages',i:'🩹',d:'Heal 6 after each battle.'},
+  crown:{n:'Crown',i:'👑',d:'Your J, Q and K count as 2 ranks higher.'},
+  sling:{n:'Slingshot',i:'🪨',d:'Your 2s and 3s beat Aces.'},
+  fang:{n:'Fang',i:'🦷',d:'Heal 1 whenever you win a round.'},
+  gambit:{n:'Opening Gambit',i:'♟️',d:'The first round of each battle deals triple damage.'},
+  stout:{n:'Stout Heart',i:'🫀',d:'+12 max HP, and heal 12 now.'},
+  purse:{n:'Coin Purse',i:'👛',d:'+6 gold after every battle.'},
+  ember:{n:'Ember Stone',i:'🔥',d:'Every card you burn hits the enemy for 3.'},
+  thief:{n:"Thief's Glove",i:'🧤',d:'Wars you win capture two cards instead of one.'},
+  aegis:{n:'Aegis',i:'🔰',d:'The first hit you take each battle deals no damage.'},
+  belt:{n:'Trophy Belt',i:'🏆',d:'+2 max HP after every battle you win.'},
+  flask:{n:'Bandolier',i:'🎽',d:'Carry up to 4 tonics instead of 3.'}
+};
+const CHARMS = {
+  gilded:{n:'Gilded',i:'🪙',d:'+2 gold whenever this card wins.'},
+  keen:{n:'Keen',i:'🔪',d:'+3 damage whenever this card wins.'},
+  mending:{n:'Mending',i:'💚',d:'Heal 2 whenever this card wins.'},
+  steady:{n:'Steady',i:'⚓',d:'This card wins ties.'}
+};
+const SUITNAME = {S:'spades',H:'hearts',D:'diamonds',C:'clubs'};
+const charmOf = (run,c) => c.ch || (run.totem && run.totem.s===c.s ? run.totem.ch : null);
+const TONICS = {
+  heal:{n:'Healing Tonic',i:'🧪',d:'Heal 12 HP.'},
+  fire:{n:'Fire Tonic',i:'💥',d:'Hit the enemy for 10.'},
+  luck:{n:'Luck Tonic',i:'🍀',d:'Your next card counts 5 ranks higher.'},
+  iron:{n:'Iron Tonic',i:'🧱',d:'The next hit you take deals no damage.'}
+};
+const QUIRKS = {
+  armored:'Armored: takes 1 less damage from every hit.',
+  brute:'Brute: hits for +2.',
+  sneaky:'Duelist: wins every tie.',
+  vampire:'Vampire: heals half the damage it deals.',
+  warlike:'Warmonger: its wars deal double damage.',
+  wall:'Iron Wall: takes 2 less damage from every hit.',
+  thorns:'Thorns: every time you hit her, you take 2 back.',
+  royal:'Royal: its face cards count 2 higher, and it takes 1 less damage.',
+  frenzy:'Frenzy: hits 1 harder every time it wins.'
+};
+const FOES = {
+  'Scout':{q:null,g:'♟'}, 'Militia':{q:null,g:'♟'}, 'Shieldman':{q:'armored',g:'♜'}, 'Brute':{q:'brute',g:'♜'}, 'Bandit':{q:'sneaky',g:'♞'},
+  'Duelist':{q:'sneaky',g:'♝'}, 'Blood Priest':{q:'vampire',g:'♝'}, 'Wolf Rider':{q:'brute',g:'♞'}, 'Wildling':{q:'frenzy',g:'♟'},
+  'Knight':{q:'armored',g:'♞'}, 'Warlord':{q:'warlike',g:'♛'}, 'Royal Guard':{q:'armored',g:'♜'}, 'Zealot':{q:'frenzy',g:'♝'},
+  'Veteran':{q:'brute',g:'♜'}, 'Iron Guard':{q:'wall',g:'♜'}, 'Beastmaster':{q:'frenzy',g:'♞'}, 'Hexer':{q:'vampire',g:'♝'},
+  'Champion':{q:'armored',g:'♛'}, 'Executioner':{q:'warlike',g:'♛'},
+  'The Gatekeeper':{g:'♜'}, 'The Thornwitch':{g:'♛'}, 'The King':{g:'♚'}
+};
+const ACTS = [
+  { name:'The Border', foes:['Scout','Militia','Shieldman','Brute','Bandit'], elites:['Veteran','Iron Guard'], boss:{name:'The Gatekeeper', hp:30, lo:3, hi:9, q:'wall'} },
+  { name:'The Wilds', foes:['Duelist','Blood Priest','Wolf Rider','Wildling','Brute'], elites:['Beastmaster','Hexer'], boss:{name:'The Thornwitch', hp:36, lo:4, hi:11, q:'thorns'} },
+  { name:'The Capital', foes:['Knight','Warlord','Royal Guard','Zealot','Duelist'], elites:['Champion','Executioner'], boss:{name:'The King', hp:48, lo:5, hi:13, q:'royal', final:true} }
+];
+const ROWS = 10, COLS = 3;
+const rint = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const rankLabel = v => v<=10 ? String(v) : {11:'J',12:'Q',13:'K',14:'A'}[v];
+const nid = () => Math.random().toString(36).slice(2,9);
+const TUNE = { hp:16, hpStep:4.3, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.4 };
+
+function foeStats(act,row,name,elite){
+  const t=act*3+Math.floor(row/3)+(elite?1.5:0);
+  const f={name, hp:TUNE.hp+Math.round(t*TUNE.hpStep), lo:Math.min(6,2+Math.floor(t/2.6)), hi:Math.min(13,6+Math.floor(t/1.3)), q:FOES[name].q};
+  if(elite){ f.hp=Math.round(f.hp*TUNE.eliteHp); f.elite=true; }
+  return f;
+}
+function rollPrize(){ const r=Math.random(); return r<.5?{k:'gold', n:rint(8,14)}:r<.8?{k:'tonic', t:pick(Object.keys(TONICS))}:{k:'charm', ch:pick(Object.keys(CHARMS))}; }
+
+/* map, Inscryption style: rows repeat card-gain, utility, battle; you choose between different spots in each row */
+const GAIN = ['recruit','suit','blind','trial'];
+const UTIL = ['rest','pack','altar','carver','fungi','goo','stones','store','event','chest'];
+function rowKinds(act,r){
+  if(r===ROWS-1) return {pool:['rest','store','pack'], n:3};
+  const c=r%3;
+  if(c===0) return {pool: r===0 ? ['recruit','suit','blind'] : GAIN, n: rint(2,3)};
+  if(c===1) return {pool: UTIL, n: rint(2,3)};
+  return {pool: (r>=5||act>0) ? ['battle','battle','elite'] : ['battle'], n: rint(2,3)};
+}
+function genMap(act){
+  const rows=[];
+  for(let r=0;r<ROWS;r++){
+    const {pool,n}=rowKinds(act,r), kinds=[];
+    const bag=shuffle(pool.slice());
+    for(let j=0;j<n;j++){ let k=bag.find(x=>!kinds.includes(x)||x==='battle'); if(!k) k=pick(pool); bag.splice(bag.indexOf(k),1); kinds.push(k); }
+    if(kinds.filter(k=>k==='elite').length>1) kinds[kinds.lastIndexOf('elite')]='battle';
+    rows.push(shuffle(kinds).map((t,j)=>({t, x:(j+.5)/n + (n>1?(Math.random()-.5)*.06:0), next:[]})));
+  }
+  rows.push([{t:'boss', x:.5, next:[]}]);
+  for(let r=0;r<rows.length-1;r++){
+    const A=rows[r], N=rows[r+1];
+    A.forEach(a=>{
+      let best=0; N.forEach((b,k)=>{ if(Math.abs(b.x-a.x)<Math.abs(N[best].x-a.x)) best=k; });
+      a.next.push(best);
+      const alt=best+(a.x>N[best].x?1:-1);
+      if(alt>=0&&alt<N.length&&Math.random()<.7) a.next.push(alt);
+    });
+    N.forEach((b,k)=>{ if(!A.some(a=>a.next.includes(k))){ let best=0; A.forEach((a,j)=>{ if(Math.abs(a.x-b.x)<Math.abs(A[best].x-b.x)) best=j; }); A[best].next.push(k); } });
+    A.forEach(a=>a.next.sort((p,q)=>p-q));
+  }
+  rows.forEach((row,r)=>row.forEach(n=>{
+    if(n.t==='battle'){ n.foe=foeStats(act,r,pick(ACTS[act].foes)); n.prize=rollPrize(); }
+    else if(n.t==='elite'){ n.foe=foeStats(act,r,pick(ACTS[act].elites),true); n.prize={k:'relic'}; }
+    else if(n.t==='boss'){ n.foe={...ACTS[act].boss}; n.prize={k:'relic'}; }
+    else if(n.t==='event') n.ev=pick(EVENT_IDS);
+    else if(n.t==='suit') n.s=pick(SUITS);
+    else if(n.t==='trial') n.tr=pick(Object.keys(TRIALS));
+  }));
+  return rows;
+}
+const PACK_SIZE = 18, RARE_CHANCE = 0.2;
+function newRun(){
+  const pool=[]; for(let v=2;v<=10;v++) for(const s of SUITS) pool.push({v,s,id:nid()});
+  const deck=shuffle(pool).slice(0,PACK_SIZE);
+  const rare=Math.random()<RARE_CHANCE;
+  if(rare) deck.push({v:rint(11,14), s:pick(SUITS), id:nid()});
+  return {v:4, act:0, row:-1, col:null, path:[], map:genMap(0), hp:50, maxHp:50, gold:15, totem:null, deck, relics:[], tonics:['heal'], bonusBurns:0, removals:0,
+    stats:{rounds:0, wars:0, dealt:0, captured:0, lost:0, battles:0}, pack:{rare, opened:false}};
+}
+function migrateRun(run){
+  if(run.v===4) return run;
+  if(!run.v) run.act = run.floor<3?0:run.floor<6?1:2;
+  run.v=4; run.totem=run.totem||null; run.row=-1; run.col=null; run.path=[]; run.map=genMap(run.act);
+  run.gold=run.gold||0; run.tonics=run.tonics||[]; run.bonusBurns=0; run.removals=0;
+  run.deck.forEach(c=>{ if(!c.id) c.id=nid(); });
+  run.stats=Object.assign({captured:0,lost:0,battles:0},run.stats);
+  ['floor','pending','beat','store','pendingCharm'].forEach(k=>delete run[k]);
+  return run;
+}
+const has = (run,r) => run.relics.includes(r);
+const tonicCap = run => has(run,'flask')?4:3;
+function reachable(run){ if(run.row===-1) return run.map[0].map((_,k)=>k); return run.map[run.row][run.col].next; }
+function newBattle(run,foe){
+  const n=foe.elite?18:16, ed=[]; for(let i=0;i<n;i++) ed.push({v:rint(foe.lo,foe.hi), s:pick(SUITS), id:nid()});
+  return {f:foe, eHp:foe.hp, eMax:foe.hp, pDraw:shuffle(run.deck.map(c=>({...c}))), pDisc:[], eDraw:shuffle(ed), eDisc:[],
+    burns:2+(has(run,'satchel')?2:0)+(run.bonusBurns||0), round:0, over:null, luck:0, block:0, aegis:has(run,'aegis'), frenzy:0, stolen:[]};
+}
+function refill(b,s){ if(!b[s+'Draw'].length && b[s+'Disc'].length){ b[s+'Draw']=shuffle(b[s+'Disc']); b[s+'Disc']=[]; } }
+function peek(b,s){ refill(b,s); return b[s+'Draw'][0]||null; }
+function take(b,s){ refill(b,s); return b[s+'Draw'].shift()||null; }
+const avail = (b,s) => b[s+'Draw'].length + b[s+'Disc'].length;
+function effP(run,c){ let v=c.v; if(has(run,'crown')&&v>=11&&v<=13) v+=2; if(has(run,'prism')&&c.s==='D') v+=2; return v; }
+function effE(b,c){ let v=c.v; if(b.f.q==='royal'&&v>=11&&v<=13) v+=2; return v; }
+function compare(run,b,pc,ec,luck){
+  if(has(run,'sling') && pc.v<=3 && ec.v===14) return 1;
+  const a=effP(run,pc)+(luck||0), e=effE(b,ec);
+  if(a>e) return 1; if(e>a) return -1;
+  if(has(run,'mirror')||charmOf(run,pc)==='steady') return 1; if(b.f.q==='sneaky') return -1; return 0;
+}
+function burn(run,b){
+  if(b.burns<=0) return null; const c=take(b,'p'); if(!c) return null; b.pDisc.push(c); b.burns--;
+  let hit=0; if(has(run,'ember')){ hit=3; b.eHp-=3; run.stats.dealt+=3; if(b.eHp<=0) b.over='win'; }
+  return {c, hit};
+}
+function useTonic(run,b,i){
+  const t=run.tonics[i]; if(!t||b.over) return null; run.tonics.splice(i,1);
+  const r={t, heal:0, dmg:0};
+  if(t==='heal'){ const h=Math.min(12, run.maxHp-run.hp); run.hp+=h; r.heal=h; }
+  else if(t==='fire'){ b.eHp-=10; r.dmg=10; run.stats.dealt+=10; if(b.eHp<=0) b.over='win'; }
+  else if(t==='luck') b.luck=5;
+  else if(t==='iron') b.block=1;
+  return r;
+}
+function gainTonic(run,t){ if(run.tonics.length>=tonicCap(run)) return false; run.tonics.push(t); return true; }
+const bestOf = cs => cs.reduce((m,c)=>!m||c.v>m.v?c:m, null);
+function playRound(run,b){
+  b.round++; run.stats.rounds++;
+  const luck=b.luck; b.luck=0;
+  let pc=take(b,'p'), ec=take(b,'e');
+  const used={p:[pc],e:[ec]}; const steps=[{t:'flip',pc,ec,luck}];
+  let wars=0, cmp=compare(run,b,pc,ec,luck), stale=false, curLuck=luck;
+  while(cmp===0){
+    if(avail(b,'p')<1 || avail(b,'e')<1){ stale=true; break; }
+    wars++; run.stats.wars++; curLuck=0;
+    const pn=Math.min(3,avail(b,'p')-1), en=Math.min(3,avail(b,'e')-1);
+    const pd=[],ed=[];
+    for(let i=0;i<pn;i++) pd.push(take(b,'p'));
+    for(let i=0;i<en;i++) ed.push(take(b,'e'));
+    pc=take(b,'p'); ec=take(b,'e');
+    used.p.push(...pd,pc); used.e.push(...ed,ec);
+    steps.push({t:'war',pd,ed,pc,ec});
+    cmp=compare(run,b,pc,ec);
+  }
+  const r={cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, thorn:0, gold:0, caps:[], lost:null, blocked:null, luck:curLuck, pc, ec};
+  if(!stale){
+    const base=Math.max(1,Math.abs(effP(run,pc)+curLuck-effE(b,ec))) + 3*wars;
+    const armor = b.f.q==='wall'?2:(b.f.q==='armored'||b.f.q==='royal')?1:0;
+    if(cmp===1){
+      let d=base;
+      if(has(run,'whetstone')) d+=1;
+      if(has(run,'spade')&&pc.s==='S') d+=3;
+      if(charmOf(run,pc)==='keen') d+=3;
+      if(has(run,'banner')&&wars) d*=2;
+      if(has(run,'gambit')&&b.round===1) d*=3;
+      d=Math.max(1,d-armor);
+      r.dmg=d; b.eHp-=d; run.stats.dealt+=d;
+      if(has(run,'fang')) r.heal+=1;
+      if(has(run,'locket')&&pc.s==='H') r.heal+=2;
+      if(charmOf(run,pc)==='mending') r.heal+=2;
+      if(charmOf(run,pc)==='gilded'){ r.gold=2; run.gold+=2; }
+      if(b.f.q==='thorns'){ r.thorn=2; run.hp-=2; }
+      run.hp=Math.min(run.maxHp, run.hp+r.heal);
+      if(wars){ // capture their best card(s) for good; stolen cards of yours come back
+        for(let n=has(run,'thief')?2:1; n>0 && used.e.length; n--){
+          const c=bestOf(used.e); used.e.splice(used.e.indexOf(c),1);
+          let got;
+          if(c.sid){ got=b.stolen.find(x=>x.id===c.sid); b.stolen=b.stolen.filter(x=>x.id!==c.sid); run.deck.push(got); }
+          else { got={v:c.v, s:c.s, id:nid()}; run.deck.push(got); run.stats.captured++; }
+          used.p.push({...got}); r.caps.push(c.sid?{...got, back:true}:got);
+        }
+      }
+    } else {
+      let d=base;
+      if(b.f.q==='brute') d+=2;
+      if(b.f.q==='frenzy') d+=b.frenzy++;
+      if(b.f.q==='warlike'&&wars) d*=2;
+      if(has(run,'buckler')) d=Math.max(1,d-1);
+      if(b.block){ b.block=0; r.blocked='tonic'; d=0; }
+      else if(b.aegis){ b.aegis=false; r.blocked='aegis'; d=0; }
+      r.dmg=d; run.hp-=d;
+      if(b.f.q==='vampire') r.eHeal=Math.floor(d/2);
+      if(has(run,'iron')&&pc.s==='C'){ r.back=Math.max(1,3-armor); b.eHp-=r.back; run.stats.dealt+=r.back; }
+      b.eHp=Math.min(b.eMax, b.eHp+r.eHeal);
+      if(wars && run.deck.length>6){ // they take your best card; win the battle to get it back
+        const c=bestOf(used.p); used.p.splice(used.p.indexOf(c),1);
+        const i=run.deck.findIndex(x=>x.id===c.id);
+        if(i>=0){ const orig=run.deck.splice(i,1)[0]; b.stolen.push(orig); used.e.push({v:c.v,s:c.s,id:nid(),sid:orig.id}); r.lost=orig; run.stats.lost++; }
+        else used.p.push(c);
+      }
+    }
+  }
+  b.pDisc.push(...used.p); b.eDisc.push(...used.e);
+  if(b.eHp<=0) b.over='win'; else if(run.hp<=0) b.over='lose';
+  return {steps, r};
+}
+function winBattle(run,b){
+  run.stats.battles++;
+  const back=b.stolen.slice(); b.stolen.forEach(c=>run.deck.push(c)); b.stolen=[];
+  const f=b.f, g=TUNE.baseGold+(f.elite?12:0)+(has(run,'purse')?6:0)+rint(0,4);
+  if(has(run,'belt')){ run.maxHp+=2; run.hp+=2; }
+  if(has(run,'bandages')) run.hp=Math.min(run.maxHp, run.hp+6);
+  run.hp=Math.min(run.maxHp, run.hp+Math.ceil(run.maxHp*TUNE.heal));
+  run.gold+=g; return {g, back};
+}
+function cardChoices(run){
+  const t=run.act*ROWS+Math.max(0,run.row), lo=Math.min(11,5+Math.floor(t/3)), hi=Math.min(14,10+Math.floor(t/4));
+  const out=[]; for(let i=0;i<3;i++){ const c={v:rint(lo,hi), s:pick(SUITS)}; if(Math.random()<.18) c.ch=pick(Object.keys(CHARMS)); out.push(c); }
+  return out;
+}
+function applyPrize(run,p){
+  if(p.k==='gold') run.gold+=p.n;
+  else if(p.k==='tonic'){ if(!gainTonic(run,p.t)){ run.gold+=10; return 'full'; } }
+}
+function addCard(run,c){ const n={...c, id:nid()}; run.deck.push(n); return n; }
+function charmCard(run,id,ch){ const c=run.deck.find(x=>x.id===id); if(c) c.ch=ch; }
+function sharpen(run,id,n=3){ const c=run.deck.find(x=>x.id===id); if(c) c.v=Math.min(14,c.v+n); return c; }
+function removeCard(run,id){ const i=run.deck.findIndex(x=>x.id===id); if(i>=0) return run.deck.splice(i,1)[0]; }
+function relicChoices(run,n=3){ return shuffle(Object.keys(RELICS).filter(k=>!has(run,k))).slice(0,n); }
+function gainRelic(run,r){ run.relics.push(r); if(r==='stout'){ run.maxHp+=12; run.hp+=12; } }
+function nextAct(run){
+  run.act++; run.row=-1; run.col=null; run.path=[]; run.map=genMap(run.act);
+  run.hp=Math.min(run.maxHp, run.hp+Math.ceil((run.maxHp-run.hp)*TUNE.actHeal));
+}
+const weakest = (run,n) => [...run.deck].sort((a,b)=>a.v-b.v).slice(0,n);
+function makeStore(run){
+  const a=run.act, lo=Math.min(12,7+a*2), hi=Math.min(14,11+a*2);
+  const card=()=>{ const c={v:rint(lo,hi), s:pick(SUITS)}; if(Math.random()<.25) c.ch=pick(Object.keys(CHARMS)); return {k:'card', c, price:10+(c.v-7)*3+(c.ch?8:0)}; };
+  const rels=relicChoices(run,2);
+  const items=[card(), card(), card()];
+  rels.forEach(r=>items.push({k:'relic', r, price:rint(40,55)+a*5}));
+  items.push({k:'tonic', t:pick(Object.keys(TONICS)), price:14});
+  items.push({k:'charm', ch:pick(Object.keys(CHARMS)), price:22+a*3});
+  items.push({k:'remove', price:30+run.removals*15});
+  return items;
+}
+function buyItem(run,it,cardId){
+  run.gold-=it.price; it.sold=true;
+  if(it.k==='card') addCard(run,it.c);
+  else if(it.k==='relic') gainRelic(run,it.r);
+  else if(it.k==='tonic') gainTonic(run,it.t);
+  else if(it.k==='charm') charmCard(run,cardId,it.ch);
+  else if(it.k==='remove'){ removeCard(run,cardId); run.removals++; }
+}
+/* events: each choice may need a card picked (pick:'any') */
+const EVENTS = {
+  gambler:{t:'The Gambler', i:'🎲', text:'A grinning man fans a deck on an upturned barrel. "One flip, friend. High card wins."', choices:[
+    {l:'Bet 15 gold', d:'Win 30 gold, or lose your 15.', can:r=>r.gold>=15, go:r=>{ if(Math.random()<.5){ r.gold+=15; return 'Your card is higher. He pays up with a sour face. +15 gold.'; } r.gold-=15; return 'His card is higher. He pockets your coins. −15 gold.'; }},
+    {l:'Bet a card', d:'Stake a card you pick. Win a card 2 ranks higher, or lose it.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ if(Math.random()<.5){ const n=addCard(r,{v:Math.min(14,c.v+2), s:c.s}); return `You win! He hands over the ${rankLabel(n.v)}. You keep yours too.`; } removeCard(r,c.id); return 'You lose. He tucks your card into his sleeve.'; }},
+    {l:'Walk away', d:'Nothing ventured.', go:()=>'You tip your hat and keep marching.'}]},
+  shrine:{t:'The Old Shrine', i:'⛩️', text:'Moss covers a stone shrine. Offerings of blood and coin rest at its feet.', choices:[
+    {l:'Offer blood', d:'Lose 8 HP. Gain a random relic.', can:r=>r.hp>8, go:r=>{ r.hp-=8; const x=relicChoices(r,1)[0]; if(!x){ r.gold+=40; return 'The shrine is quiet. You find 40 gold instead.'; } gainRelic(r,x); return `The stone glows. You receive the ${RELICS[x].n}.`; }},
+    {l:'Offer coin', d:'Pay 25 gold. Heal to full.', can:r=>r.gold>=25, go:r=>{ r.gold-=25; r.hp=r.maxHp; return 'Warmth fills you. You are fully healed.'; }},
+    {l:'Leave', d:'Respect the dead.', go:()=>'You bow and move on.'}]},
+  sharp:{t:'The Card Sharp', i:'🃏', text:'"Trade you," says a woman with too many rings. "My one for your two."', choices:[
+    {l:'Trade two weak cards', d:'Lose your two weakest cards. Gain a random face card or Ace.', can:r=>r.deck.length>9, go:r=>{ const w=weakest(r,2); w.forEach(c=>removeCard(r,c.id)); const n=addCard(r,{v:rint(11,14), s:pick(SUITS)}); return `She takes your ${w.map(c=>rankLabel(c.v)).join(' and ')} and hands you a ${rankLabel(n.v)}.`; }},
+    {l:'Pay for a lesson', d:'Pay 20 gold. Put a Keen charm on a card.', pick:'any', can:r=>r.gold>=20, go:(r,c)=>{ r.gold-=20; charmCard(r,c.id,'keen'); return 'She shows you a trick with the edge of a card. It is now Keen.'; }},
+    {l:'Leave', d:'Keep your cards close.', go:()=>'She shrugs and shuffles.'}]},
+  camp:{t:'Abandoned Camp', i:'⛺', text:'A cold fire, torn tents, and packs left in a hurry.', choices:[
+    {l:'Rest a while', d:'Heal 15 HP.', go:r=>{ r.hp=Math.min(r.maxHp,r.hp+15); return 'You sleep by the old fire. +15 HP.'; }},
+    {l:'Search the packs', d:'Find 35 gold. Might be trapped.', go:r=>{ r.gold+=35; if(Math.random()<.5){ r.hp-=8; return 'A snare snaps shut on your hand! −8 HP, but you get 35 gold.'; } return 'Nobody is coming back for this. +35 gold.'; }},
+    {l:'Take the medicine', d:'Gain a Healing Tonic.', go:r=>gainTonic(r,'heal')?'You pocket a Healing Tonic.':'Your bag is full, so you leave it.'}]},
+  forge:{t:'Roadside Forge', i:'⚒️', text:'A smith hammers at glowing iron and nods at your deck. "I can work those."', choices:[
+    {l:'Temper', d:'Lose 6 HP. Your 3 weakest cards gain 3 ranks.', can:r=>r.hp>6, go:r=>{ r.hp-=6; weakest(r,3).forEach(c=>c.v=Math.min(14,c.v+3)); return 'Sparks fly and burn your arms. Your weakest cards are stronger.'; }},
+    {l:'Melt a card', d:'Remove a card you pick. Gain 15 gold.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.gold+=15; return `The ${rankLabel(c.v)} melts into the fire. +15 gold.`; }},
+    {l:'Leave', d:'Nothing needs fixing.', go:()=>'The hammering fades behind you.'}]},
+  stranger:{t:'A Cloaked Stranger', i:'🧥', text:'"Gold for you," he whispers, pressing a heavy coin into your hand. "A small price."', choices:[
+    {l:'Take the coin', d:'Gain 60 gold. Two 2s join your deck.', go:r=>{ r.gold+=60; addCard(r,{v:2,s:pick(SUITS)}); addCard(r,{v:2,s:pick(SUITS)}); return 'The coin is warm. Two worthless cards appear in your deck. +60 gold.'; }},
+    {l:'Refuse', d:'Nothing is free.', go:()=>'He melts back into the crowd.'}]},
+  seer:{t:'The Fortune Teller', i:'🔮', text:'Candles flicker around a crystal ball. "I see your road," she says. "For a price."', choices:[
+    {l:'Pay 30 gold', d:'+1 Burn in every battle for the rest of the run.', can:r=>r.gold>=30, go:r=>{ r.gold-=30; r.bonusBurns=(r.bonusBurns||0)+1; return 'She tells you which cards to fear. +1 Burn every battle.'; }},
+    {l:'Pay 10 gold', d:'Gain a Luck Tonic.', can:r=>r.gold>=10, go:r=>{ r.gold-=10; return gainTonic(r,'luck')?'She hands you a Luck Tonic.':'Your bag is full. She keeps the gold anyway.'; }},
+    {l:'Leave', d:'The future can wait.', go:()=>'"You\'ll be back," she calls.'}]},
+  deserters:{t:'Deserters', i:'🏳️', text:'Three soldiers with torn colours sit by the road. "Take us with you. Or take our gold. We won\'t fight."', choices:[
+    {l:'Recruit them', d:'Add three random 8 to 10 cards.', go:r=>{ for(let i=0;i<3;i++) addCard(r,{v:rint(8,10),s:pick(SUITS)}); return 'Three new cards join your deck.'; }},
+    {l:'Rob them', d:'Gain 45 gold. Lose 10 HP in the scuffle.', can:r=>r.hp>10, go:r=>{ r.gold+=45; r.hp-=10; return 'They fight back after all. −10 HP, +45 gold.'; }},
+    {l:'Let them be', d:'Everyone gets tired.', go:()=>'They wave you on.'}]}
+};
+const EVENT_IDS = Object.keys(EVENTS);
+const REST = {t:'Campfire', i:'🔥', text:'A safe place to rest. The fire crackles.', choices:[
+  {l:'Rest', d:'Heal 30% of your max HP.', go:r=>{ const h=Math.min(r.maxHp-r.hp, Math.ceil(r.maxHp*.3)); r.hp+=h; return `You sleep soundly. +${h} HP.`; }},
+  {l:'Sharpen', d:'A card you pick gains 3 ranks.', pick:'any', go:(r,c)=>{ const o=c.v; sharpen(r,c.id,3); return `Your ${rankLabel(o)} is now a ${rankLabel(Math.min(14,o+3))}.`; }},
+  {l:'Brew', d:'Gain a random tonic.', go:r=>{ const t=pick(Object.keys(TONICS)); return gainTonic(r,t)?`You brew a ${TONICS[t].n}.`:'Your bag is full.'; }}]};
+/* card-gain and utility spots */
+function gainRange(run,up=0){ const t=run.act*3+Math.floor(Math.max(0,run.row)/3); return [Math.min(12,5+Math.floor(t*.8)+up), Math.min(14,9+t+up)]; }
+function randCard(run,up=0,s){ const [lo,hi]=gainRange(run,up); const c={v:rint(lo,hi), s:s||pick(SUITS)}; if(Math.random()<.15) c.ch=pick(Object.keys(CHARMS)); return c; }
+function runTrial(run,id){ const T=TRIALS[id], x=T.need?T.need(run):0, cs=shuffle(run.deck.slice()).slice(0,T.draw); return {cs, x, pass:T.test(run,cs,x)}; }
+const TRIALS = {
+  might:{n:'Trial of Might', i:'💪', d:x=>`Draw 3 cards from your deck. Pass if their ranks add up to ${x} or more.`, need:r=>24+r.act*3, draw:3, test:(r,cs,x)=>cs.reduce((s,c)=>s+c.v,0)>=x},
+  kin:{n:'Trial of Kinship', i:'🤝', d:()=>'Draw 3 cards from your deck. Pass if two of them share a suit.', draw:3, test:(r,cs)=>new Set(cs.map(c=>c.s)).size<3},
+  crown:{n:'Trial of Crowns', i:'👑', d:()=>'Draw 4 cards from your deck. Pass if one is a Jack or better.', draw:4, test:(r,cs)=>cs.some(c=>c.v>=11)},
+  numbers:{n:'Trial of Numbers', i:'🔢', d:x=>`Pass if your deck holds ${x} or more cards.`, need:r=>20+r.act*2, draw:0, test:(r,cs,x)=>r.deck.length>=x}
+};
+function rareCards(){ return [0,1,2].map(()=>{ const c={v:rint(11,14), s:pick(SUITS)}; if(Math.random()<.5) c.ch=pick(Object.keys(CHARMS)); return c; }); }
+const SYMS = {S:'♠',H:'♥',D:'♦',C:'♣'};
+function gainCards(run,n){
+  if(n.t==='suit') return [0,1,2].map(()=>randCard(run,1,n.s));
+  if(n.t==='blind') return [0,1,2].map(()=>({v:rint(3,14), s:pick(SUITS)}));
+  return [0,1,2].map(()=>randCard(run));
+}
+const lbl = c => rankLabel(c.v)+SYMS[c.s];
+const dupPairs = run => { const by={}; run.deck.forEach(c=>{ (by[c.v]=by[c.v]||[]).push(c); }); return Object.values(by).filter(a=>a.length>1).map(a=>[a[0],a[1]]).sort((a,b)=>b[0].v-a[0].v).slice(0,3); };
+const NODES = {
+  recruit:{t:'Recruits', i:'🃏', map:'Recruits', info:'Choose 1 of 3 new cards.'},
+  suit:{t:'Suit Draft', i:'♠', map:'Draft', info:n=>`Choose 1 of 3 ${SUITNAME[n.s]}, a little stronger than usual.`},
+  blind:{t:'Blind Draw', i:'🂠', map:'Blind Draw', info:'Three face-down cards. You only see their suits. Could be an Ace, could be a 2.'},
+  trial:{t:'Trial', i:'🗿', map:'Trial', info:n=>`${TRIALS[n.tr].n}. Pass the test to choose a rare card.`},
+  rest:{t:'Campfire', i:'🔥', map:'Campfire', info:'Rest to heal, or sharpen a card. Push your luck and the fire may take it.',
+    text:'The fire crackles. You could rest, or hold a card to the flames to harden it.',
+    choices:(run,st)=> !st.times ? [
+      {l:'Rest', d:'Heal 30% of your max HP.', go:r=>{ const h=Math.min(r.maxHp-r.hp, Math.ceil(r.maxHp*.3)); r.hp+=h; return {text:`You sleep soundly. +${h} HP.`}; }},
+      {l:'Sharpen a card', d:'A card you pick gains 2 ranks.', pick:'any', filter:c=>c.v<14, go:(r,c,st)=>{ const o=c.v; c.v=Math.min(14,c.v+2); st.sharp=c.id; st.times=1; return {text:`Your ${rankLabel(o)} is now a ${rankLabel(c.v)}. The fire is still hot...`, again:true}; }}
+    ] : [
+      {l:`Sharpen it again`, d:`+2 more ranks, but a ${st.times===1?30:55}% chance the fire destroys the card.`, can:r=>{ const c=r.deck.find(x=>x.id===st.sharp); return c&&c.v<14; }, go:(r,_,st)=>{ const c=r.deck.find(x=>x.id===st.sharp); if(Math.random()<(st.times===1?.3:.55)){ removeCard(r,c.id); return {text:`The flames leap up. Your ${lbl(c)} is ash.`, bad:true}; } c.v=Math.min(14,c.v+2); st.times++; return {text:`It holds! Now a ${lbl(c)}.`, again:true}; }},
+      {l:'Leave the fire', d:'Quit while you\'re ahead.', go:()=>({text:'You kick dirt over the embers and move on.'})}
+    ]},
+  pack:{t:'Abandoned Pack', i:'🎒', map:'Backpack', info:'Fill your empty tonic slots.',
+    text:'A traveller\'s pack lies by the road, still full.',
+    choices:()=>[{l:'Take what fits', d:'Fill up to 2 empty tonic slots with random tonics.', go:r=>{ const got=[]; for(let i=0;i<2;i++){ const t=pick(Object.keys(TONICS)); if(gainTonic(r,t)) got.push(TONICS[t].n); } return {text: got.length?`You find: ${got.join(' and ')}.`:'Your bag is already full, so you leave it.'}; }}]},
+  altar:{t:'The Bone Altar', i:'🕯️', map:'Altar', info:'Sacrifice a card for a lasting boon.',
+    text:'Candles gutter around a stone slab stained dark. Something wants a card.',
+    choices:()=>[
+      {l:'Sacrifice for vigour', d:'Lose a card you pick. +8 max HP.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.maxHp+=8; r.hp+=8; return {text:`The ${lbl(c)} burns away. You feel sturdier. +8 max HP.`}; }},
+      {l:'Sacrifice for sight', d:'Lose a card you pick. +1 Burn in every battle.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.bonusBurns=(r.bonusBurns||0)+1; return {text:`The ${lbl(c)} burns away. You see further ahead. +1 Burn every battle.`}; }},
+      {l:'Sacrifice for wealth', d:'Lose a card you pick. +40 gold.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.gold+=40; return {text:`The ${lbl(c)} burns away and coins spill from the ash. +40 gold.`}; }},
+      {l:'Leave', d:'Some things are best left alone.', go:()=>({text:'You back away slowly.'})}]},
+  carver:{t:'The Woodcarver', i:'🪵', map:'Woodcarver', info:'Carve a totem that charms every card of one suit.',
+    text:'An old woman whittles by the fire. "A totem," she says. "It will bless a whole suit. Only one at a time."',
+    choices:(run,st)=>{ if(!st.opts){ const s=shuffle(SUITS.slice()), c=shuffle(Object.keys(CHARMS)); st.opts=[0,1,2].map(i=>({s:s[i], ch:c[i%c.length]})); }
+      return st.opts.map(o=>({l:`${SYMS[o.s]} ${CHARMS[o.ch].n} totem`, d:`All your ${SUITNAME[o.s]} gain ${CHARMS[o.ch].n}: ${CHARMS[o.ch].d.replace('this card','they').replace('This card','They')}${run.totem?' Replaces your current totem.':''}`,
+        go:r=>{ r.totem={s:o.s, ch:o.ch}; return {text:`She hands you a little ${SUITNAME[o.s]} idol. Your ${SUITNAME[o.s]} are now ${CHARMS[o.ch].n}.`, good:true}; }})).concat([{l:'Leave', d:'No totem today.', go:()=>({text:'She goes back to her whittling.'})}]); }},
+  fungi:{t:'The Mycologists', i:'🍄', map:'Mycologists', info:'Fuse two cards of the same rank into one much stronger card.',
+    text:'Two figures in masks lean over a bubbling vat. "Two the same," they whisper together. "Make them one."',
+    choices:run=>{ const P=dupPairs(run);
+      const ch=P.map(([a,b])=>({l:`Fuse ${lbl(a)} and ${lbl(b)}`, d:`They become one ${rankLabel(Math.min(14,a.v+4))}.`, go:r=>{ removeCard(r,b.id); const k=r.deck.find(x=>x.id===a.id); k.v=Math.min(14,k.v+4); k.ch=k.ch||b.ch; return {text:`The vat hisses. Out comes a single ${lbl(k)}.`, good:true}; }}));
+      if(!P.length) ch.push({l:'Ask for a spore', d:'You have no matching ranks. They copy a card you pick, so you can fuse next time.', pick:'any', go:(r,c)=>{ addCard(r,{v:c.v,s:pick(SUITS)}); return {text:`They grow a second ${rankLabel(c.v)} for you.`}; }});
+      return ch.concat([{l:'Leave', d:'The smell is too much.', go:()=>({text:'"Come back," they hum.'})}]); }},
+  goo:{t:'The Mimic', i:'🫧', map:'Mimic', info:'Copy a card. The copy comes out a little different.',
+    text:'A wobbling blob of goo burbles at your deck. It wants to copy something.',
+    choices:()=>[{l:'Let it copy a card', d:'Gain a copy of a card you pick. It might come out better, worse, or charmed.', pick:'any', go:(r,c)=>{ const m=pick(['up2','up1','down1','charm','same']); const n={v:c.v,s:c.s,ch:c.ch};
+      if(m==='up2') n.v=Math.min(14,n.v+2); if(m==='up1') n.v=Math.min(14,n.v+1); if(m==='down1') n.v=Math.max(2,n.v-1); if(m==='charm') n.ch=pick(Object.keys(CHARMS));
+      const k=addCard(r,n); return {text:`It spits out a ${lbl(k)}${k.ch?` with a ${CHARMS[k.ch].n} charm`:''}.${m==='down1'?' A bit squashed.':m==='same'?' A perfect copy.':' Better than the original!'}`}; }},
+      {l:'Leave', d:'Keep it away from your cards.', go:()=>({text:'It burbles sadly.'})}]},
+  stones:{t:'Charm Stones', i:'🪨', map:'Stones', info:'Move a charm from one card to another.',
+    text:'Two standing stones hum with old magic. Place a card on each.',
+    choices:(run,st)=> st.moving ? [{l:'Choose the new card', d:`Give the ${CHARMS[st.moving].n} charm to a card you pick.`, pick:'any', go:(r,c,st)=>{ c.ch=st.moving; st.moving=null; return {text:`Your ${lbl(c)} is now ${CHARMS[c.ch].n}.`, good:true}; }}]
+      : run.deck.some(c=>c.ch) ? [{l:'Move a charm', d:'Sacrifice a charmed card. Its charm goes to another card you pick.', pick:'charmed', filter:c=>!!c.ch, go:(r,c,st)=>{ st.moving=c.ch; removeCard(r,c.id); return {text:`The ${lbl(c)} crumbles. The ${CHARMS[st.moving].n} charm floats free.`, again:true}; }},
+          {l:'Leave', d:'Keep your charms where they are.', go:()=>({text:'The humming fades.'})}]
+      : [{l:'Etch a charm', d:'You have no charmed cards. Pay 15 gold for a random charm on a card you pick.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`The stones etch a ${CHARMS[c.ch].n} charm into your ${lbl(c)}.`, good:true}; }},
+          {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
+};
+if(typeof module!=='undefined') module.exports={gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
+
+
+</script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sleep = ms => new Promise(r => setTimeout(r, reduce ? Math.min(ms, 300) : ms * SPEED()));
+  const VS = '\uFE0E';
+  const SYM = { S: '\u2660', H: '\u2665', D: '\u2666', C: '\u2663' };
+  const NAMES = { S: 'spades', H: 'hearts', D: 'diamonds', C: 'clubs' };
+  const RN = { 11: 'Jack', 12: 'Queen', 13: 'King', 14: 'Ace' };
+  const COURT = { 11: '\u265E', 12: '\u265B', 13: '\u265A' };
+  const GLYPH = ['\u265F', '\u265F', '\u265C', '\u265C', '\u265D', '\u265E', '\u265D', '\u265B', '\u265A'];
+  const sym = s => SYM[s] + VS;
+  const L = c => rankLabel(c.v) + sym(c.s);
+  const full = c => `${RN[c.v] || c.v} of ${NAMES[c.s]}`;
+  const short = n => n.replace(/^The /, '');
+  const REC = 'war-march-record', SLOTS = [1, 2, 3], slotKey = i => `war-slot-${i}`;
+  const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+
+  let run = null, B = null, busy = false, slot = null;
+
+  function load(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+  function store(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function save() { if (slot) store(slotKey(slot), run ? { run, battle: B ? { ...B, f: undefined } : null, t: Date.now() } : null); }
+  const clearSlot = () => { if (slot) store(slotKey(slot), null); };
+  (() => { // move a save from the old single-save version into the first free slot
+    const old = load('war-march-run'); if (!old) return;
+    const free = SLOTS.find(i => !load(slotKey(i))); if (free) store(slotKey(free), { ...old, t: Date.now() });
+    store('war-march-run', null);
+  })();
+  function latestSlot() {
+    let best = null;
+    for (const i of SLOTS) { const d = load(slotKey(i)); if (d && d.run && (!best || (d.t || 0) > best.t)) best = { i, t: d.t || 0, d }; }
+    return best;
+  }
+
+  const record = () => load(REC) || { best: 0, wins: 0, runs: 0 };
+
+  /* settings */
+  const DEF = { master: 80, music: 55, sfx: 80, muted: false, speed: 'normal', shake: true, particles: true, table: 'crimson' };
+  const SET = Object.assign({}, DEF, load('war-settings') || {});
+  if (load('war-settings') == null && load('war-sound') === false) SET.muted = true;
+  const saveSet = () => store('war-settings', SET);
+  const SPEED = () => SET.speed === 'fast' ? 1 : 1.4;
+  const applyTable = () => { document.documentElement.dataset.table = SET.table; };
+  applyTable();
+
+  /* sound: everything is synthesized with Web Audio, no sound files */
+  const Snd = (() => {
+    let ctx = null, master, sfxBus, musBus, sfxVerb, musVerb, noiseBuf, trackGain = null, cur = null, want = null, nextT = 0, step = 0, loop = 0;
+    const R = (a, b) => a + Math.random() * (b - a);
+    const now = () => ctx.currentTime;
+    function impulse(dur, decay) {
+      const len = Math.floor(ctx.sampleRate * dur), b = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch++) { const a = b.getChannelData(ch); for (let i = 0; i < len; i++) a[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); }
+      return b;
+    }
+    function ac() {
+      if (!ctx) {
+        try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+        const comp = ctx.createDynamicsCompressor();
+        comp.threshold.value = -12; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .25;
+        master = ctx.createGain(); master.connect(comp).connect(ctx.destination);
+        sfxBus = ctx.createGain(); sfxBus.connect(master);
+        musBus = ctx.createGain(); musBus.connect(master);
+        const ir = impulse(2.6, 3);
+        const mkVerb = (bus, level) => { const cv = ctx.createConvolver(), g = ctx.createGain(); cv.buffer = ir; g.gain.value = level; cv.connect(g).connect(bus); return cv; };
+        sfxVerb = mkVerb(sfxBus, .55); musVerb = mkVerb(musBus, .6);
+        noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+        const a = noiseBuf.getChannelData(0); for (let i = 0; i < a.length; i++) a[i] = Math.random() * 2 - 1;
+        applyVol(true);
+        setInterval(tick, 25);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) ctx.suspend(); else ctx.resume(); });
+        if (want) startTrack(want);
+      }
+      if (ctx.state === 'suspended' && !document.hidden) ctx.resume();
+      return ctx;
+    }
+    function applyVol(instant) {
+      if (!ctx) return;
+      const set = (p, v) => instant ? (p.value = v) : p.setTargetAtTime(v, ctx.currentTime, .05);
+      set(master.gain, SET.muted ? 0 : Math.pow(SET.master / 100, 2));
+      set(sfxBus.gain, Math.pow(SET.sfx / 100, 2));
+      set(musBus.gain, Math.pow(SET.music / 100, 2) * .8);
+    }
+    const busOf = b => b === 'mus' ? (trackGain || musBus) : sfxBus;
+    function route(node, bus, verb) {
+      node.connect(busOf(bus));
+      if (verb) { const s = ctx.createGain(); s.gain.value = verb; node.connect(s).connect(bus === 'mus' ? musVerb : sfxVerb); }
+    }
+    function hitv({ type = 'sine', f, t, dur = .2, vol = .2, slide, lp, bus = 'sfx', verb = 0 }) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      let n = o; if (lp) { const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = lp; o.connect(fl); n = fl; }
+      n.connect(g); route(g, bus, verb); o.start(t); o.stop(t + dur + .05);
+    }
+    function held({ type = 'triangle', f, t, dur, vol, attack = .02, release = .12, lp, lpEnv, detune = 0, vib = 0, bus = 'mus', verb = 0 }) {
+      const o = ctx.createOscillator(), g = ctx.createGain(), end = t + dur;
+      o.type = type; o.frequency.value = f; o.detune.value = detune;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + attack);
+      g.gain.setValueAtTime(vol, Math.max(t + attack, end - release)); g.gain.linearRampToValueAtTime(0, end);
+      let n = o;
+      if (lp) {
+        const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.Q.value = .8;
+        if (lpEnv) { fl.frequency.setValueAtTime(lp * .35, t); fl.frequency.exponentialRampToValueAtTime(lp * lpEnv, t + Math.min(.12, dur * .4)); fl.frequency.exponentialRampToValueAtTime(lp, t + Math.min(.5, dur)); }
+        else fl.frequency.value = lp;
+        o.connect(fl); n = fl;
+      }
+      if (vib) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 5.3; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(vib, t + Math.min(.3, dur)); l.connect(lg).connect(o.detune); l.start(t); l.stop(end + .05); }
+      n.connect(g); route(g, bus, verb); o.start(t); o.stop(end + .05);
+    }
+    function noise({ t, dur = .1, vol = .2, type = 'highpass', f = 2000, q = .7, sweep, attack = .002, bus = 'sfx', verb = 0 }) {
+      const s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = noiseBuf; fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f, t);
+      if (sweep) fl.frequency.exponentialRampToValueAtTime(sweep, t + dur);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      s.connect(fl).connect(g); route(g, bus, verb); s.start(t, Math.random() * 1.5); s.stop(t + dur + .05);
+    }
+    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+    const drum = (t, v = 1, bus = 'sfx') => { hitv({ f: 96, slide: 46, t, dur: .7, vol: .9 * v, bus, verb: .25 }); noise({ t, dur: .22, vol: .45 * v, type: 'lowpass', f: 500, sweep: 120, bus, verb: .3 }); };
+    const brass = (ms, t, dur, vol, bus = 'sfx') => ms.forEach(m => [-8, 8].forEach(d => held({ type: 'sawtooth', f: hz(m), t, dur, vol, detune: d, attack: .03, release: .25, lp: 1400, lpEnv: 2.2, bus, verb: .45 })));
+    const cymbal = (t, v = 1) => { noise({ t, dur: 1.6, vol: .22 * v, type: 'highpass', f: 6500, attack: .005, verb: .6 }); noise({ t, dur: .5, vol: .15 * v, type: 'bandpass', f: 3500, q: .5 }); };
+    const fx = {
+      flick() { const t = now(); noise({ t, dur: .06, vol: .45, type: 'bandpass', f: R(2400, 3400), q: 1.3 }); noise({ t: t + .01, dur: .045, vol: .22, type: 'highpass', f: 5500 }); hitv({ f: R(850, 1050), slide: 280, t, dur: .035, vol: .1 }); },
+      hit(big) {
+        const t = now();
+        hitv({ f: big ? 120 : 160, slide: 40, t, dur: big ? .45 : .28, vol: big ? .95 : .75 });
+        noise({ t, dur: .16, vol: .5, type: 'lowpass', f: 2600, sweep: 280 });
+        noise({ t, dur: .025, vol: .4, type: 'highpass', f: 3500 });
+        if (big) { [587, 1244, 1760, 2349].forEach((f, i) => hitv({ type: 'triangle', f: f * R(.985, 1.015), t: t + .005, dur: 1 - i * .18, vol: .08, verb: .7 })); hitv({ f: 55, slide: 32, t, dur: .9, vol: .6 }); }
+      },
+      hurt(big) {
+        const t = now();
+        hitv({ type: 'sawtooth', f: big ? 95 : 130, slide: 42, t, dur: .32, vol: .32, lp: 650 });
+        hitv({ f: 75, slide: 34, t, dur: .5, vol: .75 });
+        noise({ t, dur: .24, vol: .45, type: 'lowpass', f: 1000, sweep: 140 });
+        if (big) { noise({ t: t + .04, dur: .6, vol: .22, type: 'bandpass', f: 380, q: 1.5, verb: .5 }); hitv({ type: 'sawtooth', f: 62, slide: 30, t, dur: .7, vol: .2, lp: 300 }); }
+      },
+      war() { const t = now(); drum(t, 1.1); drum(t + .2, .8); drum(t + .4, 1.2); brass([50, 57, 62, 65], t + .4, .9, .045); cymbal(t + .4, .8); },
+      burn() {
+        const t = now();
+        noise({ t, dur: .7, vol: .28, type: 'bandpass', f: 300, sweep: 2800, q: .9, attack: .15, verb: .3 });
+        for (let i = 0; i < 12; i++) noise({ t: t + R(0, .6), dur: R(.01, .03), vol: R(.12, .4), type: 'highpass', f: R(1500, 4000) });
+        hitv({ f: 220, slide: 60, t: t + .05, dur: .5, vol: .15 });
+      },
+      heal() { const t = now(); [81, 88, 93, 100].forEach((m, i) => hitv({ type: 'triangle', f: hz(m), t: t + i * .07, dur: .9, vol: .1, verb: .8 })); hitv({ f: hz(105), t: t + .28, dur: 1.2, vol: .04, verb: 1 }); },
+      win() {
+        const t = now();
+        [[62, 0, .16], [66, .15, .16], [69, .3, .16], [74, .45, 1.3]].forEach(([m, d, l]) => brass([m, m - 12], t + d, l, .05));
+        brass([62, 66, 69], t + .45, 1.3, .03);
+        for (let i = 0; i < 8; i++) drum(t + i * .055, .25 + i * .06);
+        drum(t + .45, 1.2); cymbal(t + .45, 1.2);
+      },
+      lose() {
+        const t = now();
+        [[57, 0, .5], [53, .45, .5], [50, .9, 1.8]].forEach(([m, d, l]) => brass([m, m - 12], t + d, l, .04));
+        brass([50, 53, 57], t + .9, 1.8, .025);
+        drum(t, .6); drum(t + .9, 1.1);
+        noise({ t: t + .9, dur: 2.2, vol: .08, type: 'bandpass', f: 500, sweep: 150, attack: .6, verb: .6 });
+      },
+      rare() { const t = now(); [76, 83, 88, 95].forEach((m, i) => hitv({ type: 'triangle', f: hz(m), t: t + i * .06, dur: 1.1, vol: .1, verb: .9 })); cymbal(t, .5); },
+      pick() { const t = now(); hitv({ type: 'triangle', f: 988, t, dur: .25, vol: .12, verb: .5 }); hitv({ type: 'triangle', f: 1480, t: t + .06, dur: .35, vol: .1, verb: .5 }); noise({ t, dur: .04, vol: .15, type: 'highpass', f: 4000 }); },
+      coin() { const t = now(); hitv({ type: 'triangle', f: 1976, t, dur: .12, vol: .12 }); hitv({ type: 'triangle', f: 2637, t: t + .07, dur: .35, vol: .1, verb: .5 }); noise({ t, dur: .03, vol: .15, type: 'highpass', f: 6000 }); },
+      bell() { const t = now(); [[1568, 1.8, .13], [2349, 1.2, .07], [3136, .8, .04], [4186, .5, .03]].forEach(([f, d, v]) => hitv({ type: 'sine', f, t, dur: d, vol: v, verb: .8 })); hitv({ type: 'sine', f: 1568 * 1.003, t: t + .02, dur: 1.6, vol: .06, verb: .6 }); },
+      tap() { const t = now(); noise({ t, dur: .03, vol: .22, type: 'highpass', f: 4500 }); hitv({ f: 1200, slide: 600, t, dur: .03, vol: .06 }); }
+    };
+
+    /* music: small step sequencer, 16 steps per bar, 8 bars per loop */
+    const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    const midi = n => { const m = /^([A-G])(#|b)?(\d)$/.exec(n); return 12 * (+m[3] + 1) + NOTE[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0); };
+    const chord = n => { const m = /^([A-G])(#|b)?(m?)$/.exec(n); return { root: NOTE[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0), third: m[3] ? 3 : 4 }; };
+    const mel = s => { const out = []; let st = 0; for (const tok of s.trim().split(/\s+/)) { const [n, l] = tok.split(':'); if (n !== '-') out.push([st, midi(n), +l]); st += +l; } return out; };
+    const TRACKS = {
+      menu: { bpm: 74, chords: 'Dm Bb F C Dm Gm A A', pad: .02, lead: .075, melOn: () => true,
+        bass: '0.......5.......', kick: 'x...............', snare: '................', fill: '........g.g.grrr',
+        mel: ['A4:6 D5:2 F5:4 E5:4', 'D5:8 -:4 C5:2 Bb4:2', 'A4:6 C5:2 F5:4 A5:4', 'G5:8 E5:4 C5:4', 'F5:6 E5:2 D5:4 A4:4', 'Bb4:6 D5:2 G5:4 F5:4', 'E5:4 C#5:4 A4:4 E5:4', 'A4:12 -:4'] },
+      battle: { bpm: 104, chords: 'Dm Dm Bb C Dm Dm Gm A', pad: .014, lead: .07, melOn: l => l % 3 !== 0,
+        bass: '0.0.5.0.8.0.5.0.', kick: 'x.......x.......', snare: 'x..gx.g.x..gx.gg', fill: 'x.x.x.x.rrrrrrrr',
+        mel: ['D5:3 D5:1 D5:2 F5:2 A5:4 F5:4', 'E5:3 D5:1 E5:2 F5:2 E5:4 -:4', 'D5:3 D5:1 D5:2 F5:2 Bb5:4 A5:4', 'G5:3 F5:1 E5:2 D5:2 C5:4 E5:4',
+          'F5:3 F5:1 F5:2 A5:2 D6:4 C6:4', 'A5:3 G5:1 F5:2 E5:2 D5:4 -:4', 'Bb5:3 A5:1 G5:2 F5:2 E5:4 G5:4', 'A5:4 E5:4 C#5:4 A4:4'] },
+      boss: { bpm: 118, chords: 'Dm Eb Dm Eb Bb A Dm A', pad: .018, lead: .07, melOn: l => l % 4 !== 0,
+        bass: '0.0.0.0.0.0.0.5.', kick: 'x...x...x...x.x.', snare: '..x...x...x..xgx', fill: 'rrrrrrrrx.x.xxxx',
+        mel: ['D5:4 A4:4 D5:2 F5:2 E5:4', 'Eb5:4 Bb4:4 Eb5:2 G5:2 F5:4', 'D5:2 F5:2 A5:4 G5:2 F5:2 E5:4', 'Eb5:8 D5:4 C5:4',
+          'D5:4 F5:4 Bb5:4 A5:4', 'C#6:8 A5:4 E5:4', 'F5:4 E5:2 D5:2 A5:4 F5:4', 'E5:4 C#5:4 A4:8'] },
+      store: { bpm: 92, chords: 'F Dm Bb C F Dm Gm C', pad: .016, lead: .06, melOn: () => true,
+        bass: '0...7...0...7...', kick: 'x.......x.......', snare: '....x.......x...', fill: '....x...x.g.xrrr',
+        mel: ['A4:4 C5:4 F5:4 E5:4', 'D5:6 C5:2 A4:8', 'Bb4:4 D5:4 F5:4 D5:4', 'C5:8 E5:4 G5:4', 'A5:4 G5:2 F5:2 C5:4 F5:4', 'D5:6 E5:2 F5:8', 'G5:4 F5:4 D5:4 Bb4:4', 'C5:12 -:4'] }
+    };
+    for (const k in TRACKS) { const T = TRACKS[k]; T.C = T.chords.split(' ').map(chord); T.M = T.mel.map(mel); }
+
+    function startTrack(name) {
+      want = name;
+      if (!ctx) return;
+      if (cur && cur.name === name) return;
+      if (trackGain) { const old = trackGain; old.gain.setTargetAtTime(0, now(), .25); setTimeout(() => old.disconnect(), 2500); trackGain = null; }
+      if (!name) { cur = null; return; }
+      trackGain = ctx.createGain(); trackGain.gain.value = 0; trackGain.gain.setTargetAtTime(1, now(), .5); trackGain.connect(musBus);
+      cur = { name, T: TRACKS[name] }; step = 0; loop = 0; nextT = now() + .15;
+    }
+    function tick() {
+      if (!cur || !ctx || ctx.state !== 'running') return;
+      const T = cur.T, sp = 60 / T.bpm / 4;
+      if (nextT < now() - .5) nextT = now() + .05;
+      while (nextT < now() + .15) {
+        playStep(T, step, nextT, sp);
+        nextT += sp; step++;
+        if (step === 128) { step = 0; loop++; }
+      }
+    }
+    function playStep(T, s, t, sp) {
+      const bar = Math.floor(s / 16), i = s % 16, ch = T.C[bar], root = 36 + ch.root;
+      if (i === 0) [0, ch.third, 7].forEach(iv => held({ type: 'triangle', f: hz(root + 24 + iv), t, dur: sp * 16, vol: T.pad, attack: .35, release: .5, lp: 1600, verb: .5 }));
+      const b = T.bass[i];
+      if (b !== '.') { held({ type: 'triangle', f: hz(root + +b), t, dur: sp * 1.8, vol: .16, attack: .005, release: .08, lp: 500 }); held({ type: 'sine', f: hz(root + +b - 12), t, dur: sp * 1.8, vol: .12, attack: .005, release: .08 }); }
+      if (T.kick[i] === 'x') hitv({ f: 110, slide: 42, t, dur: .3, vol: .5, bus: 'mus' });
+      const sn = (bar === 7 ? T.fill : T.snare)[i];
+      if (sn === 'x') { noise({ t, dur: .16, vol: .22, type: 'bandpass', f: 1900, q: .6, bus: 'mus', verb: .3 }); hitv({ f: 190, slide: 120, t, dur: .08, vol: .18, bus: 'mus' }); }
+      else if (sn === 'g') noise({ t, dur: .06, vol: .06, type: 'bandpass', f: 2200, bus: 'mus' });
+      else if (sn === 'r') noise({ t, dur: .07, vol: .1, type: 'bandpass', f: 2000, bus: 'mus' });
+      if (T.melOn(loop)) for (const [st, m, l] of T.M[bar]) if (st === i) {
+        held({ type: 'triangle', f: hz(m), t, dur: l * sp * .95, vol: T.lead, attack: .012, release: .09, vib: 12, verb: .4 });
+        held({ type: 'sawtooth', f: hz(m), t, dur: l * sp * .95, vol: T.lead * .18, attack: .02, release: .09, lp: 1800, verb: .3 });
+      }
+    }
+
+    const api = { apply: () => applyVol(false), music: startTrack, unlock: () => ac() };
+    for (const k in fx) api[k] = (...a) => { if (SET.muted || !ac()) return; fx[k](...a); };
+    return api;
+  })();
+  function syncSoundBtns() { document.querySelectorAll('.sound-btn').forEach(b => { b.textContent = SET.muted ? '🔇' : '🔊'; b.setAttribute('aria-label', SET.muted ? 'Turn sound on' : 'Mute sound'); }); }
+
+  /* cards */
+  const PIPS = {
+    2: [[50,0],[50,100,1]],
+    3: [[50,0],[50,50],[50,100,1]],
+    4: [[0,0],[100,0],[0,100,1],[100,100,1]],
+    5: [[0,0],[100,0],[50,50],[0,100,1],[100,100,1]],
+    6: [[0,0],[100,0],[0,50],[100,50],[0,100,1],[100,100,1]],
+    7: [[0,0],[100,0],[50,25],[0,50],[100,50],[0,100,1],[100,100,1]],
+    8: [[0,0],[100,0],[50,25],[0,50],[100,50],[50,75,1],[0,100,1],[100,100,1]],
+    9: [[0,0],[100,0],[0,33],[100,33],[50,50],[0,67,1],[100,67,1],[0,100,1],[100,100,1]],
+    10: [[0,0],[100,0],[50,17],[0,33],[100,33],[0,67,1],[100,67,1],[50,83,1],[0,100,1],[100,100,1]]
+  };
+  function faceHTML(c, size) {
+    const r = rankLabel(c.v), s = sym(c.s);
+    const corners = `<span class="corner tl">${r}<small>${s}</small></span><span class="corner br">${r}<small>${s}</small></span>`;
+    let mid;
+    if (size !== 'full') mid = c.v > 10 && c.v < 14 ? `<span class="simple letter">${r}</span>` : `<span class="simple">${s}</span>`;
+    else if (c.v === 14) mid = `<div class="ace${c.s === 'S' ? ' spade' : ''}"><span>${s}</span></div>`;
+    else if (c.v > 10) mid = `<div class="court"><span class="s a">${s}</span><span class="g">${COURT[c.v] + VS}</span><span class="s b">${s}</span></div>`;
+    else mid = `<div class="pips">${PIPS[c.v].map(([x, y, v]) => `<i class="${v ? 'v' : ''}" style="left:${x}%;top:${y}%">${s}</i>`).join('')}</div>`;
+    return corners + mid;
+  }
+  function cardEl(c, { size = 'full', down = false } = {}) {
+    const el = document.createElement('div');
+    el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}`;
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', down || !c ? 'Face-down card' : full(c));
+    el.innerHTML = `<div class="fc front">${c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}</div><div class="fc backf"></div>`;
+    return el;
+  }
+  const cardHTML = (c, size, down) => cardEl(c, { size, down }).outerHTML;
+
+  function deal(lane, c, down, from, fromFaceUp) {
+    const el = cardEl(c, { down });
+    lane.append(el);
+    if (reduce || !from) return el;
+    const a = from.getBoundingClientRect(), b = el.getBoundingClientRect();
+    const dx = (a.left + a.width / 2) - (b.left + b.width / 2), dy = (a.top + a.height / 2) - (b.top + b.height / 2);
+    const sc = a.width / b.width, endR = down ? 180 : 0, startR = fromFaceUp ? 0 : 180;
+    el.animate([
+      { transform: `translate(${dx}px, ${dy}px) scale(${sc}) rotateY(${startR}deg) rotateZ(${(Math.random() * 16 - 8).toFixed(1)}deg)` },
+      { offset: .65, transform: `translate(0px, ${down ? 0 : (dy > 0 ? -10 : 10)}px) scale(1.08) rotateY(${down ? 180 : 15}deg) rotateZ(0deg)` },
+      { transform: `translate(0px, 0px) scale(1) rotateY(${endR}deg) rotateZ(0deg)` }
+    ], { duration: 460, easing: 'cubic-bezier(.2,.75,.25,1)' });
+    return el;
+  }
+
+  function burst(x, y, { n = 26, colors = ['#e0b45a', '#f7dc9a', '#fffaf0'], up = 0, spread = 140 } = {}) {
+    if (reduce || !SET.particles) return;
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('i');
+      p.className = 'spark';
+      const col = colors[i % colors.length];
+      p.style.cssText = `left:${x}px;top:${y}px;background:${col};color:${col}`;
+      document.body.append(p);
+      const ang = Math.random() * Math.PI * 2, d = 30 + Math.random() * spread;
+      const tx = Math.cos(ang) * d, ty = Math.sin(ang) * d * (up ? .5 : 1) - up * (40 + Math.random() * 60) + (up ? 0 : 50);
+      p.animate([
+        { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
+        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(.2)`, opacity: 0 }
+      ], { duration: 700 + Math.random() * 600, easing: 'cubic-bezier(.1,.7,.3,1)' }).onfinish = () => p.remove();
+    }
+  }
+  const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+
+  function banner(text, red) {
+    const b = document.createElement('div');
+    b.className = `banner${red ? ' red' : ''}`;
+    b.innerHTML = `<span>${text}</span>`;
+    document.body.append(b);
+    setTimeout(() => b.remove(), 1250);
+  }
+  function once(el, cls, ms = 500) { if (cls === 'shake' && !SET.shake) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms); }
+
+  function show(id) {
+    for (const s of ['sTitle', 'sSlots', 'sPack', 'sMap', 'sStore', 'sEvent', 'sBattle', 'sReward', 'sEnd']) $(s).hidden = s !== id;
+    hideTip();
+    once($(id), 'enter', 450);
+    Snd.music(id === 'sBattle' ? (run && run.map[run.row] && ['boss', 'elite'].includes(run.map[run.row][run.col].t) ? 'boss' : 'battle') : id === 'sStore' ? 'store' : id === 'sEnd' ? null : 'menu');
+  }
+  function hpBar(id, hp, max) {
+    const el = $(id), pct = `${Math.max(0, hp) / max * 100}%`;
+    el.querySelector('.fill').style.width = pct;
+    el.querySelector('.ghostbar').style.width = pct;
+    el.querySelector('b').textContent = `${Math.max(0, hp)} / ${max}`;
+  }
+  const relicIcons = () => (run.totem ? `<button class="relic-chip totem" type="button" aria-label="Totem" data-tip="${SYMS[run.totem.s]} ${CHARMS[run.totem.ch].n} totem|All your ${SUITNAME[run.totem.s]} are ${CHARMS[run.totem.ch].n}: ${CHARMS[run.totem.ch].d}">${SYMS[run.totem.s]}${VS}</button>` : '') + run.relics.map(r => `<button class="relic-chip" type="button" aria-label="${RELICS[r].n}" data-tip="${RELICS[r].n}|${RELICS[r].d}">${RELICS[r].i}</button>`).join('');
+
+  /* title */
+  function buildFan() {
+    const cards = [{ v: 11, s: 'C' }, { v: 12, s: 'D' }, { v: 14, s: 'S' }, { v: 13, s: 'H' }, { v: 10, s: 'H' }];
+    const rots = [-26, -13, 0, 13, 26];
+    $('fan').innerHTML = cards.map((c, i) => {
+      const el = cardEl(c); el.style.setProperty('--r', rots[i] + 'deg'); el.style.setProperty('--d', (i * 70) + 'ms'); el.style.zIndex = i === 2 ? 5 : 5 - Math.abs(i - 2);
+      return el.outerHTML;
+    }).join('');
+  }
+  function startRun(i) { Snd.pick(); slot = i; run = newRun(); B = null; save(); showPack(); }
+
+  /* save slots */
+  let slotMode = 'new', armed = null;
+  const ago = t => { const m = Math.round((Date.now() - (t || 0)) / 60000); return m < 1 ? 'Just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`; };
+  function showSlots(mode) { Snd.tap(); slotMode = mode; armed = null; renderSlots(); show('sSlots'); }
+  function renderSlots() {
+    $('slotsTitle').textContent = slotMode === 'new' ? 'New run' : 'Load run';
+    $('slotsSub').textContent = slotMode === 'new' ? 'Pick a slot for this march. A used slot gets replaced.' : 'Pick a saved march to carry on.';
+    $('slotList').innerHTML = '';
+    SLOTS.forEach((i, k) => {
+      const d = load(slotKey(i)), r = d && d.run;
+      const wrap = document.createElement('div'); wrap.className = 'slot-wrap';
+      const b = document.createElement('button'); b.type = 'button';
+      b.className = `slot${r ? '' : ' empty'}${armed === 'o' + i || armed === 'd' + i ? ' armed' : ''}`;
+      b.style.setProperty('--d', `${k * 80}ms`);
+      const act = slotMode === 'new' ? (r ? (armed === 'o' + i ? 'Tap again to replace' : 'Replace this run') : 'Start here') : 'Continue';
+      if (r) {
+        b.innerHTML = `<span class="slot-n">Slot ${i}</span><b>Act ${ROMAN[actOf(r)]}</b><span class="slot-d">${ACTS[actOf(r)].name}. ${(r.stats && r.stats.battles) || 0} battles won, deck of ${r.deck.length}, ${r.gold || 0} gold.</span>` +
+          `<span class="slot-hp"><span style="width:${Math.max(0, r.hp) / r.maxHp * 100}%"></span><em>${Math.max(0, r.hp)} / ${r.maxHp}</em></span>` +
+          `<span class="slot-relics">${r.relics.map(x => RELICS[x].i).join('')}</span><span class="slot-when">${ago(d.t)}</span><span class="slot-act">${act}</span>`;
+      } else {
+        b.innerHTML = `<span class="slot-n">Slot ${i}</span><b class="slot-empty">Empty</b>${slotMode === 'new' ? `<span class="slot-act">${act}</span>` : ''}`;
+        if (slotMode === 'load') b.disabled = true;
+      }
+      b.addEventListener('click', () => {
+        if (slotMode === 'load') { Snd.pick(); return resumeSlot(i); }
+        if (r && armed !== 'o' + i) { armed = 'o' + i; Snd.tap(); buzz(20); return renderSlots(); }
+        startRun(i);
+      });
+      wrap.append(b);
+      if (r && slotMode === 'load') {
+        const del = document.createElement('button'); del.type = 'button';
+        del.className = `link slot-del${armed === 'd' + i ? ' armed' : ''}`;
+        del.textContent = armed === 'd' + i ? 'Tap again to delete' : 'Delete';
+        del.addEventListener('click', () => {
+          if (armed !== 'd' + i) { armed = 'd' + i; Snd.tap(); return renderSlots(); }
+          store(slotKey(i), null); armed = null; Snd.burn();
+          if (!SLOTS.some(j => load(slotKey(j)))) return showTitle();
+          renderSlots();
+        });
+        wrap.append(del);
+      }
+      $('slotList').append(wrap);
+    });
+  }
+
+  /* opening pack */
+  function showPack() {
+    $('packCards').innerHTML = '';
+    const pb = $('packBtn'); pb.className = 'pack'; pb.hidden = false;
+    $('packGo').hidden = true;
+    $('packTitle').textContent = 'Your opening pack';
+    $('packSub').textContent = 'Every march starts with a fresh pack. Some hide a rare.';
+    show('sPack');
+  }
+  async function openPack() {
+    if (busy || !run) return;
+    busy = true;
+    const pb = $('packBtn');
+    Snd.tap(); buzz([20, 30, 20, 30, 40]);
+    pb.classList.add('opening');
+    await sleep(500);
+    Snd.hit(true);
+    const [px, py] = centerOf(pb);
+    burst(px, py, { n: 40, spread: 170 });
+    pb.classList.remove('opening'); pb.classList.add('gone');
+    await sleep(330);
+    pb.hidden = true;
+    const wrap = $('packCards');
+    const cards = [...run.deck];
+    cards.forEach(c => {
+      const s = document.createElement('div');
+      s.className = 'pslot' + (c.v > 10 ? ' rare' : '');
+      const el = cardEl(c, { size: 'pk', down: true });
+      s.append(el); wrap.append(s);
+      if (!reduce) el.animate([{ transform: 'translateY(60px) scale(.3) rotateY(180deg)' }, { transform: 'translateY(0px) scale(1) rotateY(180deg)' }], { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    });
+    for (let i = 0; i < cards.length; i++) { if (i % 3 === 0) Snd.flick(); await sleep(35); }
+    await sleep(350);
+    for (let i = 0; i < cards.length; i++) {
+      const s = wrap.children[i];
+      s.firstChild.classList.remove('down');
+      Snd.flick();
+      if (s.classList.contains('rare')) {
+        await sleep(220);
+        Snd.rare(); buzz([30, 40, 60]);
+        const [x, y] = centerOf(s); burst(x, y, { n: 30, spread: 110 });
+        await sleep(350);
+      }
+      await sleep(80);
+    }
+    const rare = cards.find(c => c.v > 10);
+    $('packTitle').textContent = rare ? 'A rare card!' : 'Your deck';
+    $('packSub').textContent = rare ? `${cards.length} cards, including the ${full(rare)}.` : `${cards.length} cards to start your march.`;
+    run.pack.opened = true; save();
+    $('packGo').hidden = false;
+    busy = false;
+  }
+
+  /* options */
+  let resetArmed = false;
+  function renderSet() {
+    document.querySelectorAll('#settings input[type=range]').forEach(r => { const k = r.dataset.set; r.value = SET[k]; r.style.setProperty('--p', SET[k] + '%'); r.nextElementSibling.textContent = SET[k]; });
+    document.querySelectorAll('#settings .tog').forEach(b => { const on = !!SET[b.dataset.set]; b.setAttribute('aria-pressed', on); b.textContent = on ? 'On' : 'Off'; });
+    document.querySelectorAll('#settings .seg').forEach(g => g.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', SET[g.dataset.set] === b.dataset.v)));
+    $('menuRow').hidden = !run;
+    $('resetRec').textContent = resetArmed ? 'Tap again' : 'Reset';
+  }
+  function openSettings() { Snd.tap(); resetArmed = false; renderSet(); $('settings').hidden = false; $('setClose').focus(); }
+  document.querySelectorAll('#settings input[type=range]').forEach(r => r.addEventListener('input', () => { SET[r.dataset.set] = +r.value; saveSet(); Snd.apply(); renderSet(); }));
+  document.querySelectorAll('#settings .tog').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.set; SET[k] = !SET[k]; saveSet();
+    if (k === 'muted') { Snd.apply(); syncSoundBtns(); }
+    Snd.tap(); renderSet();
+  }));
+  document.querySelectorAll('#settings .seg').forEach(g => g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    SET[g.dataset.set] = b.dataset.v; saveSet(); if (g.dataset.set === 'table') applyTable(); Snd.tap(); renderSet();
+  })));
+  $('setClose').addEventListener('click', () => { $('settings').hidden = true; });
+  $('toMenu').addEventListener('click', () => { if (busy) return; save(); $('settings').hidden = true; showTitle(); });
+  $('resetRec').addEventListener('click', () => { if (!resetArmed) { resetArmed = true; return renderSet(); } store(REC, null); resetArmed = false; Snd.burn(); renderSet(); if (!$('sTitle').hidden) showTitle(); });
+
+  /* map */
+
+  /* battle */
+  function setMsg(t) { $('bMsg').innerHTML = `<span>${t}</span>`; }
+  function pileHTML(n) {
+    const layers = Math.max(1, Math.min(4, Math.ceil(n / 6)));
+    let h = '<div class="pile" style="margin:0 ' + layers * 1.5 + 'px ' + layers * 1.5 + 'px 0">';
+    for (let i = layers - 1; i >= 0; i--) h += cardEl(null, { size: 'mini', down: true }).outerHTML.replace('class="card', `style="transform:translate(${i * 1.5}px,${i * 1.5}px) rotateY(180deg)" class="card`);
+    return h + '</div>';
+  }
+  function renderBattle() {
+    hpBar('foeHp', B.eHp, B.eMax);
+    hpBar('youHp', run.hp, run.maxHp);
+    $('battleGold').textContent = `🪙 ${run.gold}`;
+    renderTonics();
+    $('youPile').innerHTML = `${B.pDraw.length ? pileHTML(B.pDraw.length) : '<div class="empty-slot"></div>'}<span>${B.pDraw.length} left</span>`;
+    $('foePile').innerHTML = `${B.eDraw.length ? pileHTML(B.eDraw.length) : '<div class="empty-slot"></div>'}<span>${B.eDraw.length} left</span>`;
+    const pn = peek(B, 'p');
+    $('youPeek').innerHTML = pn ? `${cardHTML(pn, 'mini')}<span>Next</span>` : '';
+    if (has(run, 'spyglass')) { const en = peek(B, 'e'); $('foePeek').innerHTML = en ? `${cardHTML(en, 'mini')}<span>Next</span>` : ''; }
+    else $('foePeek').innerHTML = '<div class="empty-slot"></div>';
+    $('burnBtn').textContent = `Burn ${B.burns}`;
+    $('burnBtn').disabled = busy || B.burns <= 0 || !!B.over;
+    $('flipBtn').disabled = busy || !!B.over;
+  }
+  function popup(row, text, cls) {
+    const p = document.createElement('div');
+    p.className = `pop ${cls || ''}`; p.textContent = text;
+    $(row).append(p); setTimeout(() => p.remove(), 1200);
+  }
+
+  async function doBurn() {
+    if (busy || !B || B.over || B.burns <= 0) return;
+    busy = true; renderBattleButtons();
+    const c = $('youPeek').querySelector('.card');
+    const top = peek(B, 'p');
+    Snd.burn(); buzz(15);
+    if (c) { c.classList.add('burning'); const [x, y] = centerOf(c); burst(x, y, { n: 18, colors: ['#ff8a2a', '#ffcf5a', '#ff4d1a'], up: 1, spread: 40 }); await sleep(560); }
+    const res = burn(run, B);
+    setMsg(`Burned ${L(top)}.${res && res.hit ? ` The embers hit for ${res.hit}.` : ''}`);
+    if (res && res.hit) { popup('foeRow', `−${res.hit}`); once($('foeMed'), 'hit', 460); }
+    busy = false; renderBattle(); save();
+    if (B.over === 'win') victory();
+  }
+  function renderBattleButtons() { if (run && B) renderTonics(); $('flipBtn').disabled = busy || !B || !!B.over; $('burnBtn').disabled = busy || !B || B.burns <= 0 || !!B.over; }
+
+  async function doFlip() {
+    if (busy || !B || B.over) return;
+    busy = true; renderBattleButtons();
+    const yL = $('yLane'), oL = $('oLane'), field = $('field');
+    yL.innerHTML = ''; oL.innerHTML = ''; yL.className = 'lane'; oL.className = 'lane';
+    setMsg('&nbsp;');
+    const youPeekCard = $('youPeek').querySelector('.card');
+    const foePeekCard = $('foePeek').querySelector('.card');
+    const youPileCard = () => $('youPile').querySelector('.card:last-child');
+    const foePileCard = () => $('foePile').querySelector('.card:last-child');
+    const { steps, r } = playRound(run, B);
+
+    for (let si = 0; si < steps.length; si++) {
+      const st = steps[si];
+      if (st.t === 'flip') {
+        deal(yL, st.pc, false, youPeekCard || youPileCard(), !!youPeekCard);
+        if (youPeekCard) youPeekCard.classList.add('gone');
+        Snd.flick();
+        await sleep(130);
+        deal(oL, st.ec, false, foePeekCard || foePileCard(), !!foePeekCard);
+        if (foePeekCard) foePeekCard.classList.add('gone');
+        Snd.flick();
+        await sleep(560);
+      } else {
+        banner(si > 1 ? 'War again' : 'War'); Snd.war(); buzz([40, 60, 40]);
+        once($('sBattle'), 'shake', 420);
+        await sleep(750);
+        for (let i = 0; i < Math.max(st.pd.length, st.ed.length); i++) {
+          if (st.pd[i]) deal(yL, st.pd[i], true, youPileCard());
+          if (st.ed[i]) deal(oL, st.ed[i], true, foePileCard());
+          Snd.flick();
+          await sleep(150);
+        }
+        await sleep(200);
+        deal(yL, st.pc, false, youPileCard()); Snd.flick();
+        await sleep(160);
+        deal(oL, st.ec, false, foePileCard()); Snd.flick();
+        await sleep(620);
+      }
+    }
+
+    const pc = r.pc, ec = r.ec;
+    const tie = effP(run, pc) === effE(B, ec);
+    const warTxt = n => n ? (n > 1 ? `${n} wars ` : 'War ') : '';
+    let m;
+    if (r.cmp === 1) {
+      const mine = yL.lastElementChild;
+      mine.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-34px) scale(1.12)', offset: .45 }, { transform: 'translateY(-6px) scale(1)' }], { duration: 380, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'forwards' });
+      await sleep(170);
+      yL.classList.add('won'); oL.classList.add('lost');
+      once($('foeRow'), 'shake', 420); once($('foeMed'), 'hit', 460);
+      const big = r.dmg >= 8;
+      Snd.hit(big); buzz(big ? 60 : 25);
+      if (big) once($('sBattle'), 'shake', 420);
+      const [x, y] = centerOf(oL.lastElementChild); burst(x, y, { n: big ? 30 : 16, spread: big ? 150 : 90 });
+      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ' (with luck)' : ''} beats ${L(ec)}.`;
+      m = `${r.wars ? warTxt(r.wars) + 'won. ' : ''}${lead} <span class="dmg">${r.dmg} damage.</span>`;
+      if (r.heal) m += ` You heal ${r.heal}.`;
+      if (r.gold) { m += ` +${r.gold} gold.`; setTimeout(bumpGold, 300); }
+      if (r.thorn) { m += ` Thorns hit you for ${r.thorn}.`; setTimeout(() => popup('youRow', `−${r.thorn}`, 'hurt'), 450); }
+      r.caps.forEach(c => { m += c.back ? ` You win back your ${L(c)}!` : ` You capture their ${L(c)}!`; });
+      popup('foeRow', `−${r.dmg}`);
+      if (r.heal) { setTimeout(() => { popup('youRow', `+${r.heal}`, 'heal'); Snd.heal(); once($('youHp'), 'healflash', 600); }, 350); }
+    } else if (r.cmp === -1) {
+      const theirs = oL.lastElementChild;
+      theirs.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(34px) scale(1.12)', offset: .45 }, { transform: 'translateY(6px) scale(1)' }], { duration: 380, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'forwards' });
+      await sleep(170);
+      oL.classList.add('won'); yL.classList.add('lost');
+      once($('youRow'), 'shake', 420);
+      const big = r.dmg >= 8;
+      Snd.hurt(big); buzz(big ? [60, 40, 60] : 40);
+      if (big) once($('sBattle'), 'shake', 420);
+      const [x, y] = centerOf(yL.lastElementChild); burst(x, y, { n: big ? 24 : 12, colors: ['#e0574f', '#ff9a8c', '#7a1020'], spread: big ? 130 : 80 });
+      const lead = tie ? `Tie goes to the ${short(B.f.name)}.` : `${L(ec)} beats your ${L(pc)}.`;
+      m = `${r.wars ? warTxt(r.wars) + 'lost. ' : ''}${lead} ${r.blocked ? `Your ${r.blocked === 'aegis' ? 'Aegis' : 'Iron Tonic'} blocks the hit!` : `<span class="hurt">You take ${r.dmg}.</span>`}`;
+      if (r.back) m += ` Your club still hits for ${r.back}.`;
+      if (r.eHeal) m += ` It heals ${r.eHeal}.`;
+      if (r.lost) m += ` They take your ${L(r.lost)}! Win to get it back.`;
+      popup('youRow', r.blocked ? 'Blocked' : `−${r.dmg}`, r.blocked ? 'heal' : 'hurt');
+      if (r.back) setTimeout(() => { popup('foeRow', `−${r.back}`); Snd.hit(false); once($('foeMed'), 'hit', 460); }, 380);
+    } else {
+      m = 'Stalemate. Nobody has cards left for the war.';
+    }
+    setMsg(m);
+    if (r.caps.length) { await sleep(450); banner(r.caps.every(c => c.back) ? 'Won back' : 'Captured'); Snd.rare(); buzz([30, 40, 60]); }
+    else if (r.lost) { await sleep(450); banner('Taken', true); Snd.hurt(false); buzz(120); }
+    busy = false;
+    renderBattle();
+    save();
+
+    if (B.over === 'win') {
+      renderBattleButtons();
+      await sleep(600);
+      $('foeMed').classList.add('dead');
+      const [x, y] = centerOf($('foeMed'));
+      burst(x, y, { n: 40, spread: 180 });
+      banner('Victory'); Snd.win(); buzz([30, 50, 30, 50, 80]);
+      await sleep(1500);
+      winFight();
+    } else if (B.over === 'lose') {
+      renderBattleButtons();
+      await sleep(500);
+      $('sBattle').classList.add('fallen');
+      banner('Defeat', true); Snd.lose(); buzz(300);
+      await sleep(1700);
+      endRun(false);
+    }
+  }
+
+
+  /* reward */
+  let choosing = false;
+
+  /* end */
+
+  /* ===== roguelike update ===== */
+  const ROMAN = ['I', 'II', 'III'];
+  const foeGlyph = f => ((FOES[f && f.name] || {}).g || '\u265F') + VS;
+  const PRIZE_ICON = { gold: '🪙', tonic: '🧪', charm: '✨', relic: '🏺' };
+  const prizeText = p => p.k === 'gold' ? `${p.n} gold` : p.k === 'tonic' ? `a ${TONICS[p.t].n}` : p.k === 'charm' ? `a ${CHARMS[p.ch].n} charm` : 'a relic of your choice';
+  const SPOT = { battle: 'Battle', elite: 'Elite', event: 'Mystery', store: 'Store', chest: 'Chest', boss: 'Boss' };
+  const SPOT_ICON = { event: '❓', store: '⚖️', chest: '🧰' };
+  Object.keys(NODES).forEach(k => { SPOT[k] = NODES[k].map; SPOT_ICON[k] = NODES[k].i; });
+  const CAT = { recruit: 'gain', suit: 'gain', blind: 'gain', trial: 'gain', battle: 'fight', elite: 'fight', boss: 'fight' };
+  const nodeIcon = n => n.t === 'suit' ? SYMS[n.s] + VS : n.t === 'trial' ? TRIALS[n.tr].i : SPOT_ICON[n.t] || foeGlyph(n.foe);
+  const actOf = r => r.v >= 2 ? r.act : (r.floor < 3 ? 0 : r.floor < 6 ? 1 : 2);
+  const CHEST = { t: 'Treasure Chest', i: '🧰', text: 'An iron-bound chest sits in the grass, its lock rusted through.', choices: [
+    { l: 'Open it', d: 'Whatever is inside is yours.', go: r => { const x = relicChoices(r, 1)[0]; if (!x) { r.gold += 50; return 'Gold, and lots of it. +50 gold.'; } gainRelic(r, x); return `Inside you find the ${RELICS[x].n}. ${RELICS[x].d}`; } }] };
+  function bumpGold() { ['mapGold', 'battleGold', 'storeGold'].forEach(id => { const e = $(id); if (e && run) { e.textContent = `🪙 ${run.gold}`; once(e, 'bump', 520); } }); }
+
+  /* tooltips */
+  let tipEl = null, tipT = 0;
+  function showTip(el, extra) {
+    hideTip();
+    const [name, desc] = el.dataset.tip.split('|');
+    tipEl = document.createElement('div'); tipEl.className = 'tip';
+    tipEl.innerHTML = `<b>${name}</b>${desc}${extra ? `<br><em>${extra}</em>` : ''}`;
+    document.body.append(tipEl);
+    const r = el.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+    tipEl.style.top = (r.top - h - 10 > 8 ? r.top - h - 10 : r.bottom + 10) + 'px';
+    tipT = setTimeout(hideTip, 3000);
+  }
+  function hideTip() { clearTimeout(tipT); if (tipEl) { tipEl.remove(); tipEl = null; } }
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-tip]');
+    if (t && !t.classList.contains('tonic')) { e.stopPropagation(); Snd.tap(); showTip(t); }
+    else if (!t) hideTip();
+  }, true);
+
+  /* title and saves */
+  function showTitle() {
+    const Ls = latestSlot();
+    $('continueBtn').hidden = !Ls;
+    if (Ls) { const a = actOf(Ls.d.run); $('continueSub').textContent = `Slot ${Ls.i}, Act ${ROMAN[a]}: ${ACTS[a].name}`; }
+    $('loadBtn').disabled = !SLOTS.some(i => load(slotKey(i)));
+    const r = record();
+    $('record').textContent = r.runs ? `${r.wins ? `Kings slain: ${r.wins}. ` : `Furthest: Act ${ROMAN[Math.max(0, (r.bestAct || 1) - 1)]}. `}Runs: ${r.runs}.` : '';
+    run = null; B = null; slot = null;
+    buildFan();
+    show('sTitle');
+  }
+  function resumeSlot(i) {
+    const d = load(slotKey(i)); if (!d || !d.run) return showTitle();
+    const old = d.run.v !== 4;
+    slot = i; run = migrateRun(d.run); B = null;
+    if (old) { save(); return showMap(); }
+    if (d.battle) {
+      B = d.battle;
+      if (B.over === 'win') return winFight();
+      if (B.over === 'lose') return endRun(false);
+      return showBattle();
+    }
+    if (run.pack && !run.pack.opened) return showPack();
+    if (run.pending) return showReward();
+    if (run.store) return showStore();
+    if (run.event) return showEvent();
+    showMap();
+  }
+
+  /* the map */
+  let sel = null;
+  const ROW_H = 100;
+  function showMap() {
+    B = null; sel = null;
+    $('actLabel').textContent = `Act ${ROMAN[run.act]} of III`;
+    $('actName').textContent = ACTS[run.act].name;
+    hpBar('mapHp', run.hp, run.maxHp);
+    $('mapGold').textContent = `🪙 ${run.gold}`;
+    $('mapRelics').innerHTML = relicIcons();
+    drawMap(); renderSpot();
+    show('sMap');
+    const p = $('parch'), c = $('parchIn').querySelector('.node.can');
+    if (c) p.scrollTop = Math.max(0, c.offsetTop - p.clientHeight * .7);
+  }
+  function drawMap() {
+    const M = run.map, H = M.length * ROW_H + 60, can = reachable(run), nextRow = run.row + 1;
+    const y = r => H - 48 - r * ROW_H, x = v => 7 + v * 86;
+    const walked = new Set(run.path.map(([r, k]) => r + ':' + k));
+    let lines = '';
+    M.forEach((row, r) => row.forEach((a, j) => a.next.forEach(k => {
+      const b = M[r + 1][k];
+      const w = walked.has(r + ':' + j) && walked.has((r + 1) + ':' + k);
+      const open = (r === run.row && j === run.col);
+      lines += `<line x1="${x(a.x)}" y1="${y(r)}" x2="${x(b.x)}" y2="${y(r + 1)}" class="${w ? 'walked' : open ? 'open' : ''}" vector-effect="non-scaling-stroke"/>`;
+    })));
+    let nodes = '';
+    M.forEach((row, r) => row.forEach((n, k) => {
+      const key = r + ':' + k, done = walked.has(key), isCan = r === nextRow && can.includes(k), here = r === run.row && k === run.col;
+      const st = [n.t, done ? 'done' : '', isCan ? 'can' : '', here ? 'here' : '', !done && !isCan && r <= run.row ? 'far' : '', sel && sel.r === r && sel.k === k ? 'sel' : ''].join(' ');
+      const icon = nodeIcon(n);
+      const lbl = n.foe ? short(n.foe.name) : n.t === 'suit' ? `${SYMS[n.s]} Draft` : SPOT[n.t];
+      const pz = n.prize ? `<span class="prize">${PRIZE_ICON[n.prize.k]}</span>` : '';
+      nodes += `<button class="node ${CAT[n.t] || 'util'} ${st}" type="button" data-r="${r}" data-k="${k}" style="left:${x(n.x)}%;top:${y(r)}px" aria-label="${SPOT[n.t]}: ${lbl}"><span class="med">${icon}</span>${pz}<span class="lbl">${lbl}</span></button>`;
+    }));
+    $('parchIn').style.height = H + 'px';
+    $('parchIn').innerHTML = `<div class="parch-title">${ACTS[run.act].name}</div><svg class="map-svg" viewBox="0 0 100 ${H}" preserveAspectRatio="none">${lines}</svg>${nodes}` +
+      `<svg class="compass" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="none" stroke="#6b4a22" stroke-width="1.5"/><path d="M20 4 L24 20 L20 36 L16 20 Z" fill="#6b4a22"/><path d="M4 20 L20 16 L36 20 L20 24 Z" fill="#6b4a22" opacity=".6"/><text x="20" y="3.5" font-size="5" text-anchor="middle" fill="#6b4a22">N</text></svg>`;
+    $('parchIn').querySelectorAll('.node').forEach(b => b.addEventListener('click', () => {
+      const r = +b.dataset.r, k = +b.dataset.k;
+      sel = { r, k, peek: !b.classList.contains('can') }; Snd.tap();
+      $('parchIn').querySelectorAll('.node.sel').forEach(n => n.classList.remove('sel')); b.classList.add('sel');
+      renderSpot();
+    }));
+  }
+  function renderSpot() {
+    const info = $('spotInfo'), go = $('goBtn');
+    if (!sel) {
+      info.innerHTML = `<span class="med">🧭</span><div><b>Choose your road</b><small>Each row is a choice: new cards, then a stop along the way, then a fight. Tap any spot to look ahead.</small></div>`;
+      go.disabled = true; go.textContent = 'Pick a spot'; return;
+    }
+    const n = run.map[sel.r][sel.k], N = NODES[n.t];
+    go.disabled = sel.peek;
+    const D = N ? [n.t === 'suit' ? `${SYMS[n.s]} ${SUITNAME[n.s][0].toUpperCase() + SUITNAME[n.s].slice(1)} Draft` : N.t, typeof N.info === 'function' ? N.info(n) : N.info, 'Go there']
+      : { store: ['A store', `Cards, relics, tonics, charms and card removal, for gold. You have ${run.gold}.`, 'Visit the store'],
+          event: ['Something on the road', 'Could be a gamble, a gift or a trap. You\'ll get a choice.', 'Investigate'],
+          chest: ['A treasure chest', 'Free loot. Usually a relic.', 'Open the chest'] }[n.t];
+    if (D) {
+      info.innerHTML = `<span class="med">${nodeIcon(n)}</span><div><b>${D[0]}</b><small>${D[1]}</small></div>`;
+      go.textContent = sel.peek ? 'Not on your road yet' : D[2]; return;
+    }
+    const f = n.foe;
+    info.innerHTML = `<span class="med">${foeGlyph(f)}</span><div><b>${f.name}${n.t === 'boss' ? ' (boss)' : n.t === 'elite' ? ' (elite)' : ''}</b><small>${f.hp} HP, cards ${rankLabel(f.lo)} to ${rankLabel(f.hi)}. ${f.q ? QUIRKS[f.q] : 'No tricks.'}</small><small class="pz">Prize: ${PRIZE_ICON[n.prize.k]} ${prizeText(n.prize)}${n.t === 'battle' ? ', plus gold' : ''}</small></div>`;
+    go.textContent = sel.peek ? 'Not on your road yet' : n.t === 'boss' ? `Face ${f.name.replace(/^The /, 'the ')}` : `Fight the ${short(f.name)}`;
+  }
+  function goSpot() {
+    if (!sel || sel.peek || busy) return;
+    const n = run.map[sel.r][sel.k];
+    run.row = sel.r; run.col = sel.k; run.path.push([sel.r, sel.k]); sel = null;
+    Snd.pick();
+    if (n.t === 'store') { run.store = makeStore(run); save(); return showStore(); }
+    if (['recruit', 'suit', 'blind'].includes(n.t)) { run.pending = { k: 'gain', t: n.t, s: n.s, cards: gainCards(run, n) }; save(); return showReward(); }
+    if (n.t === 'event' || n.t === 'chest' || n.t === 'trial' || NODES[n.t]) { run.event = { t: n.t, ev: n.ev, tr: n.tr, st: {} }; save(); return showEvent(); }
+    B = newBattle(run, n.foe); save(); showBattle(true);
+  }
+
+  /* events, campfires and chests */
+  function eventDef() {
+    const E = run.event;
+    if (E.t === 'event') { const X = EVENTS[E.ev]; return { t: X.t, i: X.i, text: X.text, choices: () => X.choices }; }
+    if (E.t === 'chest') return { ...CHEST, choices: () => CHEST.choices };
+    if (E.t === 'trial') { const T = TRIALS[E.tr], x = T.need ? T.need(run) : 0; return { t: T.n, i: T.i, text: 'A carved stone face stares at you. "Prove yourself," it rumbles, "and I will share my treasures."', choices: () => [
+      { l: 'Take the trial', d: T.d(x), go: r => { const res = runTrial(r, E.tr); return { text: res.pass ? 'The stone face smiles. You pass! Choose a rare card.' : 'The stone face frowns. You fail, and it falls silent.', reveal: res.cs, offer: res.pass ? rareCards() : null, good: res.pass, bad: !res.pass }; } },
+      { l: 'Walk past', d: 'Not today.', go: () => ({ text: 'You leave the stone to its thoughts.' }) }] }; }
+    return NODES[E.t];
+  }
+  function showEvent(msg) {
+    const D = eventDef(), st = run.event.st;
+    $('evMed').textContent = D.i; $('evTitle').textContent = D.t; $('evText').textContent = D.text;
+    $('evResult').hidden = !msg; if (msg) $('evResult').innerHTML = msg;
+    $('evGo').hidden = true;
+    const box = $('evChoices'); box.innerHTML = ''; box.hidden = false;
+    D.choices(run, st).forEach((c, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'choice'; b.style.setProperty('--d', `${150 + i * 90}ms`);
+      b.innerHTML = `<b>${c.l}</b><span>${c.d}</span>`;
+      const pool = c.filter ? run.deck.filter(c.filter) : run.deck;
+      if ((c.can && !c.can(run)) || (c.pick && !pool.length)) b.disabled = true;
+      b.addEventListener('click', () => pickChoice(c));
+      box.append(b);
+    });
+    if (!$('sEvent').hidden && msg) return;
+    show('sEvent');
+    if (run.event.t === 'rest') Snd.heal();
+  }
+  function pickChoice(c) {
+    Snd.pick();
+    const st = run.event.st;
+    const finish = card => {
+      let res = c.go(run, card, st);
+      if (typeof res === 'string') res = { text: res };
+      const reveal = res.reveal && res.reveal.length ? `<span class="reveal">${res.reveal.map(x => cardHTML(x, 'tiny')).join('')}</span>` : '';
+      bumpGold();
+      const good = res.good || /relic|Inside you find|win!/i.test(res.text);
+      if (good) { Snd.rare(); const [x, y] = centerOf($('evMed')); burst(x, y, { n: 30, spread: 130 }); }
+      if (res.bad) { Snd.hurt(false); buzz(80); once($('sEvent'), 'shake', 420); }
+      if (res.again) { save(); return showEvent(res.text); }
+      run.event = null;
+      if (res.offer) run.pending = { k: 'gain', t: 'trial', cards: res.offer };
+      save();
+      $('evChoices').hidden = true;
+      $('evResult').innerHTML = res.text + reveal; $('evResult').hidden = false;
+      $('evGo').hidden = false; $('evGo').textContent = run.hp <= 0 ? 'Your march ends here' : res.offer ? 'Choose your card' : 'Continue';
+    };
+    const pool = c.filter ? run.deck.filter(c.filter) : null;
+    if (c.pick) openCardPick({ title: c.l, desc: c.d, onPick: finish, cancel: true, filter: c.filter });
+    else finish(null);
+  }
+  function eventDone() { if (run.hp <= 0) return endRun(false); if (run.pending) return showReward(); showMap(); }
+
+  /* battle */
+  function showBattle(fresh) {
+    const f = B.f, node = run.map[run.row][run.col];
+    $('sBattle').classList.remove('fallen');
+    $('foeMed').className = 'med big'; $('foeMed').textContent = foeGlyph(f);
+    $('floorLabel').textContent = node.t === 'boss' ? `Act ${ROMAN[run.act]} boss` : node.t === 'elite' ? `Elite, Act ${ROMAN[run.act]}` : `Act ${ROMAN[run.act]}: ${ACTS[run.act].name}`;
+    $('foeName').textContent = f.name;
+    $('foeQuirk').textContent = f.q ? QUIRKS[f.q] : 'No tricks. Just cards.';
+    $('battleRelics').innerHTML = relicIcons();
+    $('yLane').innerHTML = ''; $('oLane').innerHTML = '';
+    $('yLane').className = 'lane'; $('oLane').className = 'lane';
+    setMsg(fresh || B.round === 0 ? 'Flip to attack. Win a war to capture their best card. Tap a tonic twice to drink it.' : 'Battle resumed.');
+    renderBattle();
+    show('sBattle');
+    if (fresh && (node.t === 'boss' || node.t === 'elite')) setTimeout(() => { banner(node.t === 'boss' ? short(f.name) : 'Elite'); Snd.war(); }, 350);
+  }
+  let armedTonic = -1, armT = 0;
+  function renderTonics() {
+    const box = $('tonicBox'); box.innerHTML = '';
+    for (let i = 0; i < tonicCap(run); i++) {
+      const t = run.tonics[i], b = document.createElement('button'); b.type = 'button';
+      if (!t) { b.className = 'tonic empty'; b.disabled = true; b.setAttribute('aria-label', 'Empty tonic slot'); box.append(b); continue; }
+      b.className = 'tonic' + (armedTonic === i ? ' armed' : ''); b.textContent = TONICS[t].i;
+      b.dataset.tip = `${TONICS[t].n}|${TONICS[t].d}`; b.setAttribute('aria-label', TONICS[t].n);
+      b.disabled = busy || !B || !!B.over;
+      b.addEventListener('click', () => tapTonic(i, b));
+      box.append(b);
+    }
+  }
+  function tapTonic(i, el) {
+    if (busy || !B || B.over) return;
+    if (armedTonic !== i) { armedTonic = i; Snd.tap(); renderTonics(); showTip($('tonicBox').children[i], 'Tap again to drink.'); clearTimeout(armT); armT = setTimeout(() => { armedTonic = -1; if (B) renderTonics(); }, 3000); return; }
+    armedTonic = -1; hideTip();
+    const res = useTonic(run, B, i);
+    if (!res) return;
+    Snd.heal(); buzz(30);
+    const T = TONICS[res.t];
+    if (res.t === 'heal') { popup('youRow', `+${res.heal}`, 'heal'); once($('youHp'), 'healflash', 600); setMsg(`${T.n}: you heal ${res.heal}.`); }
+    else if (res.t === 'fire') { popup('foeRow', `−${res.dmg}`); once($('foeMed'), 'hit', 460); Snd.hit(true); const [x, y] = centerOf($('foeMed')); burst(x, y, { n: 30, colors: ['#ff8a2a', '#ffcf5a', '#ff4d1a'] }); setMsg(`${T.n}: the enemy takes ${res.dmg}.`); }
+    else if (res.t === 'luck') setMsg(`${T.n}: your next card counts 5 ranks higher.`);
+    else setMsg(`${T.n}: the next hit you take deals nothing.`);
+    renderBattle(); save();
+    if (B.over === 'win') victory();
+  }
+  async function victory() {
+    busy = true; renderBattleButtons();
+    await sleep(600);
+    $('foeMed').classList.add('dead');
+    const [x, y] = centerOf($('foeMed'));
+    burst(x, y, { n: 40, spread: 180 });
+    banner('Victory'); Snd.win(); buzz([30, 50, 30, 50, 80]);
+    await sleep(1500);
+    busy = false;
+    winFight();
+  }
+  function winFight() {
+    const f = B.f, node = run.map[run.row][run.col];
+    const { g, back } = winBattle(run, B);
+    B = null;
+    if (f.final) return endRun(true);
+    const base = { g, foe: f.name, back: back.map(L) };
+    if (node.t === 'boss') run.pending = { ...base, k: 'boss', choices: relicChoices(run) };
+    else if (node.t === 'elite') run.pending = { ...base, k: 'relic', choices: relicChoices(run, 2) };
+    else run.pending = { ...base, k: 'prize', p: node.prize };
+    save(); showReward();
+  }
+
+  /* rewards: prize or relic, then a card */
+  function offerView(o) {
+    if (o.k === 'card') return { vis: cardHTML(o.c, 'mini'), kind: o.c.ch ? `Card with ${CHARMS[o.c.ch].n} charm` : 'Card', t: full(o.c), d: o.c.ch ? CHARMS[o.c.ch].d : 'Joins your deck.' };
+    if (o.k === 'gold') return { vis: '<span class="icon">🪙</span>', kind: 'Prize', t: `${o.n} gold`, d: 'For the store. Tap to collect.' };
+    if (o.k === 'tonic') return { vis: `<span class="icon">${TONICS[o.t].i}</span>`, kind: 'Prize: tonic', t: TONICS[o.t].n, d: `${TONICS[o.t].d} Drink it during a battle.` };
+    if (o.k === 'charm') return { vis: `<span class="icon">${CHARMS[o.ch].i}</span>`, kind: 'Prize: charm', t: CHARMS[o.ch].n, d: `${CHARMS[o.ch].d} Tap, then pick a card for it.` };
+    if (o.k === 'relic') { const R = RELICS[o.r]; return { vis: `<span class="icon">${R.i}</span>`, kind: 'Relic', t: R.n, d: R.d }; }
+  }
+  function showReward() {
+    const P = run.pending;
+    const G = { recruit: ['Recruits', 'Choose one to join your deck, or skip.'], suit: [`${P.s ? SYMS[P.s] : ''} Draft`, `Choose one of these ${P.s ? SUITNAME[P.s] : ''}, or skip.`],
+      blind: ['Blind Draw', 'Only the suits show. Pick one and see what you get.'], trial: ['A rare card', 'Your reward for passing the trial.'] };
+    const gain = P.k === 'gain', rev = P.k === 'reveal';
+    $('rewardTitle').textContent = gain ? G[P.t][0] : rev ? 'You drew...' : `The ${short(P.foe)} falls.`;
+    $('rewardMed').textContent = gain || rev ? (P.t === 'suit' ? SYMS[P.s] + VS : P.t === 'trial' ? '🗿' : '🃏') : foeGlyph({ name: P.foe });
+    $('rewardSub').textContent = gain ? G[P.t][1] : rev ? `The ${full(P.c)}${P.c.v >= 11 ? '. Lucky!' : P.c.v <= 5 ? '. Oh dear.' : '.'} It joins your deck.`
+      : `+${P.g} gold.${P.back && P.back.length ? ` You win back your ${P.back.join(', ')}.` : ''} ${P.k === 'prize' ? 'Your prize:' : 'Claim a relic.'}`;
+    $('offers').innerHTML = '';
+    const list = P.k === 'boss' || P.k === 'relic' ? P.choices.map(r => ({ k: 'relic', r })) : gain ? P.cards.map(c => ({ k: 'card', c, blind: P.t === 'blind' })) : rev ? [{ k: 'card', c: P.c }] : [P.p];
+    list.forEach((o, i) => {
+      const v = o.blind ? { vis: cardHTML(null, 'mini', true), kind: 'Face down', t: `A card of ${SUITNAME[o.c.s]} ${SYMS[o.c.s]}`, d: 'Anything from a 3 to an Ace.' } : offerView(o);
+      const b = document.createElement('button');
+      b.className = 'offer'; b.type = 'button'; b.style.setProperty('--d', `${120 + i * 110}ms`);
+      b.innerHTML = `<div class="vis">${v.vis}</div><div><span class="kind">${v.kind}</span><b>${v.t}</b><span class="d">${rev ? 'Tap to continue.' : v.d}</span></div>`;
+      b.addEventListener('click', () => choose(i, b));
+      $('offers').append(b);
+    });
+    $('skipBtn').hidden = P.k === 'prize' || rev;
+    $('skipBtn').textContent = gain ? 'Skip' : 'Skip the relic';
+    show('sReward');
+    if (rev) { const c = $('offers').querySelector('.card'); if (c && !reduce) c.animate([{ transform: 'rotateY(180deg) scale(.8)' }, { transform: 'rotateY(0deg) scale(1)' }], { duration: 600, easing: 'cubic-bezier(.3,.7,.3,1)' }); setTimeout(() => { if (P.c.v >= 11) { Snd.rare(); const [x, y] = centerOf(c); burst(x, y, { n: 30 }); } else Snd.flick(); }, 350); }
+    if (P.k === 'prize' || P.k === 'relic' || P.k === 'boss') bumpGold();
+    if (!list.length) setTimeout(() => choose(null), 400);
+  }
+  function toCards() { run.pending = { k: 'cards', choices: cardChoices(run) }; save(); showReward(); }
+  async function choose(i, btn) {
+    if (!run || !run.pending || choosing) return;
+    choosing = true;
+    const P = run.pending;
+    if (btn) {
+      Snd.pick(); buzz(20);
+      [...$('offers').children].forEach(b => b.classList.add(b === btn ? 'chosen' : 'faded'));
+      const [x, y] = centerOf(btn); burst(x, y, { n: 20, spread: 110 });
+      await sleep(420);
+    }
+    choosing = false;
+    if (P.k === 'boss') {
+      run.pending = null;
+      if (i != null && P.choices[i]) gainRelic(run, P.choices[i]);
+      nextAct(run); save();
+      showMap(); setTimeout(() => { banner(`Act ${ROMAN[run.act]}`); Snd.war(); }, 300);
+      return;
+    }
+    if (P.k === 'gain') {
+      if (i == null) { run.pending = null; save(); return showMap(); }
+      const c = addCard(run, P.cards[i]);
+      if (P.t === 'blind') { run.pending = { k: 'reveal', c }; save(); return showReward(); }
+      run.pending = null; save(); return showMap();
+    }
+    if (P.k === 'reveal') { run.pending = null; save(); return showMap(); }
+    if (P.k === 'relic') { if (i != null && P.choices[i]) gainRelic(run, P.choices[i]); run.pending = null; save(); return showMap(); }
+    const p = P.p;
+    if (p.k === 'charm') return openCardPick({ title: `${CHARMS[p.ch].i} ${CHARMS[p.ch].n} charm`, desc: `${CHARMS[p.ch].d} Pick the card to carry it. A card holds one charm.`, onPick: c => { charmCard(run, c.id, p.ch); Snd.rare(); run.pending = null; save(); showMap(); } });
+    applyPrize(run, p);
+    if (p.k === 'gold') Snd.coin();
+    run.pending = null; save(); showMap();
+  }
+
+  /* picking a card from your deck */
+  let pickCb = null;
+  function openCardPick({ title, desc, onPick, cancel, filter }) {
+    pickCb = onPick;
+    $('charmTitle').textContent = title;
+    $('charmDesc').textContent = desc;
+    $('pickCancel').hidden = !cancel;
+    const g = $('charmGrid'); g.innerHTML = '';
+    [...run.deck].filter(filter || (() => true)).sort((a, b) => b.v - a.v || a.s.localeCompare(b.s)).forEach(c => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'pickcard';
+      b.innerHTML = cardHTML(c, 'tiny'); b.setAttribute('aria-label', full(c));
+      b.addEventListener('click', () => {
+        if (!pickCb) return;
+        const cb = pickCb; pickCb = null;
+        buzz(30); const [x, y] = centerOf(b); burst(x, y, { n: 24, spread: 90 });
+        setTimeout(() => { $('charmSheet').hidden = true; cb(c); }, 330);
+      });
+      g.append(b);
+    });
+    $('charmSheet').hidden = false;
+  }
+
+  /* the store */
+  function wareView(it) {
+    if (it.k === 'card') return { vis: cardHTML(it.c, 'mini'), t: `${rankLabel(it.c.v)}${sym(it.c.s)}${it.c.ch ? ' ' + CHARMS[it.c.ch].i : ''}`, d: it.c.ch ? `${full(it.c)} with a ${CHARMS[it.c.ch].n} charm.` : `Add the ${full(it.c)} to your deck.` };
+    if (it.k === 'relic') { const R = RELICS[it.r]; return { vis: `<span class="icon">${R.i}</span>`, t: R.n, d: R.d }; }
+    if (it.k === 'charm') { const C = CHARMS[it.ch]; return { vis: `<span class="icon">${C.i}</span>`, t: `${C.n} charm`, d: `${C.d} Goes on a card you pick.` }; }
+    if (it.k === 'tonic') { const T = TONICS[it.t]; return { vis: `<span class="icon">${T.i}</span>`, t: T.n, d: `${T.d} ${run.tonics.length >= tonicCap(run) ? 'Your bag is full.' : ''}` }; }
+    return { vis: '<span class="icon">✂️</span>', t: 'Remove a card', d: 'Take a card you pick out of your deck. Costs more each time.' };
+  }
+  function showStore() {
+    $('storeAct').textContent = `Act ${ROMAN[run.act]}: ${ACTS[run.act].name}`;
+    renderStore();
+    show('sStore');
+    setTimeout(() => { Snd.bell(); once($('bell'), 'ring', 1000); }, 250);
+  }
+  function renderStore() {
+    $('storeGold').textContent = `🪙 ${run.gold}`;
+    $('wares').innerHTML = '';
+    run.store.forEach((it, i) => {
+      const v = wareView(it), b = document.createElement('button');
+      const blocked = it.k === 'tonic' && run.tonics.length >= tonicCap(run);
+      b.type = 'button'; b.className = `ware${it.sold ? ' sold' : run.gold < it.price || blocked ? ' poor' : ''}`; b.style.setProperty('--d', `${i * 50}ms`);
+      if (it.sold) b.disabled = true;
+      b.innerHTML = `<div class="vis">${v.vis}</div><b>${v.t}</b><small>${v.d}</small><span class="price">🪙 ${it.price}</span>`;
+      b.addEventListener('click', () => buy(i, b));
+      $('wares').append(b);
+    });
+    $('storeSub').textContent = `${run.hp} of ${run.maxHp} HP, ${run.deck.length} cards, ${run.tonics.length} of ${tonicCap(run)} tonics.`;
+  }
+  function buy(i, btn) {
+    const it = run.store[i];
+    if (it.sold) return;
+    const blocked = it.k === 'tonic' && run.tonics.length >= tonicCap(run);
+    if (run.gold < it.price || blocked) { Snd.tap(); buzz(40); btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope'); return; }
+    const done = card => {
+      buyItem(run, it, card && card.id); Snd.coin(); buzz(20);
+      const [x, y] = centerOf(btn); burst(x, y, { n: 18, spread: 80 });
+      bumpGold(); save(); renderStore();
+    };
+    if (it.k === 'charm') return openCardPick({ title: `${CHARMS[it.ch].i} ${CHARMS[it.ch].n} charm`, desc: `${CHARMS[it.ch].d} Pick the card to carry it.`, onPick: done, cancel: true });
+    if (it.k === 'remove') return openCardPick({ title: 'Remove a card', desc: 'This card leaves your deck for good.', onPick: done, cancel: true });
+    done(null);
+  }
+  function leaveStore() { Snd.tap(); run.store = null; save(); showMap(); }
+
+  /* end */
+  function endRun(won) {
+    const r = record();
+    r.runs++; r.bestAct = Math.max(r.bestAct || 0, won ? 3 : run.act + 1); if (won) r.wins++;
+    store(REC, r);
+    const foe = B && B.f ? B.f.name : null;
+    $('endMed').textContent = won ? '\u265A' + VS : foe ? foeGlyph(B.f) : '💀';
+    $('endTitle').textContent = won ? 'The King is dead.' : 'You fell.';
+    $('endSub').textContent = won ? 'Three acts, one life, and the crown is yours.' : `${foe ? `The ${short(foe)}` : 'The road'} ended your march in Act ${ROMAN[run.act]}, ${ACTS[run.act].name}.`;
+    $('endStats').innerHTML = [[run.stats.battles, 'battles won'], [run.relics.length, 'relics'], [run.stats.captured, 'cards captured']]
+      .map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('');
+    clearSlot(); run = null; B = null;
+    show('sEnd');
+    if (won) {
+      Snd.win();
+      [0, 500, 1000].forEach(t => setTimeout(() => { const [x, y] = centerOf($('endMed')); burst(x, y, { n: 40, spread: 200 }); }, t + 300));
+    }
+  }
+
+  function openSheet() {
+    Snd.tap();
+    const cards = [...run.deck].sort((a, b) => b.v - a.v || a.s.localeCompare(b.s));
+    $('sheetTitle').textContent = `Your deck (${cards.length})`;
+    $('deckGrid').innerHTML = cards.map(c => cardHTML(c, 'tiny')).join('');
+    const rel = run.relics.map(r => `<li><span class="med">${RELICS[r].i}</span><div><b>${RELICS[r].n}</b><small>${RELICS[r].d}</small></div></li>`).join('');
+    const ton = run.tonics.map(t => `<li><span class="med">${TONICS[t].i}</span><div><b>${TONICS[t].n}</b><small>${TONICS[t].d} Drink it in battle.</small></div></li>`).join('');
+    const tot = run.totem ? `<li><span class="med">${SYMS[run.totem.s]}</span><div><b>${SYMS[run.totem.s]} ${CHARMS[run.totem.ch].n} totem</b><small>All your ${SUITNAME[run.totem.s]} are ${CHARMS[run.totem.ch].n}: ${CHARMS[run.totem.ch].d}</small></div></li>` : '';
+    $('relicList').innerHTML = tot + rel + ton || '<li><span class="med">?</span><div><small>No relics or tonics yet.</small></div></li>';
+    $('sheet').hidden = false; $('sheetClose').focus();
+  }
+
+  /* deck sheet */
+
+  /* wiring */
+  $('newRunBtn').addEventListener('click', () => showSlots('new'));
+  $('loadBtn').addEventListener('click', () => showSlots('load'));
+  $('optionsBtn').addEventListener('click', openSettings);
+  $('continueBtn').addEventListener('click', () => { const Ls = latestSlot(); if (Ls) { Snd.pick(); resumeSlot(Ls.i); } });
+  $('slotsBack').addEventListener('click', () => { Snd.tap(); showTitle(); });
+  $('packBtn').addEventListener('click', openPack);
+  $('packGo').addEventListener('click', () => { Snd.pick(); showMap(); });
+  document.querySelectorAll('.set-btn').forEach(b => b.addEventListener('click', openSettings));
+  document.addEventListener('pointerdown', () => Snd.unlock(), { once: true });
+
+  $('goBtn').addEventListener('click', goSpot);
+  $('leaveBtn').addEventListener('click', leaveStore);
+  $('evGo').addEventListener('click', eventDone);
+  $('pickCancel').addEventListener('click', () => { pickCb = null; $('charmSheet').hidden = true; });
+  $('flipBtn').addEventListener('click', doFlip);
+  $('youPile').addEventListener('click', doFlip);
+  $('burnBtn').addEventListener('click', doBurn);
+  $('skipBtn').addEventListener('click', () => choose(null));
+  $('againBtn').addEventListener('click', () => startRun(slot || 1));
+  $('homeBtn').addEventListener('click', showTitle);
+  $('mapDeckBtn').addEventListener('click', openSheet);
+  $('battleDeckBtn').addEventListener('click', openSheet);
+  $('sheetClose').addEventListener('click', () => { $('sheet').hidden = true; });
+  document.querySelectorAll('.sound-btn').forEach(b => b.addEventListener('click', () => { SET.muted = !SET.muted; saveSet(); Snd.apply(); syncSoundBtns(); if (!SET.muted) Snd.pick(); }));
+  let abandonArmed = false;
+  $('abandonBtn').addEventListener('click', () => {
+    if (!abandonArmed) { abandonArmed = true; $('abandonBtn').textContent = 'Tap again to abandon'; setTimeout(() => { abandonArmed = false; if (run) $('abandonBtn').textContent = 'Abandon run'; }, 3000); return; }
+    abandonArmed = false; clearSlot(); showTitle();
+  });
+
+  syncSoundBtns();
+  showTitle();
+})();
+</script>
+</body>
+</html>

@@ -19,9 +19,13 @@ Originally made as a phone web app, then ported to PC as a standalone Windows ap
 - Options: volume, table colour, animation speed, screen shake, particles, key hints
 - Custom card art: cards in `sprites/cards/` replace the built-in drawn cards
 
+## Phone version
+
+The phone web app lives in `phone/index.html`, a single self-contained page. Open it in any mobile browser. It has no build step and saves to the browser's local storage.
+
 ## Running it
 
-The game is a single `index.html`. The PC app wraps it in a native window with [pywebview](https://pywebview.flowrl.com/).
+The PC game is a single `index.html`. The PC app wraps it in a native window with [pywebview](https://pywebview.flowrl.com/).
 
 ```bash
 pip install pywebview
