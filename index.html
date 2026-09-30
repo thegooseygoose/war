@@ -901,6 +901,12 @@
   .stage .store-item b { font-size: 1.28rem; }
   .stage .store-item .d { font-size: .9rem; }
   .stage .store { padding-left: 80px; padding-right: 80px; }
+
+  /* controller */
+  .pad-mode .pad-focus { outline: 4px solid var(--brass-hi) !important; outline-offset: 5px; box-shadow: 0 0 0 9px rgba(247,220,154,.25), 0 0 28px rgba(255,200,100,.55) !important; }
+  .pad-mode, .pad-mode * { cursor: none; }
+  .pad-toast { position: fixed; left: 50%; bottom: 6%; transform: translateX(-50%); z-index: 70; padding: 12px 22px; border-radius: 999px; font-family: var(--font); font-weight: 800; font-size: 1.1rem;
+    background: rgba(18,5,9,.95); color: var(--brass-hi); box-shadow: inset 0 0 0 1.5px var(--brass), 0 10px 26px rgba(0,0,0,.5); animation: fade .25s; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -1075,6 +1081,8 @@
       <div class="set-row" id="menuRow"><span>Save and go to the main menu</span><button class="ghost" type="button" id="toMenu">Main menu</button></div>
       <div class="set-row"><span>Best-run records</span><button class="ghost" type="button" id="resetRec">Reset</button></div>
       <p class="set-note">Controls: Space flip, B burn, 1 to 4 drink a tonic, D deck, 1 2 3 pick a spot or reward, S skip, M mute, F11 fullscreen, Esc options.</p>
+      <p class="set-note">Controller: D-pad or stick to move, A to press, B to go back, X to burn, View to see your deck, Start for options.</p>
+      <p class="set-note" id="padNote"></p>
     </section>
   </div>
 </div>
@@ -2911,7 +2919,7 @@ if(typeof module!=='undefined') module.exports={gainCards,NODES,TRIALS,runTrial,
     if (k === 'fullscreen') setFullscreen(v);
   }
   function openSettings() {
-    Snd.tap(); syncSettingsUI();
+    Snd.tap(); syncSettingsUI(); Pad.syncPadNote();
     $('menuRow').hidden = !(visible('sPack') || visible('sMap') || visible('sEvent') || visible('sBattle') || visible('sReward') || visible('sStore') || visible('sEnd'));
     $('settings').hidden = false; $('setClose').focus();
   }
@@ -2999,6 +3007,137 @@ if(typeof module!=='undefined') module.exports={gainCards,NODES,TRIALS,runTrial,
     else handled = false;
     if (handled) e.preventDefault();
   });
+
+
+  /* controller: Xbox-style pads through XInput (read by the launcher) and the browser's gamepad API.
+     D-pad / left stick moves a highlight between buttons, A presses it, B backs out, X burns in battle,
+     Start opens options, View (Back) opens the deck. */
+  const Pad = (() => {
+    const BIT = { a: 0x1000, b: 0x2000, x: 0x4000, y: 0x8000, lb: 0x100, rb: 0x200, back: 0x20, start: 0x10, up: 1, down: 2, left: 4, right: 8 };
+    const STD = { a: 0, b: 1, x: 2, y: 3, lb: 4, rb: 5, back: 8, start: 9, up: 12, down: 13, left: 14, right: 15 };
+    let xi = null, xiBusy = false, tick = 0, active = false, seen = false;
+    const held = {};
+    function readState() {
+      const s = {};
+      Object.keys(BIT).forEach(k => { s[k] = false; });
+      let lx = 0, ly = 0, any = false;
+      if (xi) {  // XInput from the launcher: stick up is positive
+        any = true;
+        Object.keys(BIT).forEach(k => { if (xi.b & BIT[k]) s[k] = true; });
+        lx = xi.lx / 32767; ly = -xi.ly / 32767;
+      }
+      let pads = [];
+      try { pads = navigator.getGamepads ? [...navigator.getGamepads()] : []; } catch (e) {}
+      for (const g of pads) {
+        if (!g || !g.connected) continue;
+        any = true;
+        Object.keys(STD).forEach(k => { const b = g.buttons[STD[k]]; if (b && (b.pressed || b.value > .5)) s[k] = true; });
+        if (Math.abs(g.axes[0] || 0) > Math.abs(lx)) lx = g.axes[0];
+        if (Math.abs(g.axes[1] || 0) > Math.abs(ly)) ly = g.axes[1];
+      }
+      if (lx < -.5) s.left = true; if (lx > .5) s.right = true;
+      if (ly < -.5) s.up = true; if (ly > .5) s.down = true;
+      return any ? s : null;
+    }
+    // true on the first frame a button is down; directions also repeat while held
+    function press(k, down, now) {
+      const h = held[k];
+      if (!down) { delete held[k]; return false; }
+      if (!h) { held[k] = { next: now + 380 }; return true; }
+      if (['up', 'down', 'left', 'right'].includes(k) && now >= h.next) { h.next = now + 120; return true; }
+      return false;
+    }
+    function poll() {
+      tick++;
+      const api = window.pywebview && window.pywebview.api;
+      if (api && api.pad && !xiBusy && tick % 2 === 0) { xiBusy = true; api.pad().then(v => { xi = v || null; xiBusy = false; }, () => { xiBusy = false; }); }
+      const s = readState();
+      if (!s) return;
+      if (!seen) { seen = true; toast('🎮 Controller connected'); syncPadNote(); }
+      const now = performance.now();
+      for (const k of Object.keys(s)) if (press(k, s[k], now)) { setActive(true); act(k); }
+    }
+    setInterval(poll, 16);  // a timer, not requestAnimationFrame, so it keeps running in any window state
+
+    function setActive(on) {
+      if (active === on) return;
+      active = on;
+      document.body.classList.toggle('pad-mode', on);
+      if (!on) document.querySelectorAll('.pad-focus').forEach(e => e.classList.remove('pad-focus'));
+    }
+    addEventListener('mousemove', () => setActive(false), { passive: true });
+    addEventListener('keydown', () => setActive(false), { capture: true });
+    document.addEventListener('focusin', e => { if (!active) return; document.querySelectorAll('.pad-focus').forEach(x => x.classList.remove('pad-focus')); e.target.classList.add('pad-focus'); });
+
+    const SCREENS = ['sTitle', 'sSlots', 'sPack', 'sMap', 'sEvent', 'sBattle', 'sReward', 'sStore', 'sEnd'];
+    const rootEl = () => !$('picker').hidden ? $('picker') : !$('settings').hidden ? $('settings') : !$('sheet').hidden ? $('sheet') : $(SCREENS.find(visible) || 'sTitle');
+    const usable = el => !el.disabled && !el.hidden && el.getAttribute('aria-disabled') !== 'true' && el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden';
+    const cands = root => [...root.querySelectorAll('button, input[type=range]')].filter(usable);
+    function preferred(root, cs) {
+      const pickFirst = sel => { const el = root.querySelector(sel); return el && usable(el) ? el : null; };
+      const byScreen = { sBattle: '#flipBtn', sMap: '#lpop [data-go], #nextFoe .choice', sEvent: '#evGo, .ev-choice', sReward: '.offer', sStore: '.store-item:not(:disabled), #storeLeave',
+        sTitle: '.menu-btn', sSlots: '.slot:not(:disabled)', sPack: '#packGo, #packBtn', sEnd: '#againBtn', picker: '.pick-card', sheet: '#sheetClose', settings: '#setClose' };
+      const sel = byScreen[root.id];
+      if (sel) for (const part of sel.split(', ')) { const el = pickFirst(part); if (el) return el; }
+      return cs[0];
+    }
+    const focusEl = el => { if (!el) return; el.focus({ preventScroll: false }); el.classList.add('pad-focus'); Snd.tap(); };
+    function current(root) { const a = document.activeElement; return a && root.contains(a) && usable(a) ? a : null; }
+    function move(dir) {
+      const root = rootEl(), cs = cands(root); if (!cs.length) return;
+      const cur = current(root);
+      if (!cur) return focusEl(preferred(root, cs));
+      if (cur.type === 'range' && (dir === 'left' || dir === 'right')) {
+        const step = +cur.step || 1, v = Math.max(+cur.min, Math.min(+cur.max, +cur.value + (dir === 'left' ? -step : step)));
+        if (v !== +cur.value) { cur.value = v; cur.dispatchEvent(new Event('input', { bubbles: true })); cur.dispatchEvent(new Event('change', { bubbles: true })); }
+        return;
+      }
+      const a = cur.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+      let best = null, bs = Infinity;
+      for (const el of cs) {
+        if (el === cur) continue;
+        const b = el.getBoundingClientRect(), dx = b.left + b.width / 2 - ax, dy = b.top + b.height / 2 - ay;
+        const main = dir === 'left' ? -dx : dir === 'right' ? dx : dir === 'up' ? -dy : dy;
+        const cross = dir === 'left' || dir === 'right' ? Math.abs(dy) : Math.abs(dx);
+        if (main <= 4) continue;
+        const sc = main + cross * 2.2;
+        if (sc < bs) { bs = sc; best = el; }
+      }
+      if (best) focusEl(best);
+    }
+    function act(k) {
+      if (['up', 'down', 'left', 'right'].includes(k)) return move(k);
+      const root = rootEl(), inBattle = root.id === 'sBattle';
+      if (k === 'a') {
+        const cur = current(root);
+        if (inBattle && (!cur || cur.id === 'flipBtn')) return click('flipBtn');
+        if (cur) { if (cur.type !== 'range') cur.click(); return; }
+        const def = preferred(root, cands(root));
+        if (root.id === 'sPack' || root.id === 'sReward' && $('offers').children.length === 1) { if (def) def.click(); return; }
+        return focusEl(def);
+      }
+      if (k === 'b') {
+        if (!$('picker').hidden) { if (pickCancelable) { Snd.tap(); closePicker(null); } return; }
+        if (!$('settings').hidden) return closeSettings();
+        if (!$('sheet').hidden) return click('sheetClose');
+        if (visible('sSlots')) { Snd.tap(); return showTitle(); }
+        if (visible('sMap') && $('lpop')) { closeLevel(); const r = $('sMap'); return focusEl(r.querySelector('#nextFoe .choice.sel') || preferred(r, cands(r))); }
+        return;
+      }
+      if (k === 'x' && inBattle) return click('burnBtn');
+      if (k === 'start') { if (!$('picker').hidden) return; return $('settings').hidden ? openSettings() : closeSettings(); }
+      if (k === 'back' || k === 'y') {
+        if (!$('sheet').hidden) return click('sheetClose');
+        if (run && $('picker').hidden && $('settings').hidden && ['sMap', 'sBattle', 'sEvent', 'sStore', 'sReward'].some(visible)) openSheet();
+      }
+    }
+    function toast(t) {
+      const el = document.createElement('div'); el.className = 'pad-toast'; el.textContent = t;
+      document.body.append(el); setTimeout(() => el.remove(), 2600);
+    }
+    function syncPadNote() { const n = $('padNote'); if (n) n.textContent = seen ? 'Controller: connected.' : 'Controller: none detected yet. Plug in an Xbox controller and press any button.'; }
+    return { syncPadNote };
+  })();
 
   applySettings();
   showTitle();

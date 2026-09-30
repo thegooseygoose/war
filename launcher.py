@@ -4,6 +4,7 @@ Serves index.html from a fixed local port so the page keeps the same origin
 between launches, and turns off pywebview's private mode so the saved run and
 records (localStorage) persist in %APPDATA%\WarTheLongMarch.
 """
+import ctypes
 import hashlib
 import os
 import sys
@@ -30,7 +31,40 @@ def page_url():
     return path + "?v=" + h.hexdigest()[:10]
 
 
+class _Pad(ctypes.Structure):
+    _fields_ = [("buttons", ctypes.c_ushort), ("lt", ctypes.c_ubyte), ("rt", ctypes.c_ubyte),
+                ("lx", ctypes.c_short), ("ly", ctypes.c_short), ("rx", ctypes.c_short), ("ry", ctypes.c_short)]
+
+
+class _PadState(ctypes.Structure):
+    _fields_ = [("packet", ctypes.c_ulong), ("pad", _Pad)]
+
+
+def _load_xinput():
+    for name in ("xinput1_4", "xinput1_3", "xinput9_1_0"):
+        try:
+            return ctypes.WinDLL(name).XInputGetState
+        except (OSError, AttributeError):
+            pass
+    return None
+
+
+_xinput = _load_xinput() if sys.platform == "win32" else None
+
+
 class Api:
+    def pad(self):
+        # Xbox controllers read straight from Windows (XInput), as a backup for the
+        # browser's gamepad support, which doesn't always see a controller.
+        if not _xinput:
+            return None
+        st = _PadState()
+        for i in range(4):
+            if _xinput(i, ctypes.byref(st)) == 0:
+                p = st.pad
+                return {"b": p.buttons, "lt": p.lt, "rt": p.rt, "lx": p.lx, "ly": p.ly}
+        return None
+
     def toggle_fullscreen(self):
         webview.windows[0].toggle_fullscreen()
 
