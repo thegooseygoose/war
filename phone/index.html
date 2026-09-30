@@ -532,6 +532,7 @@
   .card .fc > img.art { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; object-fit: contain; pointer-events: none; -webkit-user-drag: none;
     filter: drop-shadow(0 calc(var(--cw) * .03) calc(var(--cw) * .04) rgba(0,0,0,.4)); }
   .card .fc > img.art.hd { image-rendering: auto; }
+  .art-fallback { display: contents; }
   .card.art .fc.front { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
   .card.art .front::after { display: none; }
   .lane.won .card.art:not(.down):last-child .front { box-shadow: none; }
@@ -1360,14 +1361,15 @@ if(typeof module!=='undefined') module.exports={gainCards,NODES,TRIALS,runTrial,
   const RANKFILE = { 11: 'jack', 12: 'queen', 13: 'king', 14: 'ace' };
   const artFile = c => `${RANKFILE[c.v] || c.v}_of_${NAMES[c.s]}`;
   const ART_DIR = /\/phone\/[^/]*$/.test(location.pathname) ? '../sprites/cards/' : 'sprites/cards/';  // the git copy sits in phone/, next to the PC game's art
-  const artImg = f => `<img class="art" src="${ART_DIR}${f}.png" alt="" draggable="false" onload="if(this.naturalWidth>120)this.classList.add('hd')">`;
+  // if the art file is missing (for example in a copy of this page without the sprites folder), fall back to the drawn card
+  const artImg = f => `<img class="art" src="${ART_DIR}${f}.png" alt="" draggable="false" onload="if(this.naturalWidth>120)this.classList.add('hd')" onerror="const c=this.closest('.card');if(c)c.classList.remove('art');if(this.nextElementSibling)this.nextElementSibling.hidden=false;this.remove()">`;
   function cardEl(c, { size = 'full', down = false } = {}) {
     const el = document.createElement('div');
     const art = c && MY_CARDS.has(artFile(c));
     el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}${art ? ' art' : ''}`;
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', down || !c ? 'Face-down card' : full(c));
-    el.innerHTML = `<div class="fc front">${art ? artImg(artFile(c)) : c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}</div><div class="fc backf"></div>`;
+    el.innerHTML = `<div class="fc front">${art ? artImg(artFile(c)) + `<span class="art-fallback" hidden>${faceHTML(c, size)}</span>` : c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}</div><div class="fc backf"></div>`;
     return el;
   }
   const cardHTML = (c, size, down) => cardEl(c, { size, down }).outerHTML;
