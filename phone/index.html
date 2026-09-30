@@ -755,8 +755,8 @@ const FOES = {
   'The Gatekeeper':{g:'♜'}, 'The Thornwitch':{g:'♛'}, 'The King':{g:'♚'}
 };
 const ACTS = [
-  { name:'The Border', foes:['Scout','Militia','Shieldman','Brute','Bandit'], elites:['Veteran','Iron Guard'], boss:{name:'The Gatekeeper', hp:30, lo:3, hi:9, q:'wall'} },
-  { name:'The Wilds', foes:['Duelist','Blood Priest','Wolf Rider','Wildling','Brute'], elites:['Beastmaster','Hexer'], boss:{name:'The Thornwitch', hp:36, lo:4, hi:11, q:'thorns'} },
+  { name:'The Border', foes:['Scout','Militia','Shieldman','Brute','Bandit'], elites:['Veteran','Iron Guard'], boss:{name:'The Gatekeeper', hp:28, lo:3, hi:9, q:'wall'} },
+  { name:'The Wilds', foes:['Duelist','Blood Priest','Wolf Rider','Wildling','Brute'], elites:['Beastmaster','Hexer'], boss:{name:'The Thornwitch', hp:41, lo:4, hi:11, q:'thorns'} },
   { name:'The Capital', foes:['Knight','Warlord','Royal Guard','Zealot','Duelist'], elites:['Champion','Executioner'], boss:{name:'The King', hp:48, lo:5, hi:13, q:'royal', final:true} }
 ];
 const ROWS = 10, COLS = 3;
@@ -765,11 +765,12 @@ const pick = a => a[Math.floor(Math.random()*a.length)];
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const rankLabel = v => v<=10 ? String(v) : {11:'J',12:'Q',13:'K',14:'A'}[v];
 const nid = () => Math.random().toString(36).slice(2,9);
-const TUNE = { hp:16, hpStep:4.3, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.4 };
+// balanced 2026-09-29 by simulation: a careful player wins ~46%, a casual one ~36%; regular fights ramp up steadily, elites and bosses are the peaks
+const TUNE = { hp:18, hpStep:4.9, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
 
 function foeStats(act,row,name,elite){
-  const t=act*3+Math.floor(row/3)+(elite?1.5:0);
-  const f={name, hp:TUNE.hp+Math.round(t*TUNE.hpStep), lo:Math.min(6,2+Math.floor(t/2.6)), hi:Math.min(13,6+Math.floor(t/1.3)), q:FOES[name].q};
+  const t=act*3+Math.floor(row/3)+(elite?.7:0);
+  const f={name, hp:TUNE.hp+Math.round(t*TUNE.hpStep), lo:Math.min(6,2+Math.floor(t/2.4)), hi:Math.min(12,7+Math.floor(t/1.4)), q:FOES[name].q};
   if(elite){ f.hp=Math.round(f.hp*TUNE.eliteHp); f.elite=true; }
   return f;
 }
