@@ -540,6 +540,13 @@
   .seal-badge { position: absolute; left: 5%; bottom: 4%; z-index: 2; width: max(15px, calc(var(--cw) * .27)); height: max(15px, calc(var(--cw) * .27)); border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #5a2a2a, #1e0a0a); box-shadow: 0 0 0 1.5px #d9a34a, 0 1px 3px rgba(0,0,0,.4);
     display: grid; place-items: center; font-size: max(9px, calc(var(--cw) * .15)); line-height: 1; }
+  .hand-row { display: flex; justify-content: center; gap: 12px; padding: 6px 0 4px; }
+  .hand-card { padding: 0; border: 0; background: none; border-radius: 10px; transition: transform .15s; }
+  .hand-card .card { --cw: calc(var(--cwb) * .78); }
+  .hand-card:active:not(:disabled) { transform: translateY(-8px) scale(1.04); }
+  .hand-card:disabled { opacity: .55; }
+  .quirk.flashq { animation: flashq 1.2s; }
+  @keyframes flashq { 20% { color: var(--brass-hi); text-shadow: 0 0 12px rgba(255,200,100,.9); } }
   @media (prefers-reduced-motion: reduce) {
     .tonic.armed, .choice, .node.can .med, .awning, .bell, .screen.enter, .fan .card, .pack-stage button.pack, .slot, .offer, .march li.now .med, .end .med.huge, .sheet, .sheet-in { animation: none; }
     .banner span, .banner::before { animation-duration: .01s; }
@@ -639,6 +646,7 @@
     <div class="you-line"><div class="relics" id="battleRelics"></div><div class="right"><div class="tonics" id="tonicBox"></div><span class="gold" id="battleGold"></span></div></div>
     <div class="hp" id="youHp" aria-label="Your health"><span class="ghostbar"></span><span class="fill"></span><b></b></div>
   </div>
+  <div class="hand-row" id="handRow" hidden></div>
   <div class="controls">
     <button class="primary" id="flipBtn" type="button">Flip</button>
     <button class="secondary" id="burnBtn" type="button">Burn</button>
@@ -790,10 +798,26 @@ const FOES = {
   'The Gatekeeper':{g:'♜'}, 'The Thornwitch':{g:'♛'}, 'The King':{g:'♚'}
 };
 const ACTS = [
-  { name:'The Border', foes:['Scout','Militia','Shieldman','Brute','Bandit'], elites:['Veteran','Iron Guard'], boss:{name:'The Gatekeeper', hp:28, lo:3, hi:9, q:'wall'} },
-  { name:'The Wilds', foes:['Duelist','Blood Priest','Wolf Rider','Wildling','Brute'], elites:['Beastmaster','Hexer'], boss:{name:'The Thornwitch', hp:41, lo:4, hi:11, q:'thorns'} },
-  { name:'The Capital', foes:['Knight','Warlord','Royal Guard','Zealot','Duelist'], elites:['Champion','Executioner'], boss:{name:'The King', hp:48, lo:5, hi:13, q:'royal', final:true} }
+  { name:'The Border', foes:['Scout','Militia','Shieldman','Brute','Bandit'], elites:['Veteran','Iron Guard'], boss:{name:'The Gatekeeper', hp:26, lo:3, hi:9, q:'wall', style:'hand', intro:'"Turn back, soldier. This border is closed."'} },
+  { name:'The Wilds', foes:['Duelist','Blood Priest','Wolf Rider','Wildling','Brute'], elites:['Beastmaster','Hexer'], boss:{name:'The Thornwitch', hp:32, lo:4, hi:11, q:'thorns', style:'bloom', intro:'"Such pretty cards. Let me prick them."'} },
+  { name:'The Capital', foes:['Knight','Warlord','Royal Guard','Zealot','Duelist'], elites:['Champion','Executioner'], boss:{name:'The King', hp:38, lo:5, hi:13, q:'royal', final:true, style:'decree', intro:'"Kneel, and I may let you keep your head."'} }
 ];
+/* each act boss fights in its own style */
+const BLOOM = 6;
+const STYLES = {
+  hand:{n:'Gate Duel', i:'🚪', d:'You hold 3 cards and see his next card before you choose which to play. Burn swaps your whole hand.'},
+  bloom:{n:'Bloom', i:'🌸', d:`Her thorns bloom every ${BLOOM} rounds and hit you for 12. Winning a war cuts the bloom back by 3 rounds.`},
+  decree:{n:'Royal Decrees', i:'📜', d:'Before every round the King decrees a new rule, like low cards win or double stakes.'}
+};
+const DECREES = {
+  low:{n:'Low cards win', d:'This round, the lower card wins.'},
+  double:{n:'Double stakes', d:'All damage this round is doubled, both ways.'},
+  faces:{n:'Nobles only', d:'Only your J, Q, K or A deal full damage this round. Other winners deal 1.'},
+  crown:{n:'The crown wins ties', d:'The King wins any tie this round.'},
+  suit:{n:'Favoured suit', d:'Cards of the favoured suit count 3 higher this round, for both sides.'}
+};
+const rollDecree = () => { const k=pick(Object.keys(DECREES)); return k==='suit' ? {k, s:pick(SUITS)} : {k}; };
+function refillHand(b){ b.hand=b.hand||[]; while(b.hand.length<3){ const c=take(b,'p'); if(!c) break; b.hand.push(c); } }
 const ROWS = 10, COLS = 3;
 const rint = (a,b) => a + Math.floor(Math.random()*(b-a+1));
 const pick = a => a[Math.floor(Math.random()*a.length)];
@@ -875,11 +899,13 @@ function migrateRun(run){
 const has = (run,r) => run.relics.includes(r);
 const tonicCap = run => (has(run,'flask')?4:3)+(hasPerk(run,'pockets')?1:0);
 function reachable(run){ if(run.row===-1) return run.map[0].map((_,k)=>k); return run.map[run.row][run.col].next; }
-function newBattle(run,foe){
+function newBattle(run,foe){ return startStyle(makeBattle(run,foe)); }
+function makeBattle(run,foe){
   const n=foe.elite?18:16, ed=[]; for(let i=0;i<n;i++) ed.push({v:rint(foe.lo,foe.hi), s:pick(SUITS), id:nid()});
   return {f:foe, eHp:foe.hp, eMax:foe.hp, pDraw:shuffle(run.deck.map(c=>({...c}))), pDisc:[], eDraw:shuffle(ed), eDisc:[],
     burns:2+(has(run,'satchel')?2:0)+(run.bonusBurns||0)+(hasPerk(run,'quarter')?1:0), round:0, over:null, luck:hasPerk(run,'tactic')?3:0, block:0, aegis:has(run,'aegis'), frenzy:0, stolen:[], purpled:[], will:false, wind:false};
 }
+function startStyle(b){ if(b.f.style==='hand') refillHand(b); if(b.f.style==='bloom') b.bloom=0; if(b.f.style==='decree') b.decree=rollDecree(); return b; }
 function refill(b,s){ if(!b[s+'Draw'].length && b[s+'Disc'].length){ b[s+'Draw']=shuffle(b[s+'Disc']); b[s+'Disc']=[]; } }
 function peek(b,s){ refill(b,s); return b[s+'Draw'][0]||null; }
 function take(b,s){ refill(b,s); return b[s+'Draw'].shift()||null; }
@@ -887,13 +913,17 @@ const avail = (b,s) => b[s+'Draw'].length + b[s+'Disc'].length;
 function effP(run,c){ if(c.sl==='stone') return 10; let v=c.v; if(has(run,'crown')&&v>=11&&v<=13) v+=2; if(has(run,'prism')&&isSuit(c,'D')) v+=2; if(c.lk) v+=4; return v; }
 function effE(b,c){ let v=c.v; if(b.f.q==='royal'&&v>=11&&v<=13) v+=2; return v; }
 function compare(run,b,pc,ec,luck){
-  if(has(run,'sling') && pc.v<=3 && ec.v===14) return 1;
-  const a=effP(run,pc)+(luck||0), e=effE(b,ec);
-  if(a>e) return 1; if(e>a) return -1;
+  const D=b.decree&&b.decree.k;
+  if(has(run,'sling') && pc.v<=3 && ec.v===14 && D!=='low') return 1;
+  let a=effP(run,pc)+(luck||0), e=effE(b,ec);
+  if(D==='suit'){ if(isSuit(pc,b.decree.s)) a+=3; if(ec.s===b.decree.s) e+=3; }
+  if(a!==e) return (a>e)!==(D==='low') ? 1 : -1;
+  if(D==='crown') return -1;
   if(has(run,'mirror')||charmOf(run,pc)==='steady') return 1; if(b.f.q==='sneaky') return -1; return 0;
 }
 function burn(run,b){
-  if(b.burns<=0) return null; const c=take(b,'p'); if(!c) return null; b.pDisc.push(c); b.burns--;
+  if(b.burns<=0) return null;
+  if(b.hand && b.f.style==='hand'){ b.pDisc.push(...b.hand); b.hand=[]; b.burns--; refillHand(b); return {c:null, hit:0, hand:true}; } const c=take(b,'p'); if(!c) return null; b.pDisc.push(c); b.burns--;
   let hit=0; if(has(run,'ember')){ hit=3; b.eHp-=3; run.stats.dealt+=3; if(b.eHp<=0) b.over='win'; }
   return {c, hit};
 }
@@ -908,11 +938,12 @@ function useTonic(run,b,i){
 }
 function gainTonic(run,t){ if(run.tonics.length>=tonicCap(run)) return false; run.tonics.push(t); return true; }
 const bestOf = cs => cs.reduce((m,c)=>!m||c.v>m.v?c:m, null);
-function playRound(run,b){
+function playRound(run,b,hi){
   b.round++; run.stats.rounds++;
+  const D=b.decree&&b.decree.k;
   const luck=b.luck; b.luck=0;
   const roll=c=>{ if(c) c.lk = c.sl==='lucky' && Math.random()<.25; return c; };  // a Lucky seal rolls each time it's flipped
-  let pc=roll(take(b,'p')), ec=take(b,'e');
+  let pc=roll(b.hand && b.f.style==='hand' && b.hand.length ? b.hand.splice(Math.min(hi||0, b.hand.length-1),1)[0] : take(b,'p')), ec=take(b,'e');
   const flipped=[pc];
   const used={p:[pc],e:[ec]}; const steps=[{t:'flip',pc,ec,luck}];
   let wars=0, cmp=compare(run,b,pc,ec,luck), stale=false, curLuck=luck;
@@ -943,6 +974,8 @@ function playRound(run,b){
       if(pc.sl==='glass') d*=3;
       d=Math.max(1,d-armor);
       if(pc.sl==='red'){ r.red=true; d*=2; }  // strikes twice
+      if(D==='faces' && pc.v<11 && pc.sl!=='stone') d=1;
+      if(D==='double') d*=2;
       r.dmg=d; b.eHp-=d; run.stats.dealt+=d;
       if(has(run,'fang')) r.heal+=1;
       if(has(run,'locket')&&isSuit(pc,'H')) r.heal+=2;
@@ -966,6 +999,7 @@ function playRound(run,b){
       if(b.f.q==='frenzy') d+=b.frenzy++;
       if(b.f.q==='warlike'&&wars) d*=2;
       if(has(run,'buckler')) d=Math.max(1,d-1);
+      if(D==='double') d*=2;
       if(b.block){ b.block=0; r.blocked='tonic'; d=0; }
       else if(b.aegis){ b.aegis=false; r.blocked='aegis'; d=0; }
       r.dmg=d; run.hp-=d;
@@ -986,6 +1020,13 @@ function playRound(run,b){
     if(hasPerk(run,'wind') && !b.wind && run.hp>0 && run.hp<run.maxHp*.25){ b.wind=true; const h=Math.min(10,run.maxHp-run.hp); run.hp+=h; r.wind=h; }
   }
   b.pDisc.push(...used.p); b.eDisc.push(...used.e);
+  if(b.f.style==='bloom' && b.eHp>0){
+    if(!stale && wars && cmp===1){ b.bloom=Math.max(0,(b.bloom||0)-3); r.cut=true; }
+    b.bloom=(b.bloom||0)+1;
+    if(b.bloom>=BLOOM){ b.bloom=0; run.hp-=12; r.bloom=12; }
+  }
+  if(b.f.style==='decree'){ r.decree=b.decree; b.decree=rollDecree(); }
+  if(b.f.style==='hand') refillHand(b);
   if(b.eHp<=0) b.over='win'; else if(run.hp<=0) b.over='lose';
   return {steps, r};
 }
@@ -1154,7 +1195,7 @@ const NODES = {
       : [{l:'Etch a charm', d:'You have no charmed cards. Pay 15 gold for a random charm on a card you pick.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`The stones etch a ${CHARMS[c.ch].n} charm into your ${lbl(c)}.`, good:true}; }},
           {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
 };
-if(typeof module!=='undefined') module.exports={SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
+if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
 
 
 </script>
@@ -1621,6 +1662,16 @@ if(typeof module!=='undefined') module.exports={SEALS,PERKS,SEAL_IDS,hasPerk,gai
   /* map */
 
   /* battle */
+  const handMode = () => !!(B && B.hand && B.f.style === 'hand');
+  const capSuit = s => SUITNAME[s][0].toUpperCase() + SUITNAME[s].slice(1);
+  const decreeText = d => d.k === 'suit' ? `${capSuit(d.s)} count 3 higher this round, for both sides.` : `${DECREES[d.k].n}. ${DECREES[d.k].d}`;
+  function quirkLine() {
+    const f = B.f, base = f.q ? QUIRKS[f.q] : 'No tricks. Just cards.';
+    if (f.style === 'bloom') { const n = BLOOM - (B.bloom || 0); return `${base} 🌸 Blooms in ${n} round${n === 1 ? '' : 's'} for 12 damage. Win a war to cut it back by 3.`; }
+    if (f.style === 'decree' && B.decree) return `${base} 📜 Decree: ${decreeText(B.decree)}`;
+    if (f.style === 'hand') return `${base} 🚪 Gate Duel: tap a card from your hand. You can see his next card.`;
+    return base;
+  }
   function setMsg(t) { $('bMsg').innerHTML = `<span>${t}</span>`; }
   function pileHTML(n) {
     const layers = Math.max(1, Math.min(4, Math.ceil(n / 6)));
@@ -1635,11 +1686,14 @@ if(typeof module!=='undefined') module.exports={SEALS,PERKS,SEAL_IDS,hasPerk,gai
     renderTonics();
     $('youPile').innerHTML = `${B.pDraw.length ? pileHTML(B.pDraw.length) : '<div class="empty-slot"></div>'}<span>${B.pDraw.length} left</span>`;
     $('foePile').innerHTML = `${B.eDraw.length ? pileHTML(B.eDraw.length) : '<div class="empty-slot"></div>'}<span>${B.eDraw.length} left</span>`;
-    const pn = peek(B, 'p');
-    $('youPeek').innerHTML = pn ? `${cardHTML(pn, 'mini')}<span>Next</span>` : '';
-    if (has(run, 'spyglass') || (pn && pn.sl === 'ghost')) { const en = peek(B, 'e'); $('foePeek').innerHTML = en ? `${cardHTML(en, 'mini')}<span>Next</span>` : ''; }
+    const pn = peek(B, 'p'), hand = handMode();
+    $('youPeek').innerHTML = pn && !hand ? `${cardHTML(pn, 'mini')}<span>Next</span>` : '';
+    $('handRow').hidden = !hand; $('flipBtn').hidden = hand;
+    if (hand) $('handRow').innerHTML = B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}</button>`).join('');
+    $('foeQuirk').textContent = quirkLine();
+    if (hand || has(run, 'spyglass') || (pn && pn.sl === 'ghost')) { const en = peek(B, 'e'); $('foePeek').innerHTML = en ? `${cardHTML(en, 'mini')}<span>Next</span>` : ''; }
     else $('foePeek').innerHTML = '<div class="empty-slot"></div>';
-    $('burnBtn').textContent = `Burn ${B.burns}`;
+    $('burnBtn').textContent = `${hand ? 'New hand' : 'Burn'} ${B.burns}`;
     $('burnBtn').disabled = busy || B.burns <= 0 || !!B.over;
     $('flipBtn').disabled = busy || !!B.over;
   }
@@ -1652,29 +1706,32 @@ if(typeof module!=='undefined') module.exports={SEALS,PERKS,SEAL_IDS,hasPerk,gai
   async function doBurn() {
     if (busy || !B || B.over || B.burns <= 0) return;
     busy = true; renderBattleButtons();
-    const c = $('youPeek').querySelector('.card');
+    const c = handMode() ? null : $('youPeek').querySelector('.card');
     const top = peek(B, 'p');
-    Snd.burn(); buzz(15);
+    if (!handMode()) Snd.burn(); buzz(15);
     if (c) { c.classList.add('burning'); const [x, y] = centerOf(c); burst(x, y, { n: 18, colors: ['#ff8a2a', '#ffcf5a', '#ff4d1a'], up: 1, spread: 40 }); await sleep(560); }
     const res = burn(run, B);
-    setMsg(`Burned ${L(top)}.${res && res.hit ? ` The embers hit for ${res.hit}.` : ''}`);
+    if (res && res.hand) { setMsg('You toss your hand and draw 3 new cards.'); Snd.flick(); }
+    else setMsg(`Burned ${L(top)}.${res && res.hit ? ` The embers hit for ${res.hit}.` : ''}`);
     if (res && res.hit) { popup('foeRow', `−${res.hit}`); once($('foeMed'), 'hit', 460); }
     busy = false; renderBattle(); save();
     if (B.over === 'win') victory();
   }
-  function renderBattleButtons() { if (run && B) renderTonics(); $('flipBtn').disabled = busy || !B || !!B.over; $('burnBtn').disabled = busy || !B || B.burns <= 0 || !!B.over; }
+  function renderBattleButtons() { if (run && B) renderTonics(); $('flipBtn').disabled = busy || !B || !!B.over; $('burnBtn').disabled = busy || !B || B.burns <= 0 || !!B.over; $('handRow').querySelectorAll('button').forEach(b => { b.disabled = busy || !B || !!B.over; }); }
 
-  async function doFlip() {
+  async function doFlip(hi) {
     if (busy || !B || B.over) return;
+    if (handMode() && typeof hi !== 'number') return;  // in the Gate Duel you tap a card instead
+    const handEl = handMode() ? $('handRow').querySelector(`[data-hi="${hi}"] .card`) : null;
     busy = true; renderBattleButtons();
     const yL = $('yLane'), oL = $('oLane'), field = $('field');
     yL.innerHTML = ''; oL.innerHTML = ''; yL.className = 'lane'; oL.className = 'lane';
     setMsg('&nbsp;');
-    const youPeekCard = $('youPeek').querySelector('.card');
+    const youPeekCard = handEl || $('youPeek').querySelector('.card');
     const foePeekCard = $('foePeek').querySelector('.card');
     const youPileCard = () => $('youPile').querySelector('.card:last-child');
     const foePileCard = () => $('foePile').querySelector('.card:last-child');
-    const { steps, r } = playRound(run, B);
+    const { steps, r } = playRound(run, B, hi);
 
     for (let si = 0; si < steps.length; si++) {
       const st = steps[si];
@@ -1755,6 +1812,10 @@ if(typeof module!=='undefined') module.exports={SEALS,PERKS,SEAL_IDS,hasPerk,gai
     if (r.retry) m += ` Purple Seal: your ${L(r.retry)} goes back on top.`;
     if (r.willSaved) m += " Iron Will: they can't take your card.";
     if (r.wind) { m += ` Second Wind: +${r.wind} HP.`; setTimeout(() => { popup('youRow', `+${r.wind}`, 'heal'); Snd.heal(); }, 520); }
+    if (r.decree) m = `${r.decree.k === 'suit' ? `${capSuit(r.decree.s)} favoured` : DECREES[r.decree.k].n}: ` + m;
+    if (r.cut) m += ' You cut her vines back!';
+    if (r.bloom) { m += ` The Thornwitch blooms! You take ${r.bloom}.`; setTimeout(() => { banner('Bloom', true); popup('youRow', `−${r.bloom}`, 'hurt'); Snd.hurt(true); buzz([60, 40, 60]); once($('sBattle'), 'shake', 420); }, 500); }
+    if (r.decree && B.decree && !B.over) setTimeout(() => { once($('foeQuirk'), 'flashq', 1200); Snd.bell(); }, 900);
     setMsg(m);
     if (r.caps.length) { await sleep(450); banner(r.caps.every(c => c.back) ? 'Won back' : 'Captured'); Snd.rare(); buzz([30, 40, 60]); }
     else if (r.lost) { await sleep(450); banner('Taken', true); Snd.hurt(false); buzz(120); }
@@ -1915,7 +1976,7 @@ if(typeof module!=='undefined') module.exports={SEALS,PERKS,SEAL_IDS,hasPerk,gai
       go.textContent = sel.peek ? 'Not on your road yet' : D[2]; return;
     }
     const f = n.foe;
-    info.innerHTML = `<span class="med">${foeGlyph(f)}</span><div><b>${f.name}${n.t === 'boss' ? ' (boss)' : n.t === 'elite' ? ' (elite)' : ''}</b><small>${f.hp} HP, cards ${rankLabel(f.lo)} to ${rankLabel(f.hi)}. ${f.q ? QUIRKS[f.q] : 'No tricks.'}</small><small class="pz">Prize: ${PRIZE_ICON[n.prize.k]} ${prizeText(n.prize)}${n.t === 'battle' ? ', plus gold' : ''}</small></div>`;
+    info.innerHTML = `<span class="med">${foeGlyph(f)}</span><div><b>${f.name}${n.t === 'boss' ? ' (boss)' : n.t === 'elite' ? ' (elite)' : ''}</b><small>${f.hp} HP, cards ${rankLabel(f.lo)} to ${rankLabel(f.hi)}. ${f.q ? QUIRKS[f.q] : 'No tricks.'}${STYLES[f.style] ? ` ${STYLES[f.style].i} ${STYLES[f.style].n}: ${STYLES[f.style].d}` : ''}</small><small class="pz">Prize: ${PRIZE_ICON[n.prize.k]} ${prizeText(n.prize)}${n.t === 'battle' ? ', plus gold' : ''}</small></div>`;
     go.textContent = sel.peek ? 'Not on your road yet' : n.t === 'boss' ? `Face ${f.name.replace(/^The /, 'the ')}` : `Fight the ${short(f.name)}`;
   }
   function goSpot() {
@@ -1993,7 +2054,7 @@ if(typeof module!=='undefined') module.exports={SEALS,PERKS,SEAL_IDS,hasPerk,gai
     $('battleRelics').innerHTML = relicIcons();
     $('yLane').innerHTML = ''; $('oLane').innerHTML = '';
     $('yLane').className = 'lane'; $('oLane').className = 'lane';
-    setMsg(fresh || B.round === 0 ? 'Flip to attack. Win a war to capture their best card. Tap a tonic twice to drink it.' : 'Battle resumed.');
+    setMsg(fresh && f.intro ? `<i>${f.intro}</i> ${STYLES[f.style] ? STYLES[f.style].d : ''}` : fresh || B.round === 0 ? 'Flip to attack. Win a war to capture their best card. Tap a tonic twice to drink it.' : 'Battle resumed.');
     renderBattle();
     show('sBattle');
     if (fresh && (node.t === 'boss' || node.t === 'elite')) setTimeout(() => { banner(node.t === 'boss' ? short(f.name) : 'Elite'); Snd.war(); }, 350);
@@ -2251,8 +2312,9 @@ if(typeof module!=='undefined') module.exports={SEALS,PERKS,SEAL_IDS,hasPerk,gai
   $('leaveBtn').addEventListener('click', leaveStore);
   $('evGo').addEventListener('click', eventDone);
   $('pickCancel').addEventListener('click', () => { pickCb = null; $('charmSheet').hidden = true; });
-  $('flipBtn').addEventListener('click', doFlip);
-  $('youPile').addEventListener('click', doFlip);
+  $('flipBtn').addEventListener('click', () => doFlip());
+  $('youPile').addEventListener('click', () => doFlip());
+  $('handRow').addEventListener('click', e => { const b = e.target.closest('[data-hi]'); if (b && !b.disabled) doFlip(+b.dataset.hi); });
   $('burnBtn').addEventListener('click', doBurn);
   $('skipBtn').addEventListener('click', () => choose(null));
   $('againBtn').addEventListener('click', () => startRun(slot || 1));

@@ -4,7 +4,8 @@
    then run  SIM(1000)            -> careful player (smart route, burns, tonics, good picks)
              SIM(1000, 'casual')  -> same choices, but a random route through the map
              SIM(1000, 'random')  -> picks everything at random
-   Targets (2026-09-29): careful ~50% wins, casual ~35%. */
+   Targets (2026-09-29): careful ~50% wins, casual ~35%.
+   Boss styles: the Gate Duel bot plays the cheapest card that wins (or its weakest when none can). */
 window.SIM = function (N = 500, mode = 'smart') {
   const smart = mode !== 'random', smartRoute = mode === 'smart';
   const R = a => a[Math.floor(Math.random() * a.length)];
@@ -16,6 +17,12 @@ window.SIM = function (N = 500, mode = 'smart') {
   function fight(run, foe) {
     const b = newBattle(run, foe); let g = 0;
     while (!b.over && g++ < 400) {
+      if (b.hand && b.f.style === 'hand') {  // Gate Duel: pick a card from the hand
+        let hi = 0;
+        if (smart) { const ec = peek(b, 'e'); const idx = b.hand.map((c, i) => i).sort((x, y) => b.hand[x].v - b.hand[y].v); hi = idx.find(i => compare(run, b, b.hand[i], ec, b.luck) === 1); if (hi == null) hi = idx[0]; }
+        else hi = Math.floor(Math.random() * b.hand.length);
+        playRound(run, b, hi); continue;
+      }
       if (smart) {
         const pn = peek(b, 'p');
         if (run.tonics.includes('fire') && b.eHp <= 10) useTonic(run, b, run.tonics.indexOf('fire'));
