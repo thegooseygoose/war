@@ -6,22 +6,22 @@ Originally made as a phone web app, then ported to PC as a standalone Windows ap
 
 ## Features
 
-- Branching map, new every run: pick your route through battle spots and store spots across three acts (The Border, The Wilds, The Capital), each ending in a boss with a gimmick
-- Every battle shows its prize on the map (gold, a card, a charm, or a relic from bosses)
-- Stores between battles: relics, cards, charms, healing and deck upgrades for gold
-- Card charms: Gilded (+1 gold when the card wins), Keen (+2 damage) and Mending (heal 1)
-- Wars with real stakes: the winner captures the loser's best card from the pile
+- The PC and phone versions share the same rules (the game logic in `index.html` matches `phone/index.html`)
+- Three acts (The Border, The Wilds, The Capital), each a new 10-row map plus a boss: the Gatekeeper, the Thornwitch and the King
+- Every row is a choice of spots: new cards (Recruits, Suit Drafts, Blind Draws, Trials), stops along the road (Campfire, Backpack, Bone Altar, Woodcarver totems, Mycologists, Mimic, Charm Stones, Store, Mystery events, Chests), then battles and elites
+- Tonics to drink mid-battle (Healing, Fire, Luck, Iron), relics, card charms (Gilded, Keen, Mending, Steady) and suit totems
+- Wars with real stakes: win one and you capture their best card; lose one and they take yours until you win the battle
 - Opening pack at the start of every run: 18 random cards, with a 1 in 5 chance of a rare face card or Ace
-- Hover any relic or charm to see what it does
-- 3 save slots, with Continue, New Run and Saved Runs from the main menu
+- Hover any relic, charm, tonic or totem to see what it does
+- 3 save slots, with Continue, New Run and Saved Runs from the main menu (saves from the first PC version carry on in the same act)
 - Widescreen layout that scales to any window size, plus fullscreen
 - Synthesized music (menu, battle, boss and store tracks) and sound effects
 - Options: volume, table colour, animation speed, screen shake, particles, key hints
-- Custom card art: cards in `sprites/cards/` replace the built-in drawn cards
+- Custom card art: cards in `sprites/cards/` replace the built-in drawn cards, in both versions
 
 ## Phone version
 
-The phone web app lives in `phone/index.html`, a single self-contained page. Open it in any mobile browser. It has no build step and saves to the browser's local storage.
+The phone web app lives in `phone/index.html`, a single page with no build step that saves to the browser's local storage. It loads the card art from `sprites/cards/` (from `../sprites/cards/` when opened from this repo). The live copy is a claude.ai artifact with the art published beside it.
 
 ## Running it
 
@@ -46,9 +46,10 @@ python -m PyInstaller --noconfirm --onefile --windowed --distpath dist_v2 --name
 | Space / F | Flip |
 | B | Burn the next card |
 | D | View deck |
-| 1 2 3 / arrows | Pick a path on the map, or a reward |
+| 1 2 3 / arrows | Pick a spot on the map, or a reward |
+| 1 – 4 | Drink a tonic (in battle) or pick a choice (at a stop) |
 | Enter | Go to the selected spot |
-| 1 – 6 | Buy in the store |
+| 1 – 8 | Buy in the store |
 | S | Skip reward |
 | Esc | Options |
 | F11 | Fullscreen |

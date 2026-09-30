@@ -528,6 +528,14 @@
   .relics .relic-chip.totem { background: rgba(224,180,90,.22); box-shadow: inset 0 0 0 1.5px var(--brass); color: var(--brass-hi); font-weight: 900; }
   .row-hint { text-align: center; font-size: .75rem; color: var(--muted); margin: 0 0 6px; }
   .offer .vis .card.down, .offer .vis .card.down:nth-child(1) { transform: rotateY(180deg) rotate(6deg); }
+  /* your own card art (sprites/cards): big art scales smoothly, small pixel art stays crisp */
+  .card .fc > img.art { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; object-fit: contain; pointer-events: none; -webkit-user-drag: none;
+    filter: drop-shadow(0 calc(var(--cw) * .03) calc(var(--cw) * .04) rgba(0,0,0,.4)); }
+  .card .fc > img.art.hd { image-rendering: auto; }
+  .card.art .fc.front { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+  .card.art .front::after { display: none; }
+  .lane.won .card.art:not(.down):last-child .front { box-shadow: none; }
+  .lane.won .card.art:not(.down):last-child .front img.art { filter: drop-shadow(0 0 calc(var(--cw) * .05) rgba(255,210,110,.95)) drop-shadow(0 0 calc(var(--cw) * .12) rgba(255,190,90,.6)); }
   @media (prefers-reduced-motion: reduce) {
     .tonic.armed, .choice, .node.can .med, .awning, .bell, .screen.enter, .fan .card, .pack-stage button.pack, .slot, .offer, .march li.now .med, .end .med.huge, .sheet, .sheet-in { animation: none; }
     .banner span, .banner::before { animation-duration: .01s; }
@@ -1346,12 +1354,19 @@ if(typeof module!=='undefined') module.exports={gainCards,NODES,TRIALS,runTrial,
     else mid = `<div class="pips">${PIPS[c.v].map(([x, y, v]) => `<i class="${v ? 'v' : ''}" style="left:${x}%;top:${y}%">${s}</i>`).join('')}</div>`;
     return corners + mid;
   }
+  // Cards you drew yourself (files in sprites/cards/, without .png). Every other card is drawn by faceHTML.
+  const MY_CARDS = new Set(['2_of_hearts', '3_of_hearts', '4_of_hearts', '5_of_hearts', '6_of_hearts', '7_of_hearts', '8_of_hearts', '9_of_hearts', '10_of_hearts', 'jack_of_hearts', 'queen_of_hearts', 'king_of_hearts', 'ace_of_hearts', '2_of_clubs', '3_of_clubs', '4_of_clubs', '5_of_clubs', '6_of_clubs', '7_of_clubs', '8_of_clubs', '9_of_clubs', '10_of_clubs', 'jack_of_clubs', 'queen_of_clubs', 'king_of_clubs', 'ace_of_clubs']);
+  const RANKFILE = { 11: 'jack', 12: 'queen', 13: 'king', 14: 'ace' };
+  const artFile = c => `${RANKFILE[c.v] || c.v}_of_${NAMES[c.s]}`;
+  const ART_DIR = /\/phone\/[^/]*$/.test(location.pathname) ? '../sprites/cards/' : 'sprites/cards/';  // the git copy sits in phone/, next to the PC game's art
+  const artImg = f => `<img class="art" src="${ART_DIR}${f}.png" alt="" draggable="false" onload="if(this.naturalWidth>120)this.classList.add('hd')">`;
   function cardEl(c, { size = 'full', down = false } = {}) {
     const el = document.createElement('div');
-    el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}`;
+    const art = c && MY_CARDS.has(artFile(c));
+    el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}${art ? ' art' : ''}`;
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', down || !c ? 'Face-down card' : full(c));
-    el.innerHTML = `<div class="fc front">${c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}</div><div class="fc backf"></div>`;
+    el.innerHTML = `<div class="fc front">${art ? artImg(artFile(c)) : c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}</div><div class="fc backf"></div>`;
     return el;
   }
   const cardHTML = (c, size, down) => cardEl(c, { size, down }).outerHTML;
@@ -1758,7 +1773,7 @@ if(typeof module!=='undefined') module.exports={gainCards,NODES,TRIALS,runTrial,
     slot = i; run = migrateRun(d.run); B = null;
     if (old) { save(); return showMap(); }
     if (d.battle) {
-      B = d.battle;
+      B = d.battle; B.f = run.map[run.row][run.col].foe;  // the foe isn't saved with the battle
       if (B.over === 'win') return winFight();
       if (B.over === 'lose') return endRun(false);
       return showBattle();

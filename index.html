@@ -839,6 +839,68 @@
   .world .lnode.sel { animation: none; z-index: 5; box-shadow: 0 0 0 4px #ffd76a, 0 0 0 10px rgba(255,215,106,.35), 0 0 26px rgba(255,190,80,.95) !important; transform: scale(1.18); }
   .world .lnode.shop.sel { transform: rotate(45deg) scale(1.18); }
   .choice.sel { border-color: var(--brass-hi); background: rgba(224,180,90,.2); box-shadow: 0 0 0 2px var(--brass); }
+
+  /* ===== the phone update: map spots, tonics, events ===== */
+  .stage .map-head .lbl { margin-bottom: 2px; }
+  .world .lnode.spot { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 1.4rem; line-height: 1; color: #3b2410;
+    background: #efe2c4; box-shadow: 0 0 0 2.5px #6b4a2b, 0 3px 6px rgba(60,30,10,.35); }
+  .world .lnode.spot.c-fight { background: #e3d3b4; color: #2a1608; font-size: 1.6rem; }
+  .world .lnode.spot.t-elite { background: #f0bfae; box-shadow: 0 0 0 3px #9a2a1c, 0 3px 6px rgba(60,30,10,.35); }
+  .world .lnode.spot.c-gain { background: #f7df9c; box-shadow: 0 0 0 2.5px #b8862e, 0 3px 6px rgba(60,30,10,.35); }
+  .world .lnode.spot.c-util { background: #d6e3c0; box-shadow: 0 0 0 2.5px #4d6a4a, 0 3px 6px rgba(60,30,10,.35); }
+  .world .lnode.spot.t-store { background: #f2d0a8; box-shadow: 0 0 0 2.5px #9a4a34, 0 3px 6px rgba(60,30,10,.35); }
+  .world .lnode.spot.done { background: var(--brass); color: #3a1209; font-weight: 900; font-size: 1.2rem; box-shadow: 0 0 0 2.5px #8d6a26; }
+  .world .lnode.spot.avail { background: #fff4d6; box-shadow: 0 0 0 3px #9a2a1c, 0 0 0 7px rgba(154,42,28,.25), 0 0 16px rgba(255,190,80,.8); }
+  .world .lnode.spot .lab { display: none; }
+  .world .lnode.spot.avail .lab, .world .lnode.spot.sel .lab, .world .lnode.boss .lab { display: block; }
+  .world .lnode.here { z-index: 4; }
+  .world .lnode.boss .prize-badge { right: -6px; top: -6px; }
+
+  .you-tools { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; }
+  .tonics { display: flex; gap: 10px; }
+  .tonic { position: relative; width: 52px; height: 52px; border-radius: 12px; border: 2px solid rgba(224,180,90,.65); background: rgba(0,0,0,.3); color: inherit;
+    font-size: 1.6rem; display: grid; place-items: center; padding: 0; transition: transform .12s, box-shadow .12s, border-color .12s; }
+  .tonic:hover:not(.off), .tonic:focus-visible { border-color: var(--brass-hi); transform: translateY(-3px); box-shadow: 0 0 16px rgba(255,200,100,.55); outline: none; }
+  .tonic.off { opacity: .45; cursor: default; }
+  .tonic.empty { border-style: dashed; opacity: .35; }
+  .tonic kbd { position: absolute; right: -7px; bottom: -7px; font: inherit; font-size: .72rem; font-weight: 800; padding: 0 5px; border-radius: 5px; background: #2a0a11; border: 1px solid rgba(247,236,217,.4); color: var(--muted); }
+  .no-hints .tonic kbd { display: none; }
+  [data-tonic], [data-totem] { cursor: help; }
+  .tonic[data-tonic] { cursor: pointer; }
+
+  .stage .event { display: grid; grid-template-columns: 540px 1fr; column-gap: 90px; align-items: center; padding: 60px 120px; }
+  .event .corner-btn { position: absolute; top: 40px; right: 56px; }
+  .ev-side { display: grid; justify-items: center; text-align: center; gap: 18px; }
+  .ev-side .med.huge { width: 170px; height: 170px; font-size: 6rem; }
+  .ev-side h2 { font-size: 3.6rem; }
+  .ev-text { margin: 0; font-size: 1.35rem; font-style: italic; max-width: 30ch; }
+  .ev-status { margin: 0; font-size: 1.1rem; color: var(--muted); }
+  .ev-main { display: grid; gap: 18px; align-content: center; }
+  .ev-choices { display: grid; gap: 14px; }
+  .ev-choice { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; text-align: left; padding: 20px 24px; border-radius: 20px; color: var(--text);
+    border: 1.5px solid rgba(224,180,90,.55); background: linear-gradient(160deg, rgba(40,10,16,.8), rgba(20,5,9,.62)); box-shadow: 0 8px 20px rgba(0,0,0,.3);
+    animation: dealOffer .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d); transition: transform .12s, border-color .12s, background .12s; }
+  .ev-choice b { font-size: 1.6rem; font-style: italic; font-weight: 900; color: var(--brass-hi); }
+  .ev-choice span { grid-column: 1; font-size: 1.12rem; color: var(--muted); line-height: 1.35; }
+  .ev-choice kbd { grid-row: 1 / span 2; grid-column: 2; align-self: center; font: inherit; font-weight: 700; font-size: .9rem; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(247,236,217,.35); color: var(--muted); }
+  .no-hints .ev-choice kbd { visibility: hidden; }
+  .ev-choice:hover:not(:disabled), .ev-choice:focus-visible { transform: translateX(8px); border-color: var(--brass-hi); background: rgba(224,180,90,.12); outline: none; }
+  .ev-choice:disabled { opacity: .38; cursor: default; }
+  .ev-result { padding: 26px 30px; border-radius: 20px; background: rgba(0,0,0,.28); box-shadow: inset 0 0 0 1.5px rgba(224,180,90,.4); font-size: 1.4rem; line-height: 1.5; animation: enter .4s; }
+  .ev-result .reveal { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .ev-result .reveal .card { --cw: 84px; }
+  .stage .event .primary { max-width: 420px; }
+  .stage .event .keys { text-align: left; }
+
+  .stage .offers { grid-template-columns: repeat(var(--n, 3), minmax(0, 420px)); justify-content: center; }
+  .stage .store-items { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .stage .store-item { grid-template-columns: 96px 1fr; gap: 12px; padding: 16px 16px; }
+  .stage .store-item .vis { min-height: 100px; }
+  .stage .store-item .vis .card { --cw: 66px; }
+  .stage .store-item .icon { width: 80px; height: 80px; font-size: 2.5rem; }
+  .stage .store-item b { font-size: 1.28rem; }
+  .stage .store-item .d { font-size: .9rem; }
+  .stage .store { padding-left: 80px; padding-right: 80px; }
 </style>
 </head>
 <body>
@@ -850,7 +912,7 @@
   <div class="fan" id="fan" aria-hidden="true"></div>
   <h1>War</h1>
   <p class="sub">The Long March</p>
-  <p class="rules">Nine battles to the King, one life. Both sides flip, and the higher card hits for the difference in rank. Ties start a war: three down, one up. The winner hits 3 harder per war and takes a card for good. Burn a card you don't want. Win battles to grow your deck and collect relics.</p>
+  <p class="rules">Three acts to the King, one life. Both sides flip, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Choose your road: recruits, drafts and trials for new cards, then campfires, totems, altars and strange folk along the way, then a fight. Build your deck as you go.</p>
   <nav class="menu" aria-label="Main menu">
     <button class="menu-btn main" id="continueBtn" type="button" hidden><span>Continue</span><small id="continueSub"></small></button>
     <button class="menu-btn" id="newRunBtn" type="button"><span>New Run</span><small>Start fresh in any of the 3 save slots</small></button>
@@ -886,16 +948,16 @@
     <div class="gold-pill"><span class="coins">🪙</span><b id="storeGold"></b><small>gold</small></div>
   </header>
   <div class="counter"><div class="store-items" id="storeItems"></div></div>
-  <div class="store-foot"><button class="primary" id="storeLeave" type="button">March on</button><p class="keys"><kbd>1</kbd>–<kbd>6</kbd> buy &nbsp;·&nbsp; <kbd>Enter</kbd> march on &nbsp;·&nbsp; <kbd>Esc</kbd> options</p></div>
+  <div class="store-foot"><button class="primary" id="storeLeave" type="button">March on</button><p class="keys"><kbd>1</kbd>–<kbd>8</kbd> buy &nbsp;·&nbsp; <kbd>Enter</kbd> march on &nbsp;·&nbsp; <kbd>Esc</kbd> options</p></div>
 </section>
 
 <section class="screen map" id="sMap" hidden>
   <div class="map-top">
-    <div class="map-head"><h2>The March</h2><div class="tools"><button class="ghost icon-btn sound-btn" type="button" aria-label="Sound">🔊</button><button class="ghost icon-btn set-btn" type="button" aria-label="Options">⚙️</button><button class="ghost" id="mapDeckBtn" type="button">Deck</button></div></div>
+    <div class="map-head"><div><span class="lbl" id="actLabel"></span><h2 id="actName">The March</h2></div><div class="tools"><button class="ghost icon-btn sound-btn" type="button" aria-label="Sound">🔊</button><button class="ghost icon-btn set-btn" type="button" aria-label="Options">⚙️</button><button class="ghost" id="mapDeckBtn" type="button">Deck</button></div></div>
     <div class="panel army">
       <span class="lbl">Your army</span>
       <div class="hp" id="mapHp" aria-label="Your health"><span class="ghostbar"></span><span class="fill"></span><b></b></div>
-      <div class="stat-grid"><div><b id="mapDeckN"></b><span>cards</span></div><div><b id="mapRelicN"></b><span>relics</span></div><div class="gold"><b id="mapGoldN"></b><span>gold</span></div><div><b id="mapFloorN"></b><span>of 12 steps</span></div></div>
+      <div class="stat-grid"><div><b id="mapDeckN"></b><span>cards</span></div><div><b id="mapRelicN"></b><span>relics</span></div><div class="gold"><b id="mapGoldN"></b><span>gold</span></div><div><b id="mapFloorN"></b><span>of 10 rows</span></div></div>
       <div class="relic-chips" id="mapRelics"></div>
     </div>
     <div class="panel next-foe" id="nextFoe"></div>
@@ -907,6 +969,17 @@
     <button class="primary" id="fightBtn" type="button">Fight</button>
     <button class="link" id="abandonBtn" type="button">Abandon run</button>
     <p class="keys"><kbd>Enter</kbd> fight &nbsp;·&nbsp; <kbd>D</kbd> deck &nbsp;·&nbsp; <kbd>Esc</kbd> options</p>
+  </div>
+</section>
+
+<section class="screen event" id="sEvent" hidden>
+  <div class="corner-btn"><button class="ghost icon-btn sound-btn" type="button" aria-label="Sound">🔊</button><button class="ghost icon-btn set-btn" type="button" aria-label="Options">⚙️</button><button class="ghost" id="evDeckBtn" type="button">Deck</button></div>
+  <div class="ev-side"><span class="med huge" id="evMed"></span><h2 id="evTitle"></h2><p class="ev-text" id="evText"></p><p class="ev-status" id="evStatus"></p></div>
+  <div class="ev-main">
+    <div class="ev-choices" id="evChoices"></div>
+    <div class="ev-result" id="evResult" hidden></div>
+    <button class="primary" id="evGo" type="button" hidden>Continue</button>
+    <p class="keys"><kbd>1</kbd>–<kbd>4</kbd> choose &nbsp;·&nbsp; <kbd>Enter</kbd> continue &nbsp;·&nbsp; <kbd>D</kbd> deck &nbsp;·&nbsp; <kbd>Esc</kbd> options</p>
   </div>
 </section>
 
@@ -938,7 +1011,7 @@
   </div>
   <div class="panel you-panel">
     <div class="you-head"><h3>You</h3><span id="youStats"></span></div>
-    <div class="relics" id="battleRelics"></div>
+    <div class="you-tools"><div class="relics" id="battleRelics"></div><div class="tonics" id="tonicBox" aria-label="Tonics"></div></div>
     <span class="lbl">Your health</span>
     <div class="hp" id="youHp" aria-label="Your health"><span class="ghostbar"></span><span class="fill"></span><b></b></div>
   </div>
@@ -946,13 +1019,13 @@
     <button class="primary" id="flipBtn" type="button">Flip</button>
     <button class="secondary" id="burnBtn" type="button">Burn</button>
   </div>
-  <p class="keys"><kbd>Space</kbd> flip &nbsp;·&nbsp; <kbd>B</kbd> burn<br><kbd>D</kbd> deck &nbsp;·&nbsp; <kbd>Esc</kbd> options</p>
+  <p class="keys"><kbd>Space</kbd> flip &nbsp;·&nbsp; <kbd>B</kbd> burn &nbsp;·&nbsp; <kbd>1</kbd>–<kbd>4</kbd> tonic<br><kbd>D</kbd> deck &nbsp;·&nbsp; <kbd>Esc</kbd> options</p>
 </section>
 
 <section class="screen reward" id="sReward" hidden>
   <div class="reward-top"><div class="med big" id="rewardMed"></div><div><h2 id="rewardTitle"></h2><p id="rewardSub">Choose one reward.</p></div></div>
   <div class="offers scroll" id="offers"></div>
-  <div class="reward-foot"><button class="link" id="skipBtn" type="button">Skip reward</button><p class="keys"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> choose &nbsp;·&nbsp; <kbd>S</kbd> skip</p></div>
+  <div class="reward-foot"><button class="link" id="skipBtn" type="button">Skip reward</button><p class="keys" id="rewardKeys"></p></div>
 </section>
 
 <section class="screen end" id="sEnd" hidden>
@@ -974,16 +1047,6 @@
 </div>
 
 
-<div class="sheet prize-sheet" id="prizePop" hidden role="dialog" aria-modal="true" aria-labelledby="prizeTitle">
-  <div class="prize-card">
-    <span class="lbl" id="prizeFrom"></span>
-    <h3 id="prizeTitle">Prize won!</h3>
-    <div class="prize-vis" id="prizeVis"></div>
-    <b id="prizeName"></b>
-    <p id="prizeDesc"></p>
-    <button class="primary" id="prizeClaim" type="button">Claim</button>
-  </div>
-</div>
 <div class="sheet" id="picker" hidden role="dialog" aria-modal="true" aria-labelledby="pickTitle">
   <div class="sheet-in pick-in">
     <header><h3 id="pickTitle"></h3><button class="ghost" id="pickCancel" type="button">Cancel</button></header>
@@ -1011,19 +1074,14 @@
       <div class="set-row"><span>Keyboard hints</span><button class="tog" type="button" data-set="hints"></button></div>
       <div class="set-row" id="menuRow"><span>Save and go to the main menu</span><button class="ghost" type="button" id="toMenu">Main menu</button></div>
       <div class="set-row"><span>Best-run records</span><button class="ghost" type="button" id="resetRec">Reset</button></div>
-      <p class="set-note">Controls: Space flip, B burn, D deck, 1 2 3 pick a reward, S skip, M mute, F11 fullscreen, Esc options.</p>
+      <p class="set-note">Controls: Space flip, B burn, 1 to 4 drink a tonic, D deck, 1 2 3 pick a spot or reward, S skip, M mute, F11 fullscreen, Esc options.</p>
     </section>
   </div>
 </div>
 </div>
 <script>
+// Game rules: shared with the phone version (phone/index.html). Keep the two in step.
 const SUITS = ['S','H','D','C'];
-// charms attach to one card and trigger when that card wins a round
-const CHARMS = {
-  gold:{n:'Gilded', i:'🪙', d:'+1 gold whenever this card wins a round.'},
-  keen:{n:'Keen', i:'🗡️', d:'+2 damage when this card wins.'},
-  mend:{n:'Mending', i:'💚', d:'Heal 1 when this card wins.'}
-};
 const RELICS = {
   whetstone:{n:'Whetstone',i:'🗡️',d:'+1 damage when you win a round.'},
   buckler:{n:'Buckler',i:'🛡️',d:'Take 1 less damage from every hit.'},
@@ -1040,7 +1098,27 @@ const RELICS = {
   sling:{n:'Slingshot',i:'🪨',d:'Your 2s and 3s beat Aces.'},
   fang:{n:'Fang',i:'🦷',d:'Heal 1 whenever you win a round.'},
   gambit:{n:'Opening Gambit',i:'♟️',d:'The first round of each battle deals triple damage.'},
-  stout:{n:'Stout Heart',i:'🫀',d:'+12 max HP, and heal 12 now.'}
+  stout:{n:'Stout Heart',i:'🫀',d:'+12 max HP, and heal 12 now.'},
+  purse:{n:'Coin Purse',i:'👛',d:'+6 gold after every battle.'},
+  ember:{n:'Ember Stone',i:'🔥',d:'Every card you burn hits the enemy for 3.'},
+  thief:{n:"Thief's Glove",i:'🧤',d:'Wars you win capture two cards instead of one.'},
+  aegis:{n:'Aegis',i:'🔰',d:'The first hit you take each battle deals no damage.'},
+  belt:{n:'Trophy Belt',i:'🏆',d:'+2 max HP after every battle you win.'},
+  flask:{n:'Bandolier',i:'🎽',d:'Carry up to 4 tonics instead of 3.'}
+};
+const CHARMS = {
+  gilded:{n:'Gilded',i:'🪙',d:'+2 gold whenever this card wins.'},
+  keen:{n:'Keen',i:'🔪',d:'+3 damage whenever this card wins.'},
+  mending:{n:'Mending',i:'💚',d:'Heal 2 whenever this card wins.'},
+  steady:{n:'Steady',i:'⚓',d:'This card wins ties.'}
+};
+const SUITNAME = {S:'spades',H:'hearts',D:'diamonds',C:'clubs'};
+const charmOf = (run,c) => c.ch || (run.totem && run.totem.s===c.s ? run.totem.ch : null);
+const TONICS = {
+  heal:{n:'Healing Tonic',i:'🧪',d:'Heal 12 HP.'},
+  fire:{n:'Fire Tonic',i:'💥',d:'Hit the enemy for 10.'},
+  luck:{n:'Luck Tonic',i:'🍀',d:'Your next card counts 5 ranks higher.'},
+  iron:{n:'Iron Tonic',i:'🧱',d:'The next hit you take deals no damage.'}
 };
 const QUIRKS = {
   armored:'Armored: takes 1 less damage from every hit.',
@@ -1048,98 +1126,107 @@ const QUIRKS = {
   sneaky:'Duelist: wins every tie.',
   vampire:'Vampire: heals half the damage it deals.',
   warlike:'Warmonger: its wars deal double damage.',
-  royal:'Royal: its face cards count 2 higher, and it takes 1 less damage.'
+  wall:'Iron Wall: takes 2 less damage from every hit.',
+  thorns:'Thorns: every time you hit her, you take 2 back.',
+  royal:'Royal: its face cards count 2 higher, and it takes 1 less damage.',
+  frenzy:'Frenzy: hits 1 harder every time it wins.'
 };
-// the march is 3 acts of 3 battles; the third battle of each act is its boss, and a store follows acts I and II
+const FOES = {
+  'Scout':{q:null,g:'♟'}, 'Militia':{q:null,g:'♟'}, 'Shieldman':{q:'armored',g:'♜'}, 'Brute':{q:'brute',g:'♜'}, 'Bandit':{q:'sneaky',g:'♞'},
+  'Duelist':{q:'sneaky',g:'♝'}, 'Blood Priest':{q:'vampire',g:'♝'}, 'Wolf Rider':{q:'brute',g:'♞'}, 'Wildling':{q:'frenzy',g:'♟'},
+  'Knight':{q:'armored',g:'♞'}, 'Warlord':{q:'warlike',g:'♛'}, 'Royal Guard':{q:'armored',g:'♜'}, 'Zealot':{q:'frenzy',g:'♝'},
+  'Veteran':{q:'brute',g:'♜'}, 'Iron Guard':{q:'wall',g:'♜'}, 'Beastmaster':{q:'frenzy',g:'♞'}, 'Hexer':{q:'vampire',g:'♝'},
+  'Champion':{q:'armored',g:'♛'}, 'Executioner':{q:'warlike',g:'♛'},
+  'The Gatekeeper':{g:'♜'}, 'The Thornwitch':{g:'♛'}, 'The King':{g:'♚'}
+};
 const ACTS = [
-  {n:'Act I', name:'The Border'},
-  {n:'Act II', name:'The Wilds'},
-  {n:'Act III', name:'The Capital'}
+  { name:'The Border', foes:['Scout','Militia','Shieldman','Brute','Bandit'], elites:['Veteran','Iron Guard'], boss:{name:'The Gatekeeper', hp:30, lo:3, hi:9, q:'wall'} },
+  { name:'The Wilds', foes:['Duelist','Blood Priest','Wolf Rider','Wildling','Brute'], elites:['Beastmaster','Hexer'], boss:{name:'The Thornwitch', hp:36, lo:4, hi:11, q:'thorns'} },
+  { name:'The Capital', foes:['Knight','Warlord','Royal Guard','Zealot','Duelist'], elites:['Champion','Executioner'], boss:{name:'The King', hp:48, lo:5, hi:13, q:'royal', final:true} }
 ];
-// who you meet in each act: regular soldiers get tougher column by column, then the act's boss
-const ACT_FOES = [
-  {pool:['Scout','Militia','Footman'], glyph:'\u265F', tiers:[{hp:12,lo:2,hi:6},{hp:15,lo:2,hi:8},{hp:16,lo:3,hi:8}],
-   boss:{name:'Shieldman', hp:18, lo:3, hi:8, q:'armored', actBoss:true, glyph:'\u265C'}},
-  {pool:['Brute','Raider','Mercenary'], glyph:'\u265E', tiers:[{hp:24,lo:3,hi:9},{hp:26,lo:3,hi:10},{hp:28,lo:4,hi:10}],
-   boss:{name:'Warlord', hp:32, lo:4, hi:10, q:'warlike', actBoss:true, glyph:'\u265B'}},
-  {pool:['Knight','Royal Guard','Lancer'], glyph:'\u265D', tiers:[{hp:35,lo:4,hi:11},{hp:40,lo:5,hi:11},{hp:43,lo:5,hi:12}],
-   boss:{name:'The King', hp:46, lo:5, hi:13, q:'royal', boss:true, glyph:'\u265A'}}
-];
-const STEPS = 12;  // 3 acts x (3 columns + boss). Enemy HP tuned for the branching map: random routes win ~33% in simulation
-const WAR_GOLD = 3, MIN_DECK = 8;  // tuned so the store helps without making runs easy (sim: ~31% wins)
+const ROWS = 10, COLS = 3;
 const rint = (a,b) => a + Math.floor(Math.random()*(b-a+1));
 const pick = a => a[Math.floor(Math.random()*a.length)];
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const rankLabel = v => v<=10 ? String(v) : {11:'J',12:'Q',13:'K',14:'A'}[v];
+const nid = () => Math.random().toString(36).slice(2,9);
+const TUNE = { hp:16, hpStep:4.3, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.4 };
 
+function foeStats(act,row,name,elite){
+  const t=act*3+Math.floor(row/3)+(elite?1.5:0);
+  const f={name, hp:TUNE.hp+Math.round(t*TUNE.hpStep), lo:Math.min(6,2+Math.floor(t/2.6)), hi:Math.min(13,6+Math.floor(t/1.3)), q:FOES[name].q};
+  if(elite){ f.hp=Math.round(f.hp*TUNE.eliteHp); f.elite=true; }
+  return f;
+}
+function rollPrize(){ const r=Math.random(); return r<.5?{k:'gold', n:rint(8,14)}:r<.8?{k:'tonic', t:pick(Object.keys(TONICS))}:{k:'charm', ch:pick(Object.keys(CHARMS))}; }
+
+/* map, Inscryption style: rows repeat card-gain, utility, battle; you choose between different spots in each row */
+const GAIN = ['recruit','suit','blind','trial'];
+const UTIL = ['rest','pack','altar','carver','fungi','goo','stones','store','event','chest'];
+function rowKinds(act,r){
+  if(r===ROWS-1) return {pool:['rest','store','pack'], n:3};
+  const c=r%3;
+  if(c===0) return {pool: r===0 ? ['recruit','suit','blind'] : GAIN, n: rint(2,3)};
+  if(c===1) return {pool: UTIL, n: rint(2,3)};
+  return {pool: (r>=5||act>0) ? ['battle','battle','elite'] : ['battle'], n: rint(2,3)};
+}
+function genMap(act){
+  const rows=[];
+  for(let r=0;r<ROWS;r++){
+    const {pool,n}=rowKinds(act,r), kinds=[];
+    const bag=shuffle(pool.slice());
+    for(let j=0;j<n;j++){ let k=bag.find(x=>!kinds.includes(x)||x==='battle'); if(!k) k=pick(pool); bag.splice(bag.indexOf(k),1); kinds.push(k); }
+    if(kinds.filter(k=>k==='elite').length>1) kinds[kinds.lastIndexOf('elite')]='battle';
+    rows.push(shuffle(kinds).map((t,j)=>({t, x:(j+.5)/n + (n>1?(Math.random()-.5)*.06:0), next:[]})));
+  }
+  rows.push([{t:'boss', x:.5, next:[]}]);
+  for(let r=0;r<rows.length-1;r++){
+    const A=rows[r], N=rows[r+1];
+    A.forEach(a=>{
+      let best=0; N.forEach((b,k)=>{ if(Math.abs(b.x-a.x)<Math.abs(N[best].x-a.x)) best=k; });
+      a.next.push(best);
+      const alt=best+(a.x>N[best].x?1:-1);
+      if(alt>=0&&alt<N.length&&Math.random()<.7) a.next.push(alt);
+    });
+    N.forEach((b,k)=>{ if(!A.some(a=>a.next.includes(k))){ let best=0; A.forEach((a,j)=>{ if(Math.abs(a.x-b.x)<Math.abs(A[best].x-b.x)) best=j; }); A[best].next.push(k); } });
+    A.forEach(a=>a.next.sort((p,q)=>p-q));
+  }
+  rows.forEach((row,r)=>row.forEach(n=>{
+    if(n.t==='battle'){ n.foe=foeStats(act,r,pick(ACTS[act].foes)); n.prize=rollPrize(); }
+    else if(n.t==='elite'){ n.foe=foeStats(act,r,pick(ACTS[act].elites),true); n.prize={k:'relic'}; }
+    else if(n.t==='boss'){ n.foe={...ACTS[act].boss}; n.prize={k:'relic'}; }
+    else if(n.t==='event') n.ev=pick(EVENT_IDS);
+    else if(n.t==='suit') n.s=pick(SUITS);
+    else if(n.t==='trial') n.tr=pick(Object.keys(TRIALS));
+  }));
+  return rows;
+}
 const PACK_SIZE = 18, RARE_CHANCE = 0.2;
 function newRun(){
-  // opening pack: 18 different cards from 2-10 of any suit, plus a 20% chance of one rare J/Q/K/A
-  const pool=[]; for(let v=2;v<=10;v++) for(const s of SUITS) pool.push({v,s});
+  const pool=[]; for(let v=2;v<=10;v++) for(const s of SUITS) pool.push({v,s,id:nid()});
   const deck=shuffle(pool).slice(0,PACK_SIZE);
   const rare=Math.random()<RARE_CHANCE;
-  if(rare) deck.push({v:rint(11,14), s:pick(SUITS)});
-  return {step:0, last:null, at:null, path:[], map:makeMap(), hp:40, maxHp:40, gold:0, deck, relics:[], stats:{rounds:0, wars:0, dealt:0, captured:0, lost:0}, pack:{rare, opened:false}};
+  if(rare) deck.push({v:rint(11,14), s:pick(SUITS), id:nid()});
+  return {v:4, act:0, row:-1, col:null, path:[], map:genMap(0), hp:50, maxHp:50, gold:15, totem:null, deck, relics:[], tonics:['heal'], bonusBurns:0, removals:0,
+    stats:{rounds:0, wars:0, dealt:0, captured:0, lost:0, battles:0}, pack:{rare, opened:false}};
 }
-/* the march map: each act is 3 columns of 2-3 spots (battles and stores) joined by paths you choose, then the act boss */
-function makeMap(){
-  const nodes=[], acts=[], relics=shuffle(Object.keys(RELICS));
-  const add=(from,to)=>{ if(!nodes[from].next.includes(to)) nodes[from].next.push(to); };
-  // connect one column to the next without crossing lines; every spot gets a way in and a way out
-  const link=(a,b)=>{
-    const prim=a.map((_,i)=>Math.round(i*(b.length-1)/Math.max(1,a.length-1)));
-    a.forEach((id,i)=>{ add(id,b[prim[i]]); const up=prim[i]+1; if(up<b.length && Math.random()<.5 && (i===a.length-1 || prim[i+1]>=up)) add(id,b[up]); });
-    b.forEach((id,j)=>{ if(!a.some(x=>nodes[x].next.includes(id))){ let i=0; a.forEach((x,k)=>{ if(Math.min(...nodes[x].next.map(t=>b.indexOf(t)))<=j) i=k; }); add(a[i],id); } });
-  };
-  for(let act=0; act<3; act++){
-    const cols=[];
-    for(let c=0;c<3;c++){ const n=rint(2,3), col=[]; for(let i=0;i<n;i++){ col.push(nodes.length); nodes.push({id:nodes.length, act, col:c, i, n, type:'battle', next:[]}); } cols.push(col); }
-    const boss=nodes.length; nodes.push({id:boss, act, col:3, i:0, n:1, type:'boss', next:[]});
-    link(cols[0],cols[1]); link(cols[1],cols[2]); cols[2].forEach(id=>add(id,boss));
-    // stores: some spots in columns 2 and 3, never two in a row, always at least one per act, never a whole column
-    const preds=id=>nodes.filter(x=>x.next.includes(id));
-    cols[1].forEach(id=>{ if(Math.random()<.35) nodes[id].type='store'; });
-    cols[2].forEach(id=>{ if(Math.random()<.35 && preds(id).every(x=>x.type!=='store')) nodes[id].type='store'; });
-    [cols[1],cols[2]].forEach(col=>{ if(col.every(id=>nodes[id].type==='store')) nodes[pick(col)].type='battle'; });
-    if(![...cols[1],...cols[2]].some(id=>nodes[id].type==='store')){
-      const sid=pick(cols[1]); nodes[sid].type='store'; nodes[sid].next.forEach(t=>{ if(nodes[t].type==='store') nodes[t].type='battle'; });
-    }
-    acts.push({cols, boss});
-  }
-  for(let a=0;a<2;a++) nodes[acts[a].boss].next=[...acts[a+1].cols[0]];
-  const nameShift=rint(0,2);
-  nodes.forEach(nd=>{
-    const A=ACT_FOES[nd.act];
-    nd.tier=nd.act*3+Math.min(nd.col,2);
-    if(nd.type==='boss'){ nd.foe={...A.boss}; nd.prize=nd.foe.boss?null:{k:'relic', r:relics.pop()}; }
-    else if(nd.type==='battle'){
-      nd.foe={name:A.pool[(nd.i+(nd.act*7+nd.col*3+nameShift))%A.pool.length], ...A.tiers[nd.col], glyph:A.glyph};  // names differ within a column
-      const roll=Math.random();
-      nd.prize = roll<.45 ? {k:'gold', n:6+2*nd.tier} : roll<.75 ? {k:'charm', c:pick(Object.keys(CHARMS))} : {k:'card', cs:[{v:rint(9+nd.act,12+nd.act), s:pick(SUITS)}]};
-    }
-    // map position (1000 x 760): acts left to right, spread top to bottom within a column
-    nd.x=nd.act*333+62+nd.col*74;
-    nd.y=nd.type==='boss' ? 390 : Math.round(390+(nd.i-(nd.n-1)/2)*(nd.n===3?165:200)+(Math.random()*36-18));
-  });
-  return {nodes, acts};
-}
-// spots you can walk to next
-function choicesOf(run){ return run.last==null ? run.map.acts[0].cols[0] : run.map.nodes[run.last].next; }
-const nodeAt = run => run.map.nodes[run.at];
-function clearNode(run){ run.path.push(run.at); run.last=run.at; run.at=null; run.step++; }
-function claimPrize(run,pz,idx){
-  if(!pz || pz.claimed) return;
-  pz.claimed=true;
-  if(pz.k==='gold'){ run.gold=(run.gold||0)+pz.n; return; }
-  if(pz.k==='relic' && has(run,pz.r)){ run.gold=(run.gold||0)+30; pz.swapped=true; return; }  // already own it: 30 gold instead
-  applyOffer(run,pz,idx);
+function migrateRun(run){
+  if(run.v===4) return run;
+  if(!run.v) run.act = run.floor<3?0:run.floor<6?1:2;
+  run.v=4; run.totem=run.totem||null; run.row=-1; run.col=null; run.path=[]; run.map=genMap(run.act);
+  run.gold=run.gold||0; run.tonics=run.tonics||[]; run.bonusBurns=0; run.removals=0;
+  run.deck.forEach(c=>{ if(!c.id) c.id=nid(); });
+  run.stats=Object.assign({captured:0,lost:0,battles:0},run.stats);
+  ['floor','pending','beat','store','pendingCharm'].forEach(k=>delete run[k]);
+  return run;
 }
 const has = (run,r) => run.relics.includes(r);
-function newBattle(run){
-  const f=nodeAt(run).foe; const ed=[];
-  for(let i=0;i<16;i++) ed.push({v:rint(f.lo,f.hi), s:pick(SUITS)});
-  return {f, eHp:f.hp, eMax:f.hp, pDraw:shuffle(run.deck.map(c=>({...c}))), pDisc:[], eDraw:shuffle(ed), eDisc:[],
-    burns:2+(has(run,'satchel')?2:0), round:0, over:null};
+const tonicCap = run => has(run,'flask')?4:3;
+function reachable(run){ if(run.row===-1) return run.map[0].map((_,k)=>k); return run.map[run.row][run.col].next; }
+function newBattle(run,foe){
+  const n=foe.elite?18:16, ed=[]; for(let i=0;i<n;i++) ed.push({v:rint(foe.lo,foe.hi), s:pick(SUITS), id:nid()});
+  return {f:foe, eHp:foe.hp, eMax:foe.hp, pDraw:shuffle(run.deck.map(c=>({...c}))), pDisc:[], eDraw:shuffle(ed), eDisc:[],
+    burns:2+(has(run,'satchel')?2:0)+(run.bonusBurns||0), round:0, over:null, luck:0, block:0, aegis:has(run,'aegis'), frenzy:0, stolen:[]};
 }
 function refill(b,s){ if(!b[s+'Draw'].length && b[s+'Disc'].length){ b[s+'Draw']=shuffle(b[s+'Disc']); b[s+'Disc']=[]; } }
 function peek(b,s){ refill(b,s); return b[s+'Draw'][0]||null; }
@@ -1147,21 +1234,37 @@ function take(b,s){ refill(b,s); return b[s+'Draw'].shift()||null; }
 const avail = (b,s) => b[s+'Draw'].length + b[s+'Disc'].length;
 function effP(run,c){ let v=c.v; if(has(run,'crown')&&v>=11&&v<=13) v+=2; if(has(run,'prism')&&c.s==='D') v+=2; return v; }
 function effE(b,c){ let v=c.v; if(b.f.q==='royal'&&v>=11&&v<=13) v+=2; return v; }
-function compare(run,b,pc,ec){
+function compare(run,b,pc,ec,luck){
   if(has(run,'sling') && pc.v<=3 && ec.v===14) return 1;
-  const a=effP(run,pc), e=effE(b,ec);
+  const a=effP(run,pc)+(luck||0), e=effE(b,ec);
   if(a>e) return 1; if(e>a) return -1;
-  if(has(run,'mirror')) return 1; if(b.f.q==='sneaky') return -1; return 0;
+  if(has(run,'mirror')||charmOf(run,pc)==='steady') return 1; if(b.f.q==='sneaky') return -1; return 0;
 }
-function burn(b){ if(b.burns<=0) return false; const c=take(b,'p'); if(!c) return false; b.pDisc.push(c); b.burns--; return true; }
+function burn(run,b){
+  if(b.burns<=0) return null; const c=take(b,'p'); if(!c) return null; b.pDisc.push(c); b.burns--;
+  let hit=0; if(has(run,'ember')){ hit=3; b.eHp-=3; run.stats.dealt+=3; if(b.eHp<=0) b.over='win'; }
+  return {c, hit};
+}
+function useTonic(run,b,i){
+  const t=run.tonics[i]; if(!t||b.over) return null; run.tonics.splice(i,1);
+  const r={t, heal:0, dmg:0};
+  if(t==='heal'){ const h=Math.min(12, run.maxHp-run.hp); run.hp+=h; r.heal=h; }
+  else if(t==='fire'){ b.eHp-=10; r.dmg=10; run.stats.dealt+=10; if(b.eHp<=0) b.over='win'; }
+  else if(t==='luck') b.luck=5;
+  else if(t==='iron') b.block=1;
+  return r;
+}
+function gainTonic(run,t){ if(run.tonics.length>=tonicCap(run)) return false; run.tonics.push(t); return true; }
+const bestOf = cs => cs.reduce((m,c)=>!m||c.v>m.v?c:m, null);
 function playRound(run,b){
   b.round++; run.stats.rounds++;
+  const luck=b.luck; b.luck=0;
   let pc=take(b,'p'), ec=take(b,'e');
-  const used={p:[pc],e:[ec]}; const steps=[{t:'flip',pc,ec}];
-  let wars=0, cmp=compare(run,b,pc,ec), stale=false;
+  const used={p:[pc],e:[ec]}; const steps=[{t:'flip',pc,ec,luck}];
+  let wars=0, cmp=compare(run,b,pc,ec,luck), stale=false, curLuck=luck;
   while(cmp===0){
     if(avail(b,'p')<1 || avail(b,'e')<1){ stale=true; break; }
-    wars++; run.stats.wars++;
+    wars++; run.stats.wars++; curLuck=0;
     const pn=Math.min(3,avail(b,'p')-1), en=Math.min(3,avail(b,'e')-1);
     const pd=[],ed=[];
     for(let i=0;i<pn;i++) pd.push(take(b,'p'));
@@ -1171,111 +1274,215 @@ function playRound(run,b){
     steps.push({t:'war',pd,ed,pc,ec});
     cmp=compare(run,b,pc,ec);
   }
-  const r={cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, pc, ec};
+  const r={cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, thorn:0, gold:0, caps:[], lost:null, blocked:null, luck:curLuck, pc, ec};
   if(!stale){
-    const base=Math.max(1,Math.abs(effP(run,pc)-effE(b,ec))) + 3*wars;
-    const armor = (b.f.q==='armored'||b.f.q==='royal');
+    const base=Math.max(1,Math.abs(effP(run,pc)+curLuck-effE(b,ec))) + 3*wars;
+    const armor = b.f.q==='wall'?2:(b.f.q==='armored'||b.f.q==='royal')?1:0;
     if(cmp===1){
       let d=base;
       if(has(run,'whetstone')) d+=1;
-      if(pc.charm==='keen') d+=2;
       if(has(run,'spade')&&pc.s==='S') d+=3;
+      if(charmOf(run,pc)==='keen') d+=3;
       if(has(run,'banner')&&wars) d*=2;
       if(has(run,'gambit')&&b.round===1) d*=3;
-      if(armor) d=Math.max(1,d-1);
+      d=Math.max(1,d-armor);
       r.dmg=d; b.eHp-=d; run.stats.dealt+=d;
       if(has(run,'fang')) r.heal+=1;
       if(has(run,'locket')&&pc.s==='H') r.heal+=2;
-      if(pc.charm==='mend') r.heal+=1;
-      if(pc.charm==='gold'){ run.gold=(run.gold||0)+1; r.charmGold=1; }
+      if(charmOf(run,pc)==='mending') r.heal+=2;
+      if(charmOf(run,pc)==='gilded'){ r.gold=2; run.gold+=2; }
+      if(b.f.q==='thorns'){ r.thorn=2; run.hp-=2; }
       run.hp=Math.min(run.maxHp, run.hp+r.heal);
+      if(wars){ // capture their best card(s) for good; stolen cards of yours come back
+        const E0=used.e.slice(); r.capIdx=[];  // where each captured card sits in the enemy's lane, for the PC animation
+        for(let n=has(run,'thief')?2:1; n>0 && used.e.length; n--){
+          const c=bestOf(used.e); r.capIdx.push(E0.indexOf(c)); used.e.splice(used.e.indexOf(c),1);
+          let got;
+          if(c.sid){ got=b.stolen.find(x=>x.id===c.sid); b.stolen=b.stolen.filter(x=>x.id!==c.sid); run.deck.push(got); }
+          else { got={v:c.v, s:c.s, id:nid()}; run.deck.push(got); run.stats.captured++; }
+          used.p.push({...got}); r.caps.push(c.sid?{...got, back:true}:got);
+        }
+      }
     } else {
       let d=base;
       if(b.f.q==='brute') d+=2;
+      if(b.f.q==='frenzy') d+=b.frenzy++;
       if(b.f.q==='warlike'&&wars) d*=2;
       if(has(run,'buckler')) d=Math.max(1,d-1);
+      if(b.block){ b.block=0; r.blocked='tonic'; d=0; }
+      else if(b.aegis){ b.aegis=false; r.blocked='aegis'; d=0; }
       r.dmg=d; run.hp-=d;
       if(b.f.q==='vampire') r.eHeal=Math.floor(d/2);
-      if(has(run,'iron')&&pc.s==='C'){ r.back=armor?2:3; b.eHp-=r.back; run.stats.dealt+=r.back; }
+      if(has(run,'iron')&&pc.s==='C'){ r.back=Math.max(1,3-armor); b.eHp-=r.back; run.stats.dealt+=r.back; }
       b.eHp=Math.min(b.eMax, b.eHp+r.eHeal);
-    }
-  }
-  // war stakes: the winner takes a card for good
-  if(!stale && wars){
-    if(cmp===1){
-      let bi=0; used.e.forEach((c,i)=>{ if(c.v>used.e[bi].v) bi=i; });
-      const cap=used.e.splice(bi,1)[0];
-      run.deck.push({v:cap.v, s:cap.s}); used.p.push({v:cap.v, s:cap.s});
-      r.captured=cap; r.capIdx=bi; r.gold=WAR_GOLD*wars; run.gold=(run.gold||0)+r.gold; run.stats.captured=(run.stats.captured||0)+1;
-    } else if(run.deck.length>MIN_DECK){
-      // the enemy takes your best card from the war pile, just as you would take theirs
-      let lost=used.p[0]; used.p.forEach(c=>{ if(c.v>lost.v) lost=c; });
-      const ui=used.p.indexOf(lost); if(ui>=0) used.p.splice(ui,1);
-      let di=run.deck.findIndex(x=>x.v===lost.v&&x.s===lost.s&&(x.charm||null)===(lost.charm||null));
-      if(di<0) di=run.deck.findIndex(x=>x.v===lost.v&&x.s===lost.s);
-      if(di>=0) run.deck.splice(di,1);
-      r.lost=lost; r.lostIdx=ui; run.stats.lost=(run.stats.lost||0)+1;
+      if(wars && run.deck.length>6){ // they take your best card; win the battle to get it back
+        const c=bestOf(used.p); r.lostIdx=used.p.indexOf(c); used.p.splice(r.lostIdx,1);
+        const i=run.deck.findIndex(x=>x.id===c.id);
+        if(i>=0){ const orig=run.deck.splice(i,1)[0]; b.stolen.push(orig); used.e.push({v:c.v,s:c.s,id:nid(),sid:orig.id}); r.lost=orig; run.stats.lost++; }
+        else used.p.push(c);
+      }
     }
   }
   b.pDisc.push(...used.p); b.eDisc.push(...used.e);
   if(b.eHp<=0) b.over='win'; else if(run.hp<=0) b.over='lose';
   return {steps, r};
 }
-function winBattle(run){
+function winBattle(run,b){
+  run.stats.battles++;
+  const back=b.stolen.slice(); b.stolen.forEach(c=>run.deck.push(c)); b.stolen=[];
+  const f=b.f, g=TUNE.baseGold+(f.elite?12:0)+(has(run,'purse')?6:0)+rint(0,4);
+  if(has(run,'belt')){ run.maxHp+=2; run.hp+=2; }
   if(has(run,'bandages')) run.hp=Math.min(run.maxHp, run.hp+6);
-  run.hp=Math.min(run.maxHp, run.hp+Math.ceil(run.maxHp*0.4));
-  const nd=nodeAt(run), f=nd.foe, g=4+2*(nd.tier+1)+(f.actBoss?5:0);
-  run.gold=(run.gold||0)+g;
-  return g;
+  run.hp=Math.min(run.maxHp, run.hp+Math.ceil(run.maxHp*TUNE.heal));
+  run.gold+=g; return {g, back};
 }
-const lowest3 = run => [...run.deck].sort((a,b)=>a.v-b.v).slice(0,3);
-function makeStore(run){
-  const act=nodeAt(run).act, items=[];
-  const pool=shuffle(Object.keys(RELICS).filter(k=>!has(run,k)));
-  pool.slice(0,2).forEach(r=>items.push({k:'relic', r, price:40+act*10}));
-  const card=()=>({v:Math.min(14,rint(9+act,12+act)), s:pick(SUITS)});
-  items.push({k:'card', cs:[card(),card()], price:30+act*6});
-  items.push({k:'charm', c:pick(Object.keys(CHARMS)), price:25+act*5});
-  items.push({k:'heal', n:20, price:25});
-  items.push(run.deck.length>10 && Math.random()<.5 ? {k:'cull', cs:[], price:35} : {k:'temper', cs:[], price:40});
-  return items.map(it=>({...it, sold:false}));
-}
-function buyItem(run,i,idx){
-  const it=run.store && run.store.items[i];
-  if(!it || it.sold || (run.gold||0)<it.price) return false;
-  if(it.k==='temper'||it.k==='cull') it.cs=lowest3(run);
-  run.gold-=it.price; applyOffer(run,it,idx); it.sold=true;
-  return true;
-}
-function makeOffers(run){
-  const f=nodeAt(run).tier; // how deep into the march this battle was
-  const lo=Math.min(12,8+Math.floor(f/2)), hi=Math.min(14,11+Math.ceil(f*0.5));
-  const cardOffer=()=>({k:'card', cs:[{v:rint(lo,hi), s:pick(SUITS)},{v:rint(lo,hi), s:pick(SUITS)}]});
-  const out=[cardOffer()];
-  const pool=Object.keys(RELICS).filter(k=>!has(run,k));
-  if(pool.length) out.push({k:'relic', r:pick(pool)}); else out.push({k:'heal', n:15});
-  const sorted=[...run.deck].sort((a,b)=>a.v-b.v);
-  const third=[{k:'temper', cs:sorted.slice(0,3)}];
-  if(run.deck.length>10) third.push({k:'cull', cs:sorted.slice(0,3)});
-  if(run.hp<run.maxHp-5) third.push({k:'heal', n:15});
-  third.push(cardOffer());
-  third.push({k:'charm', c:pick(Object.keys(CHARMS))});
-  out.push(pick(third));
+function cardChoices(run){
+  const t=run.act*ROWS+Math.max(0,run.row), lo=Math.min(11,5+Math.floor(t/3)), hi=Math.min(14,10+Math.floor(t/4));
+  const out=[]; for(let i=0;i<3;i++){ const c={v:rint(lo,hi), s:pick(SUITS)}; if(Math.random()<.18) c.ch=pick(Object.keys(CHARMS)); out.push(c); }
   return out;
 }
-function applyOffer(run,o,idx){
-  if(o.k==='card') o.cs.forEach(c=>run.deck.push({...c}));
-  else if(o.k==='relic'){ run.relics.push(o.r); if(o.r==='stout'){ run.maxHp+=12; run.hp+=12; } }
-  else if(o.k==='heal') run.hp=Math.min(run.maxHp, run.hp+o.n);
-  else if(o.k==='charm'){
-    let t=idx;
-    if(t==null){ t=-1; run.deck.forEach((c,j)=>{ if(!c.charm && (t<0 || c.v>run.deck[t].v)) t=j; }); }  // no choice given: best uncharmed card
-    if(t>=0 && run.deck[t]) run.deck[t].charm=o.c;
-  }
-  else if(o.k==='temper') o.cs.forEach(c=>{ const d=run.deck.find(x=>x.v===c.v&&x.s===c.s); if(d) d.v=Math.min(14,d.v+5); });
-  else if(o.k==='cull') o.cs.forEach(c=>{ const i=run.deck.findIndex(x=>x.v===c.v&&x.s===c.s); if(i>=0) run.deck.splice(i,1); });
+function applyPrize(run,p){
+  if(p.k==='gold') run.gold+=p.n;
+  else if(p.k==='tonic'){ if(!gainTonic(run,p.t)){ run.gold+=10; return 'full'; } }
 }
-if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,peek,makeOffers,applyOffer,winBattle,makeStore,buyItem,makeMap,choicesOf,clearNode,claimPrize,ACTS,ACT_FOES,RELICS,CHARMS,effP,has};
+function addCard(run,c){ const n={...c, id:nid()}; run.deck.push(n); return n; }
+function charmCard(run,id,ch){ const c=run.deck.find(x=>x.id===id); if(c) c.ch=ch; }
+function sharpen(run,id,n=3){ const c=run.deck.find(x=>x.id===id); if(c) c.v=Math.min(14,c.v+n); return c; }
+function removeCard(run,id){ const i=run.deck.findIndex(x=>x.id===id); if(i>=0) return run.deck.splice(i,1)[0]; }
+function relicChoices(run,n=3){ return shuffle(Object.keys(RELICS).filter(k=>!has(run,k))).slice(0,n); }
+function gainRelic(run,r){ run.relics.push(r); if(r==='stout'){ run.maxHp+=12; run.hp+=12; } }
+function nextAct(run){
+  run.act++; run.row=-1; run.col=null; run.path=[]; run.map=genMap(run.act);
+  run.hp=Math.min(run.maxHp, run.hp+Math.ceil((run.maxHp-run.hp)*TUNE.actHeal));
+}
+const weakest = (run,n) => [...run.deck].sort((a,b)=>a.v-b.v).slice(0,n);
+function makeStore(run){
+  const a=run.act, lo=Math.min(12,7+a*2), hi=Math.min(14,11+a*2);
+  const card=()=>{ const c={v:rint(lo,hi), s:pick(SUITS)}; if(Math.random()<.25) c.ch=pick(Object.keys(CHARMS)); return {k:'card', c, price:10+(c.v-7)*3+(c.ch?8:0)}; };
+  const rels=relicChoices(run,2);
+  const items=[card(), card(), card()];
+  rels.forEach(r=>items.push({k:'relic', r, price:rint(40,55)+a*5}));
+  items.push({k:'tonic', t:pick(Object.keys(TONICS)), price:14});
+  items.push({k:'charm', ch:pick(Object.keys(CHARMS)), price:22+a*3});
+  items.push({k:'remove', price:30+run.removals*15});
+  return items;
+}
+function buyItem(run,it,cardId){
+  run.gold-=it.price; it.sold=true;
+  if(it.k==='card') addCard(run,it.c);
+  else if(it.k==='relic') gainRelic(run,it.r);
+  else if(it.k==='tonic') gainTonic(run,it.t);
+  else if(it.k==='charm') charmCard(run,cardId,it.ch);
+  else if(it.k==='remove'){ removeCard(run,cardId); run.removals++; }
+}
+/* events: each choice may need a card picked (pick:'any') */
+const EVENTS = {
+  gambler:{t:'The Gambler', i:'🎲', text:'A grinning man fans a deck on an upturned barrel. "One flip, friend. High card wins."', choices:[
+    {l:'Bet 15 gold', d:'Win 30 gold, or lose your 15.', can:r=>r.gold>=15, go:r=>{ if(Math.random()<.5){ r.gold+=15; return 'Your card is higher. He pays up with a sour face. +15 gold.'; } r.gold-=15; return 'His card is higher. He pockets your coins. −15 gold.'; }},
+    {l:'Bet a card', d:'Stake a card you pick. Win a card 2 ranks higher, or lose it.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ if(Math.random()<.5){ const n=addCard(r,{v:Math.min(14,c.v+2), s:c.s}); return `You win! He hands over the ${rankLabel(n.v)}. You keep yours too.`; } removeCard(r,c.id); return 'You lose. He tucks your card into his sleeve.'; }},
+    {l:'Walk away', d:'Nothing ventured.', go:()=>'You tip your hat and keep marching.'}]},
+  shrine:{t:'The Old Shrine', i:'⛩️', text:'Moss covers a stone shrine. Offerings of blood and coin rest at its feet.', choices:[
+    {l:'Offer blood', d:'Lose 8 HP. Gain a random relic.', can:r=>r.hp>8, go:r=>{ r.hp-=8; const x=relicChoices(r,1)[0]; if(!x){ r.gold+=40; return 'The shrine is quiet. You find 40 gold instead.'; } gainRelic(r,x); return `The stone glows. You receive the ${RELICS[x].n}.`; }},
+    {l:'Offer coin', d:'Pay 25 gold. Heal to full.', can:r=>r.gold>=25, go:r=>{ r.gold-=25; r.hp=r.maxHp; return 'Warmth fills you. You are fully healed.'; }},
+    {l:'Leave', d:'Respect the dead.', go:()=>'You bow and move on.'}]},
+  sharp:{t:'The Card Sharp', i:'🃏', text:'"Trade you," says a woman with too many rings. "My one for your two."', choices:[
+    {l:'Trade two weak cards', d:'Lose your two weakest cards. Gain a random face card or Ace.', can:r=>r.deck.length>9, go:r=>{ const w=weakest(r,2); w.forEach(c=>removeCard(r,c.id)); const n=addCard(r,{v:rint(11,14), s:pick(SUITS)}); return `She takes your ${w.map(c=>rankLabel(c.v)).join(' and ')} and hands you a ${rankLabel(n.v)}.`; }},
+    {l:'Pay for a lesson', d:'Pay 20 gold. Put a Keen charm on a card.', pick:'any', can:r=>r.gold>=20, go:(r,c)=>{ r.gold-=20; charmCard(r,c.id,'keen'); return 'She shows you a trick with the edge of a card. It is now Keen.'; }},
+    {l:'Leave', d:'Keep your cards close.', go:()=>'She shrugs and shuffles.'}]},
+  camp:{t:'Abandoned Camp', i:'⛺', text:'A cold fire, torn tents, and packs left in a hurry.', choices:[
+    {l:'Rest a while', d:'Heal 15 HP.', go:r=>{ r.hp=Math.min(r.maxHp,r.hp+15); return 'You sleep by the old fire. +15 HP.'; }},
+    {l:'Search the packs', d:'Find 35 gold. Might be trapped.', go:r=>{ r.gold+=35; if(Math.random()<.5){ r.hp-=8; return 'A snare snaps shut on your hand! −8 HP, but you get 35 gold.'; } return 'Nobody is coming back for this. +35 gold.'; }},
+    {l:'Take the medicine', d:'Gain a Healing Tonic.', go:r=>gainTonic(r,'heal')?'You pocket a Healing Tonic.':'Your bag is full, so you leave it.'}]},
+  forge:{t:'Roadside Forge', i:'⚒️', text:'A smith hammers at glowing iron and nods at your deck. "I can work those."', choices:[
+    {l:'Temper', d:'Lose 6 HP. Your 3 weakest cards gain 3 ranks.', can:r=>r.hp>6, go:r=>{ r.hp-=6; weakest(r,3).forEach(c=>c.v=Math.min(14,c.v+3)); return 'Sparks fly and burn your arms. Your weakest cards are stronger.'; }},
+    {l:'Melt a card', d:'Remove a card you pick. Gain 15 gold.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.gold+=15; return `The ${rankLabel(c.v)} melts into the fire. +15 gold.`; }},
+    {l:'Leave', d:'Nothing needs fixing.', go:()=>'The hammering fades behind you.'}]},
+  stranger:{t:'A Cloaked Stranger', i:'🧥', text:'"Gold for you," he whispers, pressing a heavy coin into your hand. "A small price."', choices:[
+    {l:'Take the coin', d:'Gain 60 gold. Two 2s join your deck.', go:r=>{ r.gold+=60; addCard(r,{v:2,s:pick(SUITS)}); addCard(r,{v:2,s:pick(SUITS)}); return 'The coin is warm. Two worthless cards appear in your deck. +60 gold.'; }},
+    {l:'Refuse', d:'Nothing is free.', go:()=>'He melts back into the crowd.'}]},
+  seer:{t:'The Fortune Teller', i:'🔮', text:'Candles flicker around a crystal ball. "I see your road," she says. "For a price."', choices:[
+    {l:'Pay 30 gold', d:'+1 Burn in every battle for the rest of the run.', can:r=>r.gold>=30, go:r=>{ r.gold-=30; r.bonusBurns=(r.bonusBurns||0)+1; return 'She tells you which cards to fear. +1 Burn every battle.'; }},
+    {l:'Pay 10 gold', d:'Gain a Luck Tonic.', can:r=>r.gold>=10, go:r=>{ r.gold-=10; return gainTonic(r,'luck')?'She hands you a Luck Tonic.':'Your bag is full. She keeps the gold anyway.'; }},
+    {l:'Leave', d:'The future can wait.', go:()=>'"You\'ll be back," she calls.'}]},
+  deserters:{t:'Deserters', i:'🏳️', text:'Three soldiers with torn colours sit by the road. "Take us with you. Or take our gold. We won\'t fight."', choices:[
+    {l:'Recruit them', d:'Add three random 8 to 10 cards.', go:r=>{ for(let i=0;i<3;i++) addCard(r,{v:rint(8,10),s:pick(SUITS)}); return 'Three new cards join your deck.'; }},
+    {l:'Rob them', d:'Gain 45 gold. Lose 10 HP in the scuffle.', can:r=>r.hp>10, go:r=>{ r.gold+=45; r.hp-=10; return 'They fight back after all. −10 HP, +45 gold.'; }},
+    {l:'Let them be', d:'Everyone gets tired.', go:()=>'They wave you on.'}]}
+};
+const EVENT_IDS = Object.keys(EVENTS);
+const REST = {t:'Campfire', i:'🔥', text:'A safe place to rest. The fire crackles.', choices:[
+  {l:'Rest', d:'Heal 30% of your max HP.', go:r=>{ const h=Math.min(r.maxHp-r.hp, Math.ceil(r.maxHp*.3)); r.hp+=h; return `You sleep soundly. +${h} HP.`; }},
+  {l:'Sharpen', d:'A card you pick gains 3 ranks.', pick:'any', go:(r,c)=>{ const o=c.v; sharpen(r,c.id,3); return `Your ${rankLabel(o)} is now a ${rankLabel(Math.min(14,o+3))}.`; }},
+  {l:'Brew', d:'Gain a random tonic.', go:r=>{ const t=pick(Object.keys(TONICS)); return gainTonic(r,t)?`You brew a ${TONICS[t].n}.`:'Your bag is full.'; }}]};
+/* card-gain and utility spots */
+function gainRange(run,up=0){ const t=run.act*3+Math.floor(Math.max(0,run.row)/3); return [Math.min(12,5+Math.floor(t*.8)+up), Math.min(14,9+t+up)]; }
+function randCard(run,up=0,s){ const [lo,hi]=gainRange(run,up); const c={v:rint(lo,hi), s:s||pick(SUITS)}; if(Math.random()<.15) c.ch=pick(Object.keys(CHARMS)); return c; }
+function runTrial(run,id){ const T=TRIALS[id], x=T.need?T.need(run):0, cs=shuffle(run.deck.slice()).slice(0,T.draw); return {cs, x, pass:T.test(run,cs,x)}; }
+const TRIALS = {
+  might:{n:'Trial of Might', i:'💪', d:x=>`Draw 3 cards from your deck. Pass if their ranks add up to ${x} or more.`, need:r=>24+r.act*3, draw:3, test:(r,cs,x)=>cs.reduce((s,c)=>s+c.v,0)>=x},
+  kin:{n:'Trial of Kinship', i:'🤝', d:()=>'Draw 3 cards from your deck. Pass if two of them share a suit.', draw:3, test:(r,cs)=>new Set(cs.map(c=>c.s)).size<3},
+  crown:{n:'Trial of Crowns', i:'👑', d:()=>'Draw 4 cards from your deck. Pass if one is a Jack or better.', draw:4, test:(r,cs)=>cs.some(c=>c.v>=11)},
+  numbers:{n:'Trial of Numbers', i:'🔢', d:x=>`Pass if your deck holds ${x} or more cards.`, need:r=>20+r.act*2, draw:0, test:(r,cs,x)=>r.deck.length>=x}
+};
+function rareCards(){ return [0,1,2].map(()=>{ const c={v:rint(11,14), s:pick(SUITS)}; if(Math.random()<.5) c.ch=pick(Object.keys(CHARMS)); return c; }); }
+const SYMS = {S:'♠',H:'♥',D:'♦',C:'♣'};
+function gainCards(run,n){
+  if(n.t==='suit') return [0,1,2].map(()=>randCard(run,1,n.s));
+  if(n.t==='blind') return [0,1,2].map(()=>({v:rint(3,14), s:pick(SUITS)}));
+  return [0,1,2].map(()=>randCard(run));
+}
+const lbl = c => rankLabel(c.v)+SYMS[c.s];
+const dupPairs = run => { const by={}; run.deck.forEach(c=>{ (by[c.v]=by[c.v]||[]).push(c); }); return Object.values(by).filter(a=>a.length>1).map(a=>[a[0],a[1]]).sort((a,b)=>b[0].v-a[0].v).slice(0,3); };
+const NODES = {
+  recruit:{t:'Recruits', i:'🃏', map:'Recruits', info:'Choose 1 of 3 new cards.'},
+  suit:{t:'Suit Draft', i:'♠', map:'Draft', info:n=>`Choose 1 of 3 ${SUITNAME[n.s]}, a little stronger than usual.`},
+  blind:{t:'Blind Draw', i:'🂠', map:'Blind Draw', info:'Three face-down cards. You only see their suits. Could be an Ace, could be a 2.'},
+  trial:{t:'Trial', i:'🗿', map:'Trial', info:n=>`${TRIALS[n.tr].n}. Pass the test to choose a rare card.`},
+  rest:{t:'Campfire', i:'🔥', map:'Campfire', info:'Rest to heal, or sharpen a card. Push your luck and the fire may take it.',
+    text:'The fire crackles. You could rest, or hold a card to the flames to harden it.',
+    choices:(run,st)=> !st.times ? [
+      {l:'Rest', d:'Heal 30% of your max HP.', go:r=>{ const h=Math.min(r.maxHp-r.hp, Math.ceil(r.maxHp*.3)); r.hp+=h; return {text:`You sleep soundly. +${h} HP.`}; }},
+      {l:'Sharpen a card', d:'A card you pick gains 2 ranks.', pick:'any', filter:c=>c.v<14, go:(r,c,st)=>{ const o=c.v; c.v=Math.min(14,c.v+2); st.sharp=c.id; st.times=1; return {text:`Your ${rankLabel(o)} is now a ${rankLabel(c.v)}. The fire is still hot...`, again:true}; }}
+    ] : [
+      {l:`Sharpen it again`, d:`+2 more ranks, but a ${st.times===1?30:55}% chance the fire destroys the card.`, can:r=>{ const c=r.deck.find(x=>x.id===st.sharp); return c&&c.v<14; }, go:(r,_,st)=>{ const c=r.deck.find(x=>x.id===st.sharp); if(Math.random()<(st.times===1?.3:.55)){ removeCard(r,c.id); return {text:`The flames leap up. Your ${lbl(c)} is ash.`, bad:true}; } c.v=Math.min(14,c.v+2); st.times++; return {text:`It holds! Now a ${lbl(c)}.`, again:true}; }},
+      {l:'Leave the fire', d:'Quit while you\'re ahead.', go:()=>({text:'You kick dirt over the embers and move on.'})}
+    ]},
+  pack:{t:'Abandoned Pack', i:'🎒', map:'Backpack', info:'Fill your empty tonic slots.',
+    text:'A traveller\'s pack lies by the road, still full.',
+    choices:()=>[{l:'Take what fits', d:'Fill up to 2 empty tonic slots with random tonics.', go:r=>{ const got=[]; for(let i=0;i<2;i++){ const t=pick(Object.keys(TONICS)); if(gainTonic(r,t)) got.push(TONICS[t].n); } return {text: got.length?`You find: ${got.join(' and ')}.`:'Your bag is already full, so you leave it.'}; }}]},
+  altar:{t:'The Bone Altar', i:'🕯️', map:'Altar', info:'Sacrifice a card for a lasting boon.',
+    text:'Candles gutter around a stone slab stained dark. Something wants a card.',
+    choices:()=>[
+      {l:'Sacrifice for vigour', d:'Lose a card you pick. +8 max HP.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.maxHp+=8; r.hp+=8; return {text:`The ${lbl(c)} burns away. You feel sturdier. +8 max HP.`}; }},
+      {l:'Sacrifice for sight', d:'Lose a card you pick. +1 Burn in every battle.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.bonusBurns=(r.bonusBurns||0)+1; return {text:`The ${lbl(c)} burns away. You see further ahead. +1 Burn every battle.`}; }},
+      {l:'Sacrifice for wealth', d:'Lose a card you pick. +40 gold.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.gold+=40; return {text:`The ${lbl(c)} burns away and coins spill from the ash. +40 gold.`}; }},
+      {l:'Leave', d:'Some things are best left alone.', go:()=>({text:'You back away slowly.'})}]},
+  carver:{t:'The Woodcarver', i:'🪵', map:'Woodcarver', info:'Carve a totem that charms every card of one suit.',
+    text:'An old woman whittles by the fire. "A totem," she says. "It will bless a whole suit. Only one at a time."',
+    choices:(run,st)=>{ if(!st.opts){ const s=shuffle(SUITS.slice()), c=shuffle(Object.keys(CHARMS)); st.opts=[0,1,2].map(i=>({s:s[i], ch:c[i%c.length]})); }
+      return st.opts.map(o=>({l:`${SYMS[o.s]} ${CHARMS[o.ch].n} totem`, d:`All your ${SUITNAME[o.s]} gain ${CHARMS[o.ch].n}: ${CHARMS[o.ch].d.replace('this card','they').replace('This card','They')}${run.totem?' Replaces your current totem.':''}`,
+        go:r=>{ r.totem={s:o.s, ch:o.ch}; return {text:`She hands you a little ${SUITNAME[o.s]} idol. Your ${SUITNAME[o.s]} are now ${CHARMS[o.ch].n}.`, good:true}; }})).concat([{l:'Leave', d:'No totem today.', go:()=>({text:'She goes back to her whittling.'})}]); }},
+  fungi:{t:'The Mycologists', i:'🍄', map:'Mycologists', info:'Fuse two cards of the same rank into one much stronger card.',
+    text:'Two figures in masks lean over a bubbling vat. "Two the same," they whisper together. "Make them one."',
+    choices:run=>{ const P=dupPairs(run);
+      const ch=P.map(([a,b])=>({l:`Fuse ${lbl(a)} and ${lbl(b)}`, d:`They become one ${rankLabel(Math.min(14,a.v+4))}.`, go:r=>{ removeCard(r,b.id); const k=r.deck.find(x=>x.id===a.id); k.v=Math.min(14,k.v+4); k.ch=k.ch||b.ch; return {text:`The vat hisses. Out comes a single ${lbl(k)}.`, good:true}; }}));
+      if(!P.length) ch.push({l:'Ask for a spore', d:'You have no matching ranks. They copy a card you pick, so you can fuse next time.', pick:'any', go:(r,c)=>{ addCard(r,{v:c.v,s:pick(SUITS)}); return {text:`They grow a second ${rankLabel(c.v)} for you.`}; }});
+      return ch.concat([{l:'Leave', d:'The smell is too much.', go:()=>({text:'"Come back," they hum.'})}]); }},
+  goo:{t:'The Mimic', i:'🫧', map:'Mimic', info:'Copy a card. The copy comes out a little different.',
+    text:'A wobbling blob of goo burbles at your deck. It wants to copy something.',
+    choices:()=>[{l:'Let it copy a card', d:'Gain a copy of a card you pick. It might come out better, worse, or charmed.', pick:'any', go:(r,c)=>{ const m=pick(['up2','up1','down1','charm','same']); const n={v:c.v,s:c.s,ch:c.ch};
+      if(m==='up2') n.v=Math.min(14,n.v+2); if(m==='up1') n.v=Math.min(14,n.v+1); if(m==='down1') n.v=Math.max(2,n.v-1); if(m==='charm') n.ch=pick(Object.keys(CHARMS));
+      const k=addCard(r,n); return {text:`It spits out a ${lbl(k)}${k.ch?` with a ${CHARMS[k.ch].n} charm`:''}.${m==='down1'?' A bit squashed.':m==='same'?' A perfect copy.':' Better than the original!'}`}; }},
+      {l:'Leave', d:'Keep it away from your cards.', go:()=>({text:'It burbles sadly.'})}]},
+  stones:{t:'Charm Stones', i:'🪨', map:'Stones', info:'Move a charm from one card to another.',
+    text:'Two standing stones hum with old magic. Place a card on each.',
+    choices:(run,st)=> st.moving ? [{l:'Choose the new card', d:`Give the ${CHARMS[st.moving].n} charm to a card you pick.`, pick:'any', go:(r,c,st)=>{ c.ch=st.moving; st.moving=null; return {text:`Your ${lbl(c)} is now ${CHARMS[c.ch].n}.`, good:true}; }}]
+      : run.deck.some(c=>c.ch) ? [{l:'Move a charm', d:'Sacrifice a charmed card. Its charm goes to another card you pick.', pick:'charmed', filter:c=>!!c.ch, go:(r,c,st)=>{ st.moving=c.ch; removeCard(r,c.id); return {text:`The ${lbl(c)} crumbles. The ${CHARMS[st.moving].n} charm floats free.`, again:true}; }},
+          {l:'Leave', d:'Keep your charms where they are.', go:()=>({text:'The humming fades.'})}]
+      : [{l:'Etch a charm', d:'You have no charmed cards. Pay 15 gold for a random charm on a card you pick.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`The stones etch a ${CHARMS[c.ch].n} charm into your ${lbl(c)}.`, good:true}; }},
+          {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
+};
+if(typeof module!=='undefined') module.exports={gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
 
 </script>
 <script>
@@ -1596,7 +1803,7 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
   addEventListener('pointerdown', () => Snd.unlock(), { capture: true });
   // soft tick when the mouse moves onto a menu button, save slot, reward or the pack
   document.addEventListener('mouseover', e => {
-    const el = e.target.closest && e.target.closest('.menu-btn, .slot, .offer, button.pack, .store-item, .pick-card');
+    const el = e.target.closest && e.target.closest('.menu-btn, .slot, .offer, button.pack, .store-item, .pick-card, .ev-choice, .choice, .tonic');
     if (el && !el.disabled && !(e.relatedTarget && el.contains(e.relatedTarget))) Snd.hover();
   });
   addEventListener('keydown', () => Snd.unlock(), { capture: true });
@@ -1639,7 +1846,7 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}${art ? ' art' : ''}${artBack ? ' artback' : ''}`;
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', down || !c ? 'Face-down card' : full(c));
-    const badge = c && c.charm && CHARMS[c.charm] ? `<span class="charm" data-charm="${c.charm}" aria-label="${CHARMS[c.charm].n}">${CHARMS[c.charm].i}</span>` : '';
+    const badge = c && c.ch && CHARMS[c.ch] ? `<span class="charm" data-charm="${c.ch}" aria-label="${CHARMS[c.ch].n}">${CHARMS[c.ch].i}</span>` : '';
     el.innerHTML = `<div class="fc front">${art ? artImg(artFile(c)) : c ? faceHTML(c, size) : ''}${badge}</div><div class="fc backf">${artBack ? artImg('card_back') : ''}</div>`;
     return el;
   }
@@ -1688,7 +1895,7 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
   function once(el, cls, ms = 500) { if (cls === 'shake' && !SET.shake) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms); }
 
   function show(id) {
-    for (const s of ['sTitle', 'sSlots', 'sPack', 'sMap', 'sBattle', 'sReward', 'sStore', 'sEnd']) $(s).hidden = s !== id;
+    for (const s of ['sTitle', 'sSlots', 'sPack', 'sMap', 'sEvent', 'sBattle', 'sReward', 'sStore', 'sEnd']) $(s).hidden = s !== id;
     if (typeof tip !== 'undefined') tip.hidden = true;
     once($(id), 'enter', 450);
   }
@@ -1698,102 +1905,124 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     el.querySelector('.ghostbar').style.width = pct;
     el.querySelector('b').textContent = `${Math.max(0, hp)} / ${max}`;
   }
-  const relicIcons = () => run.relics.map(r => `<span data-relic="${r}" aria-label="${RELICS[r].n}: ${RELICS[r].d}">${RELICS[r].i}</span>`).join('');
-  /* the march map: branching paths through three acts; pick your route spot by spot */
-  const CAMP = { x: 24, y: 390 };
+  const ROMAN = ['I', 'II', 'III'];
+  const foeGlyph = f => ((FOES[f && f.name] || {}).g || '♟') + VS;
+  const PRIZE_ICON = { gold: '🪙', tonic: '🧪', charm: '✨', relic: '🏺' };
+  const prizeIcon = p => p.k === 'tonic' ? TONICS[p.t].i : p.k === 'charm' ? CHARMS[p.ch].i : PRIZE_ICON[p.k];
+  const prizeText = p => p.k === 'gold' ? `${p.n} gold` : p.k === 'tonic' ? `a ${TONICS[p.t].n}` : p.k === 'charm' ? `a ${CHARMS[p.ch].n} charm` : 'a relic of your choice';
+  const SPOT = { battle: 'Battle', elite: 'Elite', event: 'Mystery', store: 'Store', chest: 'Chest', boss: 'Boss' };
+  const SPOT_ICON = { event: '❓', store: '⚖️', chest: '🧰' };
+  Object.keys(NODES).forEach(k => { SPOT[k] = NODES[k].map; SPOT_ICON[k] = NODES[k].i; });
+  const CAT = { recruit: 'gain', suit: 'gain', blind: 'gain', trial: 'gain', battle: 'fight', elite: 'fight', boss: 'fight' };
+  const nodeIcon = n => n.t === 'suit' ? SYMS[n.s] + VS : n.t === 'trial' ? TRIALS[n.tr].i : SPOT_ICON[n.t] || foeGlyph(n.foe);
+  const suitName = s => SUITNAME[s][0].toUpperCase() + SUITNAME[s].slice(1);
+  const CHEST = { t: 'Treasure Chest', i: '🧰', text: 'An iron-bound chest sits in the grass, its lock rusted through.', choices: [
+    { l: 'Open it', d: 'Whatever is inside is yours.', go: r => { const x = relicChoices(r, 1)[0]; if (!x) { r.gold += 50; return 'Gold, and lots of it. +50 gold.'; } gainRelic(r, x); return `Inside you find the ${RELICS[x].n}. ${RELICS[x].d}`; } }] };
+  // what a spot is: [title, description, go-button label]
+  function spotInfo(n) {
+    const N = NODES[n.t];
+    if (N) return [n.t === 'suit' ? `${SYMS[n.s]} ${suitName(n.s)} Draft` : N.t, typeof N.info === 'function' ? N.info(n) : N.info, 'Go there'];
+    if (n.t === 'store') return ['Store', `Cards, relics, tonics, charms and card removal, for gold. You have ${run.gold}.`, 'Enter the store'];
+    if (n.t === 'event') return ['Something on the road', "Could be a gamble, a gift or a trap. You'll get a choice.", 'Investigate'];
+    if (n.t === 'chest') return ['Treasure chest', 'Free loot. Usually a relic.', 'Open the chest'];
+    const f = n.foe;
+    return [f.name, `${f.hp} HP, cards ${rankLabel(f.lo)} to ${rankLabel(f.hi)}. ${f.q ? QUIRKS[f.q] : 'No tricks. Just cards.'}`, n.t === 'boss' ? `Face ${f.name.replace(/^The /, 'the ')}` : `Fight the ${short(f.name)}`];
+  }
+  const relicIcons = () => (run.totem ? `<span data-totem="1" aria-label="Totem">${SYMS[run.totem.s]}${VS}</span>` : '') + run.relics.map(r => `<span data-relic="${r}" aria-label="${RELICS[r].n}: ${RELICS[r].d}">${RELICS[r].i}</span>`).join('');
+  // totem, relics and tonics as labelled chips (map screen)
+  const chips = () => {
+    const t = run.totem ? `<span data-totem="1"><i>${SYMS[run.totem.s]}${VS}</i>${CHARMS[run.totem.ch].n} totem</span>` : '';
+    const r = run.relics.map(x => `<span data-relic="${x}"><i>${RELICS[x].i}</i>${RELICS[x].n}</span>`).join('');
+    const tn = run.tonics.map(x => `<span data-tonic="${x}"><i>${TONICS[x].i}</i>${TONICS[x].n}</span>`).join('');
+    return t + r + tn || '<em>No relics or tonics yet.</em>';
+  };
+
+  /* the act map: 10 rows of spots plus the boss, walked left to right; each row is a choice */
+  const CAMP = { x: 40, y: 380 };
+  const MX = r => 112 + r * 80, MY = x => 70 + x * 620;
+  const ptOf = key => { if (key === 'camp') return CAMP; const [r, k] = key.split(':').map(Number); const n = run.map[r] && run.map[r][k]; return n ? { x: MX(r), y: MY(n.x) } : CAMP; };
+  const hereKey = () => run.row < 0 ? 'camp' : run.row + ':' + run.col;
   const cubic = (a, b) => { const dx = (b.x - a.x) * .5; return `M${a.x},${a.y} C${a.x + dx},${a.y} ${b.x - dx},${b.y} ${b.x},${b.y}`; };
   const cubicAt = (a, b, t) => { const dx = (b.x - a.x) * .5, u = 1 - t;
     const P = [a, { x: a.x + dx, y: a.y }, { x: b.x - dx, y: b.y }, b];
     return { x: u * u * u * P[0].x + 3 * u * u * t * P[1].x + 3 * u * t * t * P[2].x + t * t * t * P[3].x, y: u * u * u * P[0].y + 3 * u * u * t * P[1].y + 3 * u * t * t * P[2].y + t * t * t * P[3].y }; };
   let mapDecorKey = null, mapDecor = '';
-  function worldDecor(map) {
-    const key = map.nodes.map(n => n.x + ',' + n.y).join(';');
+  function worldDecor(M, act) {
+    const key = act + '|' + M.map(row => row.map(n => n.x.toFixed(3)).join(',')).join(';');
     if (key === mapDecorKey) return mapDecor;
     let seed = 1; for (const ch of key) seed = (seed * 31 + ch.charCodeAt(0)) % 2147483647;
     const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
     // keep scenery off the spots and the paths
-    const pts = [];
+    const pts = [], P = (r, n) => ({ x: MX(r), y: MY(n.x) });
     const along = (a, b) => { for (let k = 0; k <= 10; k++) pts.push(cubicAt(a, b, k / 10)); };
-    map.acts[0].cols[0].forEach(id => along(CAMP, map.nodes[id]));
-    map.nodes.forEach(n => n.next.forEach(t => along(n, map.nodes[t])));
-    const clear = (x, y, r) => pts.every(p => (p.x - x) ** 2 + (p.y - y) ** 2 > r * r);
+    M[0].forEach(n => along(CAMP, P(0, n)));
+    M.forEach((row, r) => row.forEach(n => n.next.forEach(k => along(P(r, n), P(r + 1, M[r + 1][k])))));
+    const clear = (x, y, rad) => pts.every(p => (p.x - x) ** 2 + (p.y - y) ** 2 > rad * rad);
     const ink = '#5a3d22';
     let g = '';
-    // the Border: fields and cottages
-    for (let i = 0; i < 60; i++) { const x = 20 + rnd() * 300, y = 60 + rnd() * 680; if (!clear(x, y, 44)) continue;
-      const w = 40 + rnd() * 40, h = 20 + rnd() * 14, a = (rnd() * 30 - 15).toFixed(1), c = rnd() < .5 ? '#c9b46a' : '#a9b86a';
-      g += `<g transform="translate(${x.toFixed(0)},${y.toFixed(0)}) rotate(${a})"><rect x="${-w / 2}" y="${-h / 2}" width="${w.toFixed(0)}" height="${h.toFixed(0)}" rx="4" fill="${c}" opacity=".55"/>`
-        + `<path d="M${-w / 2 + 5},${-h / 2 + 5} h${w - 10} M${-w / 2 + 5},0 h${w - 10} M${-w / 2 + 5},${h / 2 - 5} h${w - 10}" stroke="${ink}" stroke-width="1" opacity=".3"/></g>`; }
-    for (let i = 0; i < 14; i++) { const x = 30 + rnd() * 280, y = 80 + rnd() * 640; if (!clear(x, y, 34)) continue;
-      g += `<g transform="translate(${x.toFixed(0)},${y.toFixed(0)})" fill="#8a5a36" stroke="${ink}" stroke-width="1.5"><rect x="-12" y="-8" width="24" height="16" fill="#e9d3a4"/><path d="M-16,-7 L0,-20 L16,-7 Z"/></g>`; }
-    // river between the Border and the Wilds
-    const river = 'M336,-20 C362,110 312,230 340,380 S318,600 348,780';
-    g += `<path d="${river}" fill="none" stroke="#6f9ab8" stroke-width="18" stroke-linecap="round" opacity=".75"/><path d="${river}" fill="none" stroke="#a9c8dc" stroke-width="5" stroke-dasharray="18 26" opacity=".7"/>`;
-    // the Wilds: mountains and forest
-    for (let i = 0; i < 7; i++) { const x = 360 + rnd() * 290, y = 70 + rnd() * 640, h = 38 + rnd() * 30; if (!clear(x, y, h * .95)) continue;
-      g += `<path d="M${x - h},${y + h * .45} L${x},${y - h * .55} L${x + h},${y + h * .45} Z" fill="#9c8a74" stroke="${ink}" stroke-width="2"/><path d="M${x - h * .28},${y - h * .18} L${x},${y - h * .55} L${x + h * .28},${y - h * .18} L${x + h * .08},${y - h * .1} L${x - h * .06},${y - h * .2} Z" fill="#f7f0e0"/>`; }
-    for (let i = 0; i < 220; i++) { const x = 352 + rnd() * 310, y = 60 + rnd() * 690; if (!clear(x, y, 30)) continue;
-      const s2 = 8 + rnd() * 7; g += `<g transform="translate(${x.toFixed(0)},${y.toFixed(0)})"><rect x="-1.5" y="${(s2 * .9).toFixed(1)}" width="3" height="${(s2 * .5).toFixed(1)}" fill="${ink}"/><path d="M0,${(-s2 * 1.1).toFixed(1)} L${s2.toFixed(1)},${s2.toFixed(1)} L${(-s2).toFixed(1)},${s2.toFixed(1)} Z" fill="${rnd() < .5 ? '#4f7a45' : '#3f6a3c'}" stroke="${ink}" stroke-width="1"/></g>`; }
-    // the Capital: city wall, roofs and the King's castle
-    g += `<path d="M668,-10 C690,150 650,300 672,420 S660,640 676,780" fill="none" stroke="${ink}" stroke-width="7" stroke-dasharray="14 6" opacity=".5"/>`;
-    for (let i = 0; i < 70; i++) { const x = 690 + rnd() * 290, y = 60 + rnd() * 690; if (!clear(x, y, 30) || (x > 800 && y < 190)) continue;
-      g += `<g transform="translate(${x.toFixed(0)},${y.toFixed(0)})"><rect x="-9" y="-6" width="18" height="14" fill="#d9c6a0" stroke="${ink}" stroke-width="1"/><path d="M-11,-5 L0,-15 L11,-5 Z" fill="#9a4a38" stroke="${ink}" stroke-width="1"/></g>`; }
-    g += `<g transform="translate(895,125) scale(.85)" stroke="${ink}" stroke-width="2.5">
-      <rect x="-70" y="-20" width="140" height="70" fill="#cdbb99"/>
-      <path d="M-70,-20 v-10 h14 v10 h14 v-10 h14 v10 h14 v-10 h14 v10 h14 v-10 h14 v10 h14 v-10 h14 v10 h14 v-10" fill="none"/>
-      <rect x="-95" y="-50" width="36" height="100" fill="#bfae8d"/><rect x="59" y="-50" width="36" height="100" fill="#bfae8d"/>
-      <rect x="-22" y="-78" width="44" height="72" fill="#c9b893"/>
-      <path d="M-99,-50 L-77,-80 L-55,-50 Z M55,-50 L77,-80 L99,-50 Z M-26,-78 L0,-112 L26,-78 Z" fill="#8a2a24"/>
-      <path d="M0,-112 v-22" /><path d="M0,-134 l22,7 l-22,7 Z" fill="#b01e2c"/>
-      <path d="M-14,50 v-26 a14,14 0 0 1 28,0 v26 Z" fill="#5a3d22"/></g>`;
-    // compass and region names
-    g += `<g transform="translate(58,700)" stroke="${ink}" stroke-width="1.5"><circle r="30" fill="#f3e4c2" opacity=".8"/><path d="M0,-36 L7,0 L0,36 L-7,0 Z" fill="#8a2a24"/><path d="M-36,0 L0,-7 L36,0 L0,7 Z" fill="#c9a24e"/><text y="-40" text-anchor="middle" font-size="14" font-weight="900" fill="${ink}" stroke="none" font-family="Fraunces, Georgia, serif">N</text></g>`;
-    const label = (x, y, t) => `<text x="${x}" y="${y}" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-style="italic" font-weight="900" font-size="30" fill="${ink}" opacity=".62">${t}</text>`;
-    g += label(168, 44, 'The Border') + label(505, 44, 'The Wilds') + label(830, 44, 'The Capital');
+    if (act === 0) {  // the Border: fields and cottages
+      for (let i = 0; i < 110; i++) { const x = 20 + rnd() * 960, y = 60 + rnd() * 680; if (!clear(x, y, 44)) continue;
+        const w = 40 + rnd() * 40, h = 20 + rnd() * 14, a = (rnd() * 30 - 15).toFixed(1), c = rnd() < .5 ? '#c9b46a' : '#a9b86a';
+        g += `<g transform="translate(${x.toFixed(0)},${y.toFixed(0)}) rotate(${a})"><rect x="${-w / 2}" y="${-h / 2}" width="${w.toFixed(0)}" height="${h.toFixed(0)}" rx="4" fill="${c}" opacity=".55"/>`
+          + `<path d="M${-w / 2 + 5},${-h / 2 + 5} h${w - 10} M${-w / 2 + 5},0 h${w - 10} M${-w / 2 + 5},${h / 2 - 5} h${w - 10}" stroke="${ink}" stroke-width="1" opacity=".3"/></g>`; }
+      for (let i = 0; i < 30; i++) { const x = 30 + rnd() * 940, y = 80 + rnd() * 640; if (!clear(x, y, 34)) continue;
+        g += `<g transform="translate(${x.toFixed(0)},${y.toFixed(0)})" fill="#8a5a36" stroke="${ink}" stroke-width="1.5"><rect x="-12" y="-8" width="24" height="16" fill="#e9d3a4"/><path d="M-16,-7 L0,-20 L16,-7 Z"/></g>`; }
+    } else if (act === 1) {  // the Wilds: mountains and forest
+      for (let i = 0; i < 16; i++) { const x = 30 + rnd() * 940, y = 70 + rnd() * 640, h = 38 + rnd() * 30; if (!clear(x, y, h * .95)) continue;
+        g += `<path d="M${x - h},${y + h * .45} L${x},${y - h * .55} L${x + h},${y + h * .45} Z" fill="#9c8a74" stroke="${ink}" stroke-width="2"/><path d="M${x - h * .28},${y - h * .18} L${x},${y - h * .55} L${x + h * .28},${y - h * .18} L${x + h * .08},${y - h * .1} L${x - h * .06},${y - h * .2} Z" fill="#f7f0e0"/>`; }
+      for (let i = 0; i < 520; i++) { const x = 10 + rnd() * 980, y = 60 + rnd() * 690; if (!clear(x, y, 30)) continue;
+        const s2 = 8 + rnd() * 7; g += `<g transform="translate(${x.toFixed(0)},${y.toFixed(0)})"><rect x="-1.5" y="${(s2 * .9).toFixed(1)}" width="3" height="${(s2 * .5).toFixed(1)}" fill="${ink}"/><path d="M0,${(-s2 * 1.1).toFixed(1)} L${s2.toFixed(1)},${s2.toFixed(1)} L${(-s2).toFixed(1)},${s2.toFixed(1)} Z" fill="${rnd() < .5 ? '#4f7a45' : '#3f6a3c'}" stroke="${ink}" stroke-width="1"/></g>`; }
+    } else {  // the Capital: roofs and the King's castle
+      for (let i = 0; i < 170; i++) { const x = 20 + rnd() * 960, y = 60 + rnd() * 690; if (!clear(x, y, 30) || (x > 780 && y < 200)) continue;
+        g += `<g transform="translate(${x.toFixed(0)},${y.toFixed(0)})"><rect x="-9" y="-6" width="18" height="14" fill="#d9c6a0" stroke="${ink}" stroke-width="1"/><path d="M-11,-5 L0,-15 L11,-5 Z" fill="#9a4a38" stroke="${ink}" stroke-width="1"/></g>`; }
+      g += `<g transform="translate(880,118) scale(.8)" stroke="${ink}" stroke-width="2.5">
+        <rect x="-70" y="-20" width="140" height="70" fill="#cdbb99"/>
+        <path d="M-70,-20 v-10 h14 v10 h14 v-10 h14 v10 h14 v-10 h14 v10 h14 v-10 h14 v10 h14 v-10 h14 v10 h14 v-10" fill="none"/>
+        <rect x="-95" y="-50" width="36" height="100" fill="#bfae8d"/><rect x="59" y="-50" width="36" height="100" fill="#bfae8d"/>
+        <rect x="-22" y="-78" width="44" height="72" fill="#c9b893"/>
+        <path d="M-99,-50 L-77,-80 L-55,-50 Z M55,-50 L77,-80 L99,-50 Z M-26,-78 L0,-112 L26,-78 Z" fill="#8a2a24"/>
+        <path d="M0,-112 v-22" /><path d="M0,-134 l22,7 l-22,7 Z" fill="#b01e2c"/>
+        <path d="M-14,50 v-26 a14,14 0 0 1 28,0 v26 Z" fill="#5a3d22"/></g>`;
+    }
+    // compass and the act's name
+    g += `<g transform="translate(58,708)" stroke="${ink}" stroke-width="1.5"><circle r="30" fill="#f3e4c2" opacity=".8"/><path d="M0,-36 L7,0 L0,36 L-7,0 Z" fill="#8a2a24"/><path d="M-36,0 L0,-7 L36,0 L0,7 Z" fill="#c9a24e"/><text y="-40" text-anchor="middle" font-size="14" font-weight="900" fill="${ink}" stroke="none" font-family="Fraunces, Georgia, serif">N</text></g>`;
+    g += `<text x="500" y="46" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-style="italic" font-weight="900" font-size="34" fill="${ink}" opacity=".62">${ACTS[act].name}</text>`;
+    const tint = ['#9fb465', '#3f6a3c', '#6c6a80'][act], op = ['.2', '.16', '.15'][act];
     mapDecorKey = key;
     mapDecor = `<defs><radialGradient id="parch" cx="50%" cy="50%" r="75%"><stop offset="0" stop-color="#f6e8c6"/><stop offset=".7" stop-color="#e6cf9e"/><stop offset="1" stop-color="#c7a66c"/></radialGradient>
       <radialGradient id="vig" cx="50%" cy="50%" r="72%"><stop offset=".65" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#3a1e08" stop-opacity=".45"/></radialGradient></defs>
-      <rect width="1000" height="760" fill="url(#parch)"/>
-      <rect x="0" width="338" height="760" fill="#9fb465" opacity=".2"/><rect x="338" width="332" height="760" fill="#3f6a3c" opacity=".16"/><rect x="670" width="330" height="760" fill="#6c6a80" opacity=".15"/>
+      <rect width="1000" height="760" fill="url(#parch)"/><rect width="1000" height="760" fill="${tint}" opacity="${op}"/>
       ${g}`;
     return mapDecor;
   }
-  const prizeIcon = pz => pz.k === 'relic' ? RELICS[pz.r].i : pz.k === 'charm' ? CHARMS[pz.c].i : pz.k === 'gold' ? '🪙' : '🃏';
-  function prizeRow(pz) {
-    if (!pz) return `<div class="lp-prize"><span class="lbl">Prize for winning</span><div class="row"><span class="ic">👑</span><div><b>The crown</b><small>Beat the King to win the march.</small></div></div></div>`;
-    const v = offerView(pz), tipAttr = pz.k === 'relic' ? ` data-relic="${pz.r}"` : pz.k === 'charm' ? ` data-charm="${pz.c}"` : '';
-    const ic = pz.k === 'card' ? cardHTML(pz.cs[0], 'mini') : prizeIcon(pz);
-    return `<div class="lp-prize"><span class="lbl">Prize for winning</span><div class="row"><span class="ic"${tipAttr}>${ic}</span><div><b>${v.kind === 'Relic' ? 'Relic: ' : ''}${v.t}</b><small>${pz.k === 'card' ? `Adds the ${full(pz.cs[0])} to your deck.` : v.d}</small></div></div></div>`;
+  function prizeRow(n) {
+    const p = n.prize;
+    if (n.foe && n.foe.final) return `<div class="lp-prize"><span class="lbl">Prize for winning</span><div class="row"><span class="ic">👑</span><div><b>The crown</b><small>Beat the King to win the march.</small></div></div></div>`;
+    const tipAttr = p.k === 'tonic' ? ` data-tonic="${p.t}"` : p.k === 'charm' ? ` data-charm="${p.ch}"` : '';
+    const b = p.k === 'relic' ? `Relic: choose 1 of ${n.t === 'elite' ? 2 : 3}` : prizeText(p).replace(/^a /, 'A ').replace(/^(\d)/, '$1');
+    const d = p.k === 'gold' ? 'Plus the usual gold for winning.' : p.k === 'tonic' ? `${TONICS[p.t].d} Plus gold.` : p.k === 'charm' ? `${CHARMS[p.ch].d} You pick the card. Plus gold.` : 'Plus extra gold.';
+    return `<div class="lp-prize"><span class="lbl">Prize for winning</span><div class="row"><span class="ic"${tipAttr}>${prizeIcon(p)}</span><div><b>${b}</b><small>${d}</small></div></div></div>`;
   }
   // what state a spot on the map is in
-  function spotState(id) {
-    const nd = run.map.nodes[id];
-    if (run.path.includes(id)) return 'done';
-    if (run.at == null && choicesOf(run).includes(id)) return 'avail';
-    if (nd.act * 4 + nd.col < run.step) return 'skipped';
+  function spotState(r, k) {
+    if (run.path.some(([a, b]) => a === r && b === k)) return 'done';
+    if (r === run.row + 1 && reachable(run).includes(k)) return 'avail';
+    if (r <= run.row) return 'skipped';
     return 'locked';
   }
-  function spotTitle(nd) { return nd.type === 'store' ? 'Store' : nd.foe.name; }
   // click a spot to see what is there; spots you can reach have a button to go
-  function openNode(id) {
+  function openNode(key) {
     closeLevel();
-    const W = $('world'), nd = run.map.nodes[id]; if (!W || !nd) return;
-    const st = spotState(id), pop = document.createElement('div'); pop.className = 'lpop'; pop.id = 'lpop';
-    const status = st === 'done' ? '<p class="status">Cleared ✓</p>' : st === 'skipped' ? '<p class="status">You took another path.</p>' : st === 'locked' ? '<p class="status">Further along. Follow the paths to reach it.</p>' : '';
-    if (nd.type === 'store') {
-      pop.innerHTML = `<button class="x" type="button" aria-label="Close">✕</button><div class="lp-head"><span class="med">🛒</span><div><span class="lbl">${ACTS[nd.act].n} · Rest stop</span><b>Store</b></div></div>`
-        + `<p class="gim">Relics, cards, charms and healing, paid for in gold. Taking this path means one fewer battle (and one fewer prize) this act.</p>`
-        + (st === 'avail' ? `<button class="primary" type="button" data-go="${id}">Enter the store</button>` : status);
-    } else {
-      const f = nd.foe, tag = f.boss ? 'Final boss' : f.actBoss ? 'Act boss' : 'Battle';
-      pop.innerHTML = `<button class="x" type="button" aria-label="Close">✕</button>`
-        + `<div class="lp-head"><span class="med">${f.glyph + VS}</span><div><span class="lbl">${ACTS[nd.act].n} · ${tag}</span><b>${f.name}</b></div></div>`
-        + `<p class="stats">${f.hp} HP · cards ${rankLabel(f.lo)} to ${rankLabel(f.hi)}</p><p class="gim">${f.q ? QUIRKS[f.q] : 'No tricks. Just cards.'}</p>`
-        + (st === 'done' || st === 'skipped' ? '' : prizeRow(nd.prize))
-        + (st === 'avail' ? `<button class="primary" type="button" data-go="${id}">Fight the ${short(f.name)}</button>` : status);
-    }
+    const W = $('world'), [r, k] = key.split(':').map(Number), n = run.map[r] && run.map[r][k]; if (!W || !n) return;
+    const st = spotState(r, k), [t, d, go] = spotInfo(n), pop = document.createElement('div'); pop.className = 'lpop'; pop.id = 'lpop';
+    const status = st === 'done' ? 'Cleared ✓' : st === 'skipped' ? 'You took another path.' : 'Further along. Follow the paths to reach it.';
+    const tag = n.foe ? (n.t === 'boss' ? (n.foe.final ? 'Final boss' : 'Act boss') : n.t === 'elite' ? 'Elite battle' : 'Battle') : SPOT[n.t];
+    let body = n.foe ? `<p class="stats">${n.foe.hp} HP · cards ${rankLabel(n.foe.lo)} to ${rankLabel(n.foe.hi)}</p><p class="gim">${n.foe.q ? QUIRKS[n.foe.q] : 'No tricks. Just cards.'}</p>` : `<p class="gim">${d}</p>`;
+    if (n.prize && st !== 'done' && st !== 'skipped') body += prizeRow(n);
+    pop.innerHTML = `<button class="x" type="button" aria-label="Close">✕</button><div class="lp-head"><span class="med">${nodeIcon(n)}</span><div><span class="lbl">Act ${ROMAN[run.act]} · ${tag}</span><b>${t}</b></div></div>${body}`
+      + (st === 'avail' ? `<button class="primary" type="button" data-go="${key}">${go}</button>` : `<p class="status">${status}</p>`);
     W.append(pop);
-    const px = nd.x / 1000 * W.clientWidth, py = nd.y / 760 * W.clientHeight, pw = pop.offsetWidth, ph = pop.offsetHeight;
+    const px = MX(r) / 1000 * W.clientWidth, py = MY(n.x) / 760 * W.clientHeight, pw = pop.offsetWidth, ph = pop.offsetHeight;
     const left = px > W.clientWidth * .55 ? px - pw - 40 : px + 40;
     pop.style.left = Math.max(10, Math.min(W.clientWidth - pw - 10, left)) + 'px';
     pop.style.top = Math.max(10, Math.min(W.clientHeight - ph - 10, py - ph / 2)) + 'px';
@@ -1802,65 +2031,71 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
   }
   function closeLevel() { const p = $('lpop'); if (p) p.remove(); }
   let selNode = null;
-  function selectNode(id, withPopup = true) {
-    if (!run || run.at != null || !choicesOf(run).includes(id)) { openNode(id); return; }
-    selNode = id;
+  const canGo = key => { if (!run) return false; const [r, k] = key.split(':').map(Number); return r === run.row + 1 && reachable(run).includes(k); };
+  function selectNode(key, withPopup = true) {
+    if (!canGo(key)) { openNode(key); return; }
+    selNode = key;
     document.querySelectorAll('.world .lnode.sel').forEach(n => n.classList.remove('sel'));
-    const n = document.querySelector(`.world [data-node="${id}"]`); if (n) n.classList.add('sel');
-    document.querySelectorAll('.world .roads path.avail').forEach(p => p.classList.toggle('chosen', +p.dataset.to === id));
-    document.querySelectorAll('#nextFoe .choice').forEach(b => b.classList.toggle('sel', +b.dataset.pick === id));
-    const nd = run.map.nodes[id];
-    $('fightBtn').textContent = nd.type === 'store' ? 'Enter the store' : `Fight the ${short(nd.foe.name)}`;
-    if (withPopup) openNode(id); else Snd.tap();
+    const n = document.querySelector(`.world [data-node="${key}"]`); if (n) n.classList.add('sel');
+    document.querySelectorAll('.world .roads path.avail').forEach(p => p.classList.toggle('chosen', p.dataset.to === key));
+    document.querySelectorAll('#nextFoe .choice').forEach(b => b.classList.toggle('sel', b.dataset.pick === key));
+    const [r, k] = key.split(':').map(Number);
+    $('fightBtn').textContent = spotInfo(run.map[r][k])[2];
+    if (withPopup) openNode(key); else Snd.tap();
   }
-  // walk to a spot: fight there, or open its store
-  function goNode(id) {
+  // walk to a spot: fight there, or see what the spot holds
+  function goNode(key) {
     closeLevel();
-    if (!run || run.at != null || !choicesOf(run).includes(id)) return;
-    run.at = id;
-    if (run.map.nodes[id].type === 'store') { run.store = { items: makeStore(run) }; save(); Snd.pick(); showStore(); }
-    else startBattle();
+    if (!canGo(key) || busy) return;
+    const [r, k] = key.split(':').map(Number), n = run.map[r][k];
+    run.row = r; run.col = k; run.path.push([r, k]); selNode = null;
+    Snd.pick();
+    if (n.t === 'store') { run.store = makeStore(run); save(); return showStore(); }
+    if (['recruit', 'suit', 'blind'].includes(n.t)) { run.pending = { k: 'gain', t: n.t, s: n.s, cards: gainCards(run, n) }; save(); return showReward(); }
+    if (n.t === 'event' || n.t === 'chest' || NODES[n.t]) { run.event = { t: n.t, ev: n.ev, tr: n.tr, st: {} }; save(); return showEvent(); }
+    B = newBattle(run, n.foe); save(); showBattle(true);
   }
   $('world').addEventListener('click', e => {
     if (e.target.closest('.x')) { closeLevel(); return; }
-    const go = e.target.closest('[data-go]'); if (go) { goNode(+go.dataset.go); return; }
+    const go = e.target.closest('[data-go]'); if (go) { goNode(go.dataset.go); return; }
     if (e.target.closest('.lpop')) return;
-    const road = e.target.closest('[data-to]'); if (road) { selectNode(+road.dataset.to); return; }
+    const road = e.target.closest('[data-to]'); if (road) { selectNode(road.dataset.to); return; }
     const n = e.target.closest('[data-node]');
-    if (n) { const id = +n.dataset.node; choicesOf(run).includes(id) && run.at == null ? selectNode(id) : openNode(id); } else closeLevel();
+    if (n) { const key = n.dataset.node; canGo(key) ? selectNode(key) : openNode(key); } else closeLevel();
   });
   let walkTimer = null;
   function renderWorld() {
-    const W = $('world'), M = run.map, ch = run.at == null ? choicesOf(run) : [];
-    const lastPt = run.last == null ? CAMP : M.nodes[run.last];
-    const onPath = (a, b) => { const ia = run.path.indexOf(a), ib = run.path.indexOf(b); return ia >= 0 && ib === ia + 1; };
-    let lines = '', halos = '';
-    let hits = '';
+    const W = $('world'), M = run.map, R = run.row + 1, ch = reachable(run);
+    const walked = new Set(run.path.map(([a, b]) => a + ':' + b));
+    let lines = '', halos = '', hits = '';
     const edge = (a, b, cls, to) => { const d = cubic(a, b); halos += `<path class="halo" d="${d}"/>`;
       const av = cls.includes('avail'); lines += `<path class="${cls}" d="${d}"${av ? ` data-to="${to}"` : ''}/>`; if (av) hits += `<path class="hit" d="${d}" data-to="${to}"/>`; };
-    M.acts[0].cols[0].forEach(id => edge(CAMP, M.nodes[id], run.path[0] === id ? 'road done' : run.last == null && ch.includes(id) ? 'road avail' : 'road', id));
-    M.nodes.forEach(n => n.next.forEach(t => edge(n, M.nodes[t], onPath(n.id, t) ? 'road done' : run.last === n.id && ch.includes(t) ? 'road avail' : 'road', t)));
-    const nodes = M.nodes.map(nd => {
-      const st = spotState(nd.id), pos = `left:${nd.x / 10}%;top:${nd.y / 7.6}%`;
-      if (nd.type === 'store') return `<div class="wnode" style="${pos}"><span class="lnode shop ${st}" data-node="${nd.id}"><span>🛒</span><span class="lab">Store</span></span></div>`;
-      const f = nd.foe, type = nd.type === 'boss' ? `boss${f.boss ? ' final' : ''}` : 'fight';
-      const inner = nd.type === 'boss' ? (st === 'done' ? '✓' : f.glyph + VS) : (st === 'done' ? '✓' : '⚔️');
-      const badge = nd.prize && (st === 'avail' || st === 'locked') ? `<span class="prize-badge">${prizeIcon(nd.prize)}</span>` : '';
-      return `<div class="wnode" style="${pos}"><span class="lnode ${type} ${st}" data-node="${nd.id}">${inner}${badge}<span class="lab">${f.name}</span></span></div>`;
-    }).join('');
-    W.innerHTML = `<svg viewBox="0 0 1000 760" preserveAspectRatio="none" aria-hidden="true">${worldDecor(M)}<g class="roads">${halos}${lines}${hits}</g>
+    M[0].forEach((n, k) => edge(CAMP, ptOf('0:' + k), walked.has('0:' + k) ? 'road done' : run.row === -1 ? 'road avail' : 'road', '0:' + k));
+    M.forEach((row, r) => row.forEach((n, j) => n.next.forEach(k => {
+      const a = r + ':' + j, b = (r + 1) + ':' + k;
+      edge(ptOf(a), ptOf(b), walked.has(a) && walked.has(b) ? 'road done' : r === run.row && j === run.col ? 'road avail' : 'road', b);
+    })));
+    let nodes = '';
+    M.forEach((row, r) => row.forEach((n, k) => {
+      const key = r + ':' + k, st = spotState(r, k), p = ptOf(key), here = key === hereKey() ? ' here' : '';
+      const lbl = n.foe ? short(n.foe.name) : n.t === 'suit' ? `${SYMS[n.s]} Draft` : SPOT[n.t];
+      const badge = n.prize && (st === 'avail' || st === 'locked') ? `<span class="prize-badge">${n.foe.final ? '👑' : prizeIcon(n.prize)}</span>` : '';
+      const cls = n.t === 'boss' ? `boss${n.foe.final ? ' final' : ''}` : `spot c-${CAT[n.t] || 'util'} t-${n.t}`;
+      nodes += `<div class="wnode" style="left:${p.x / 10}%;top:${p.y / 7.6}%"><span class="lnode ${cls} ${st}${here}" data-node="${key}" title="${spotInfo(n)[0]}">${st === 'done' && n.t !== 'boss' ? '✓' : nodeIcon(n)}${badge}<span class="lab">${lbl}</span></span></div>`;
+    }));
+    W.innerHTML = `<svg viewBox="0 0 1000 760" preserveAspectRatio="none" aria-hidden="true">${worldDecor(M, run.act)}<g class="roads">${halos}${lines}${hits}</g>
       <rect width="1000" height="760" fill="url(#vig)"/></svg>
       <div class="wnode" style="left:${CAMP.x / 10}%;top:${CAMP.y / 7.6}%"><span class="camp">⛺<span class="lab">Camp</span></span></div>
       ${nodes}<div class="walker" id="walker"><b>You</b><i></i></div>`;
   }
-  // walk the marker from where it last stood to the spot just cleared
+  // walk the marker from where it last stood to where you are now
   function walkWorld(from) {
     const wk = $('walker'); if (!wk) return;
-    const M = run.map, to = run.last == null ? CAMP : M.nodes[run.last];
+    const to = ptOf(hereKey());
     const place = p => { wk.style.left = p.x / 10 + '%'; wk.style.top = p.y / 7.6 + '%'; };
     clearTimeout(walkTimer); wk.classList.remove('walking');
-    const fromPt = from === 'camp' ? CAMP : from != null ? M.nodes[from] : null;
-    if (!fromPt || fromPt === to || reduce) { place(to); return; }
+    const fromPt = from ? ptOf(from) : null;
+    if (!fromPt || from === hereKey() || reduce) { place(to); return; }
     const steps = 14; let k = 0;
     place(fromPt); wk.classList.add('walking');
     const stepFn = () => { k++; place(cubicAt(fromPt, to, k / steps)); if (k % 3 === 0) Snd.flick();
@@ -1868,29 +2103,28 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     walkTimer = setTimeout(stepFn, 400);
   }
 
-  /* compact track at the top of a battle: 12 steps, bosses as medallions */
+  /* compact track at the top of a battle: the act's 10 rows, then its boss */
   function miniTrack() {
     const parts = [];
-    for (let k = 0; k < STEPS; k++) {
-      if (k) parts.push(`<i class="lseg${k <= run.step ? ' done' : ''}"></i>`);
-      const act = Math.floor(k / 4), isBoss = k % 4 === 3, final = act === 2 && isBoss;
-      let cls, inner = '';
-      if (k < run.step) { const nd = run.map.nodes[run.path[k]]; cls = nd.type === 'store' ? 'shop done' : nd.type === 'boss' ? 'boss done' : 'reg done'; inner = nd.type === 'boss' ? '✓' : nd.type === 'store' ? '<span>🛒</span>' : ''; }
-      else if (k === run.step) { cls = isBoss ? `boss now${final ? ' final' : ''}` : 'reg now'; inner = isBoss ? ACT_FOES[act].boss.glyph + VS : ''; }
-      else { cls = isBoss ? `boss locked${final ? ' final' : ''}` : 'reg locked'; inner = isBoss ? ACT_FOES[act].boss.glyph + VS : ''; }
-      parts.push(`<span class="lnode ${cls}">${inner}</span>`);
+    for (let r = 0; r <= ROWS; r++) {
+      if (r) parts.push(`<i class="lseg${r <= run.row ? ' done' : ''}"></i>`);
+      const cls = r < run.row ? 'done' : r === run.row ? 'now' : 'locked';
+      parts.push(r === ROWS ? `<span class="lnode boss ${cls}${run.act === 2 ? ' final' : ''}">${foeGlyph(run.map[ROWS][0].foe)}</span>` : `<span class="lnode reg ${cls}"></span>`);
     }
     return parts.join('');
   }
   const setAct = a => { if (a == null) delete document.documentElement.dataset.act; else document.documentElement.dataset.act = a; };
 
-  /* relic tooltips: hover any relic to see what it does */
+  /* tooltips: hover any relic, charm, tonic or totem to see what it does */
   const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; document.body.append(tip);
   document.addEventListener('mouseover', e => {
-    const el = e.target.closest && e.target.closest('[data-relic], [data-charm]');
+    const el = e.target.closest && e.target.closest('[data-relic], [data-charm], [data-tonic], [data-totem]');
     if (!el) { tip.hidden = true; return; }
     let R;
-    R = el.dataset.relic ? RELICS[el.dataset.relic] : CHARMS[el.dataset.charm];
+    if (el.dataset.relic) R = RELICS[el.dataset.relic];
+    else if (el.dataset.charm) R = CHARMS[el.dataset.charm];
+    else if (el.dataset.tonic) R = TONICS[el.dataset.tonic] && { ...TONICS[el.dataset.tonic], d: TONICS[el.dataset.tonic].d + (el.dataset.ti ? ' Click or press ' + (+el.dataset.ti + 1) + ' to drink.' : ' Drink it in battle.') };
+    else if (run && run.totem) R = { i: SYMS[run.totem.s] + VS, n: `${suitName(run.totem.s)} totem: ${CHARMS[run.totem.ch].n}`, d: `All your ${SUITNAME[run.totem.s]} are ${CHARMS[run.totem.ch].n}: ${CHARMS[run.totem.ch].d}` };
     if (!R) return;
     tip.innerHTML = `<b>${R.i} ${R.n}</b><span>${R.d}</span>`; tip.hidden = false;
     const r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight, gap = 10;
@@ -1908,11 +2142,11 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
       return el.outerHTML;
     }).join('');
   }
-  // "Act II · step 6 of 12" for saves (older saves counted 9 floors)
+  // "Act II · row 6 of 10" for saves (saves from the first PC version are moved onto the new map when loaded)
   function runWhere(r) {
-    if (!r.map) return `Floor ${(r.floor || 0) + 1} of 9`;
-    const act = r.at != null ? r.map.nodes[r.at].act : r.last != null ? r.map.nodes[choicesOf(r)[0]].act : 0;
-    return `${ACTS[act].n} · step ${Math.min(STEPS, r.step + 1)} of ${STEPS}`;
+    if (r.map && !Array.isArray(r.map)) return 'Older save';
+    const a = r.act || 0;
+    return `Act ${ROMAN[a]} · ${r.row == null || r.row < 0 ? 'at camp' : r.row >= ROWS ? 'boss' : `row ${r.row + 1} of ${ROWS}`}`;
   }
   function showTitle() {
     Snd.music('menu'); setAct(null);
@@ -1925,7 +2159,7 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     $('loadSub').textContent = !used ? 'No saved runs yet' : used === 1 ? '1 of 3 slots used · view or delete it' : `${used} of 3 slots used · switch runs or delete one`;
     run = null; B = null;
     const r = record();
-    $('record').textContent = r.runs ? `Best: step ${Math.min(r.best, STEPS)} of ${STEPS}. Kings slain: ${r.wins}. Runs: ${r.runs}.` : '';
+    $('record').textContent = r.runs ? `${r.wins ? `Kings slain: ${r.wins}. ` : `Furthest: Act ${ROMAN[Math.max(0, (r.bestAct || 1) - 1)]}. `}Runs: ${r.runs}.` : '';
     buildFan();
     show('sTitle');
     const first = menuBtns()[0]; if (first) first.focus({ preventScroll: true });
@@ -1957,8 +2191,8 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
       let body;
       if (!d) body = `<span class="slot-n">Slot ${i}</span><b class="slot-empty">Empty</b><span class="slot-d">No run saved here.</span>`;
       else {
-        const r = d.run, here = r.map && r.at != null ? r.map.nodes[r.at] : null;
-        const where = d.battle && here && here.foe ? `In battle with the ${short(here.foe.name)}` : r.pending ? 'Choosing a reward' : r.store ? 'Shopping at a store' : 'Choosing a path';
+        const r = d.run, newMap = Array.isArray(r.map), here = newMap && r.row >= 0 ? r.map[r.row][r.col] : null;
+        const where = d.battle && here && here.foe ? `In battle with the ${short(here.foe.name)}` : r.pending ? 'Choosing a reward' : r.store ? 'Shopping at a store' : r.event ? 'Stopped along the road' : 'Choosing a path';
         body = `<span class="slot-n">Slot ${i}</span><b>${runWhere(r)}</b><span class="slot-d">${where}</span>
           <span class="slot-hp"><span style="width:${Math.max(0, r.hp) / r.maxHp * 100}%"></span><em>${Math.max(0, r.hp)} / ${r.maxHp} HP</em></span>
           <span class="slot-d">${r.deck.length} cards · ${r.relics.length} relic${r.relics.length === 1 ? '' : 's'} · ${r.gold || 0} gold</span>
@@ -2064,22 +2298,30 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     Snd.pick();
     const s = load(slotKey(i)); if (!s || !s.run) return showTitle();
     slot = i; run = s.run;
-    if (!run.map) {  // a save from before the branching map: start that act fresh on a new map
-      const act = Math.min(2, Math.floor((run.floor || 0) / 3));
-      Object.assign(run, { map: makeMap(), step: act * 4, path: [], at: null }); run.last = act ? run.map.acts[act - 1].boss : null;
-      for (let k = 0; k < act; k++) run.path.push(...[0, 1, 2].map(c => run.map.acts[k].cols[c][0]), run.map.acts[k].boss);
-      delete run.pending; delete run.store; delete run.prizePending; s.battle = null;
-      save();
+    let battle = s.battle;
+    if (run.v !== 4) {
+      if (run.map && !Array.isArray(run.map)) {  // a save from the first PC version (12-step map): carry on in the same act, on a new map
+        const nd = run.at != null ? run.map.nodes[run.at] : run.last != null ? run.map.nodes[run.last] : null;
+        run.act = !nd ? 0 : run.at == null && nd.type === 'boss' ? Math.min(2, nd.act + 1) : nd.act;
+        run.v = 3;
+        const CH = { gold: 'gilded', keen: 'keen', mend: 'mending' };
+        run.deck.forEach(c => { if (c.charm) c.ch = CH[c.charm]; delete c.charm; });
+        ['step', 'last', 'at', 'walkSeen', 'prizePending', 'lastGold', 'beat'].forEach(k => delete run[k]);
+      }
+      migrateRun(run); battle = null; save();
     }
     if (run.pack && !run.pack.opened) { B = null; return showPack(); }
-    if (s.battle && run.at != null) {
-      B = s.battle; B.f = nodeAt(run).foe;
-      if (B.over === 'win') return winFight(true);
+    if (battle && run.row >= 0) {
+      B = battle; B.f = run.map[run.row][run.col].foe;  // the foe isn't stored with the battle, it comes from the map
+      if (B.over === 'win') return winFight();
       if (B.over === 'lose') return endRun(false);
-      showBattle();
-    } else if (run.pending) showReward();
-    else if (run.store) showStore();
-    else showMap();
+      return showBattle();
+    }
+    B = null;
+    if (run.pending) return showReward();
+    if (run.store) return showStore();
+    if (run.event) return showEvent();
+    showMap();
   }
 
   /* map */
@@ -2087,24 +2329,23 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     Snd.music('menu');
     B = null;
     hpBar('mapHp', run.hp, run.maxHp);
-    $('mapRelics').innerHTML = run.relics.length
-      ? run.relics.map(r => `<span data-relic="${r}"><i>${RELICS[r].i}</i>${RELICS[r].n}</span>`).join('')
-      : '<em>No relics yet. Win battles to earn them.</em>';
+    $('mapRelics').innerHTML = chips();
     $('mapDeckN').textContent = run.deck.length;
     $('mapRelicN').textContent = run.relics.length;
-    $('mapFloorN').textContent = Math.min(STEPS, run.step + 1);
-    const ch = choicesOf(run), curAct = run.map.nodes[ch[0]].act;
-    $('nextFoe').className = 'panel next-foe choose';
-    $('nextFoe').innerHTML = `<span class="lbl">${ch.length > 1 ? 'Choose your path' : 'Your path'}</span><div class="choices">${ch.map((id, n) => {
-      const nd = run.map.nodes[id];
-      if (nd.type === 'store') return `<button class="choice" type="button" data-pick="${id}"><span class="ci">🛒</span><span><b>Store</b><small>Spend gold, skip a battle</small></span><span class="ck"><kbd>${n + 1}</kbd></span></button>`;
-      const f = nd.foe;
-      return `<button class="choice" type="button" data-pick="${id}"><span class="ci">${f.glyph + VS}</span><span><b>${f.name}${f.boss ? ' · Final boss' : f.actBoss ? ' · Act boss' : ''}</b><small>${f.hp} HP · prize ${nd.prize ? prizeIcon(nd.prize) : '👑'}</small></span><span class="ck"><kbd>${n + 1}</kbd></span></button>`;
-    }).join('')}</div>`;
     $('mapGoldN').textContent = run.gold || 0;
-    setAct(curAct);
+    $('mapFloorN').textContent = Math.min(ROWS, Math.max(0, run.row + 1));
+    $('actLabel').textContent = `Act ${ROMAN[run.act]} of III`;
+    $('actName').textContent = ACTS[run.act].name;
+    const R = run.row + 1, ch = reachable(run).map(k => R + ':' + k);
+    $('nextFoe').className = 'panel next-foe choose';
+    $('nextFoe').innerHTML = `<span class="lbl">${ch.length > 1 ? 'Choose your path' : 'Your path'}</span><div class="choices">${ch.map((key, i) => {
+      const n = run.map[R][+key.split(':')[1]], t = spotInfo(n)[0];
+      const sub = n.foe ? `${n.foe.hp} HP${n.t === 'elite' ? ' · Elite' : n.t === 'boss' ? ' · Boss' : ''} · prize ${n.foe.final ? '👑' : prizeIcon(n.prize)}` : spotInfo(n)[1];
+      return `<button class="choice" type="button" data-pick="${key}"><span class="ci">${nodeIcon(n)}</span><span><b>${t}</b><small>${sub}</small></span><span class="ck"><kbd>${i + 1}</kbd></span></button>`;
+    }).join('')}</div>`;
+    setAct(run.act);
     renderWorld();
-    const from = run.walkSeen === undefined ? null : run.walkSeen; run.walkSeen = run.last == null ? 'camp' : run.last;
+    const from = run.walkSeen; run.walkSeen = hereKey();
     setTimeout(() => walkWorld(from), 0);  // after the screen is shown
     selNode = null;
     $('fightBtn').textContent = 'Pick a spot on the map';
@@ -2114,24 +2355,23 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
   }
 
   /* battle */
-  function startBattle() { Snd.pick(); B = newBattle(run); save(); showBattle(true); }
+  const nodeHere = () => run.map[run.row][run.col];
   function showBattle(fresh) {
-    const f = B.f;
-    Snd.music(f.boss || f.actBoss ? 'boss' : 'battle');
-    const nd = nodeAt(run);
-    setAct(nd.act); $('warDim').classList.remove('on');
+    const f = B.f, node = nodeHere();
+    Snd.music(node.t === 'boss' || node.t === 'elite' ? 'boss' : 'battle');
+    setAct(run.act); $('warDim').classList.remove('on');
     $('sBattle').classList.remove('fallen');
-    $('foeMed').className = 'med big'; $('foeMed').textContent = f.glyph + VS;
-    $('floorLabel').textContent = f.boss ? 'Final battle' : `${ACTS[nd.act].n} · Step ${run.step + 1} of ${STEPS}${f.actBoss ? ' · Act boss' : ''}`;
+    $('foeMed').className = 'med big'; $('foeMed').textContent = foeGlyph(f);
+    $('floorLabel').textContent = node.t === 'boss' ? (f.final ? 'Final battle' : `Act ${ROMAN[run.act]} boss`) : `${node.t === 'elite' ? 'Elite · ' : ''}Act ${ROMAN[run.act]} · Row ${run.row + 1} of ${ROWS}`;
     $('foeName').textContent = f.name;
     $('foeQuirk').textContent = f.q ? QUIRKS[f.q] : 'No tricks. Just cards.';
     $('battleRelics').innerHTML = relicIcons();
     $('yLane').innerHTML = ''; $('oLane').innerHTML = '';
     $('yLane').className = 'lane'; $('oLane').className = 'lane';
-    setMsg(fresh || B.round === 0 ? 'Flip to attack. Burn skips the card shown on the right.' : 'Battle resumed.');
+    setMsg(fresh || B.round === 0 ? 'Flip to attack. Win a war to capture their best card. Drink a tonic any time.' : 'Battle resumed.');
     renderBattle();
     show('sBattle');
-    if (fresh && (f.boss || f.actBoss)) setTimeout(() => { banner(short(f.name)); Snd.war(); }, 350);
+    if (fresh && (node.t === 'boss' || node.t === 'elite')) setTimeout(() => { banner(node.t === 'boss' ? short(f.name) : 'Elite'); Snd.war(); }, 350);
   }
   function setMsg(t) { $('bMsg').innerHTML = `<span>${t}</span>`; }  // one wrapper so flex layout keeps the spaces between parts
   function pileHTML(n) {
@@ -2146,6 +2386,7 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     Snd.tension(!B.over && run.hp > 0 && run.hp <= run.maxHp * .3);  // heartbeat in the music at low health
     $('youStats').textContent = `${B.pDraw.length + B.pDisc.length} cards · ${run.gold || 0} gold`;
     $('battlePips').innerHTML = `<div class="ladder mini">${miniTrack()}</div>`;
+    renderTonics();
     $('youPile').innerHTML = `${B.pDraw.length ? pileHTML(B.pDraw.length) : '<div class="empty-slot"></div>'}<span>${B.pDraw.length} left</span>`;
     $('foePile').innerHTML = `${B.eDraw.length ? pileHTML(B.eDraw.length) : '<div class="empty-slot"></div>'}<span>${B.eDraw.length} left</span>`;
     const pn = peek(B, 'p');
@@ -2161,6 +2402,31 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     p.className = `pop ${cls || ''}`; p.textContent = text;
     $(row).append(p); setTimeout(() => p.remove(), 1200);
   }
+  function renderTonics() {
+    const off = busy || !B || !!B.over;
+    let h = '';
+    for (let i = 0; i < tonicCap(run); i++) {
+      const t = run.tonics[i];
+      h += t ? `<button class="tonic${off ? ' off' : ''}" type="button" data-ti="${i}" data-tonic="${t}" aria-label="${TONICS[t].n}"${off ? ' aria-disabled="true"' : ''}>${TONICS[t].i}<kbd>${i + 1}</kbd></button>`
+        : '<span class="tonic empty" aria-label="Empty tonic slot"></span>';
+    }
+    $('tonicBox').innerHTML = h;
+  }
+  function drinkTonic(i) {
+    if (busy || !B || B.over || !run.tonics[i]) return;
+    tip.hidden = true;
+    const res = useTonic(run, B, i);
+    if (!res) return;
+    Snd.heal();
+    const T = TONICS[res.t];
+    if (res.t === 'heal') { popup('youRow', `+${res.heal}`, 'heal'); once($('youHp'), 'healflash', 600); setMsg(`${T.n}: you heal ${res.heal}.`); }
+    else if (res.t === 'fire') { popup('foeRow', `−${res.dmg}`); once($('foeMed'), 'hit', 460); Snd.hit(true); const [x, y] = centerOf($('foeMed')); burst(x, y, { n: 30, colors: ['#ff8a2a', '#ffcf5a', '#ff4d1a'] }); setMsg(`${T.n}: the enemy takes ${res.dmg}.`); }
+    else if (res.t === 'luck') setMsg(`${T.n}: your next card counts 5 ranks higher.`);
+    else setMsg(`${T.n}: the next hit you take deals nothing.`);
+    renderBattle(); save();
+    if (B.over === 'win') victory();
+  }
+  $('tonicBox').addEventListener('click', e => { const b = e.target.closest('[data-ti]'); if (b) drinkTonic(+b.dataset.ti); });
 
   async function doBurn() {
     if (busy || !B || B.over || B.burns <= 0) return;
@@ -2169,16 +2435,18 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     const top = peek(B, 'p');
     Snd.burn(); buzz(15);
     if (c) { c.classList.add('burning'); const [x, y] = centerOf(c); burst(x, y, { n: 18, colors: ['#ff8a2a', '#ffcf5a', '#ff4d1a'], up: 1, spread: 40 }); await sleep(560); }
-    burn(B);
-    setMsg(`Burned ${L(top)}.`);
+    const res = burn(run, B);
+    setMsg(`Burned ${L(top)}.${res && res.hit ? ` The embers hit for ${res.hit}.` : ''}`);
+    if (res && res.hit) { popup('foeRow', `−${res.hit}`); once($('foeMed'), 'hit', 460); }
     busy = false; renderBattle(); save();
+    if (B.over === 'win') victory();
   }
-  function renderBattleButtons() { $('flipBtn').disabled = busy || !B || !!B.over; $('burnBtn').disabled = busy || !B || B.burns <= 0 || !!B.over; }
+  function renderBattleButtons() { if (run && B) renderTonics(); $('flipBtn').disabled = busy || !B || !!B.over; $('burnBtn').disabled = busy || !B || B.burns <= 0 || !!B.over; }
 
   async function doFlip() {
     if (busy || !B || B.over) return;
     busy = true; renderBattleButtons();
-    const yL = $('yLane'), oL = $('oLane'), field = $('field');
+    const yL = $('yLane'), oL = $('oLane');
     yL.innerHTML = ''; oL.innerHTML = ''; yL.className = 'lane'; oL.className = 'lane';
     setMsg('&nbsp;');
     const youPeekCard = $('youPeek').querySelector('.card');
@@ -2202,7 +2470,7 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
         $('warDim').classList.add('on');
         banner(si > 1 ? 'War again' : 'War'); Snd.war(); buzz([40, 60, 40]);
         once($('sBattle'), 'shake', 420);
-        setMsg(`<span class="stakes">${si > 1 ? 'Stakes rise' : 'War'}: the winner takes a card for good</span>`);
+        setMsg(`<span class="stakes">${si > 1 ? 'Stakes rise' : 'War'}: the winner takes a card</span>`);
         await sleep(800);
         Snd.roll(1.3);
         for (let i = 0; i < Math.max(st.pd.length, st.ed.length); i++) {
@@ -2235,10 +2503,11 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
       Snd.hit(big); buzz(big ? 60 : 25);
       if (big) once($('sBattle'), 'shake', 420);
       const [x, y] = centerOf(oL.lastElementChild); burst(x, y, { n: big ? 30 : 16, spread: big ? 150 : 90 });
-      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie ? 'Tie goes to you.' : `Your ${L(pc)} beats ${L(ec)}.`;
+      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ' (with luck)' : ''} beats ${L(ec)}.`;
       m = `${r.wars ? warTxt(r.wars) + 'won. ' : ''}${lead} <span class="dmg">${r.dmg} damage.</span>`;
       if (r.heal) m += ` You heal ${r.heal}.`;
-      if (r.charmGold) m += ` <span class="cap">+1 gold (Gilded)</span>`;
+      if (r.gold) m += ` <span class="cap">+${r.gold} gold (Gilded)</span>`;
+      if (r.thorn) { m += ` Thorns hit you for ${r.thorn}.`; setTimeout(() => popup('youRow', `−${r.thorn}`, 'hurt'), 450); }
       popup('foeRow', `−${r.dmg}`);
       if (r.heal) { setTimeout(() => { popup('youRow', `+${r.heal}`, 'heal'); Snd.heal(); once($('youHp'), 'healflash', 600); }, 350); }
     } else if (r.cmp === -1) {
@@ -2252,42 +2521,35 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
       if (big) once($('sBattle'), 'shake', 420);
       const [x, y] = centerOf(yL.lastElementChild); burst(x, y, { n: big ? 24 : 12, colors: ['#e0574f', '#ff9a8c', '#7a1020'], spread: big ? 130 : 80 });
       const lead = tie ? `Tie goes to the ${short(B.f.name)}.` : `${L(ec)} beats your ${L(pc)}.`;
-      m = `${r.wars ? warTxt(r.wars) + 'lost. ' : ''}${lead} <span class="hurt">You take ${r.dmg}.</span>`;
+      m = `${r.wars ? warTxt(r.wars) + 'lost. ' : ''}${lead} ${r.blocked ? `Your ${r.blocked === 'aegis' ? 'Aegis' : 'Iron Tonic'} blocks the hit!` : `<span class="hurt">You take ${r.dmg}.</span>`}`;
       if (r.back) m += ` Your club still hits for ${r.back}.`;
       if (r.eHeal) m += ` It heals ${r.eHeal}.`;
-      popup('youRow', `−${r.dmg}`, 'hurt');
+      popup('youRow', r.blocked ? 'Blocked' : `−${r.dmg}`, r.blocked ? 'heal' : 'hurt');
       if (r.back) setTimeout(() => { popup('foeRow', `−${r.back}`); Snd.hit(false); once($('foeMed'), 'hit', 460); }, 380);
     } else {
       m = 'Stalemate. Nobody has cards left for the war.';
     }
-    if (r.captured) m += ` <span class="cap">You capture their ${L(r.captured)}! +${r.gold} gold</span>`;
-    if (r.lost) m += ` <span class="hurt">They take your ${L(r.lost)} for good.</span>`;
+    r.caps.forEach(c => { m += c.back ? ` <span class="cap">You win back your ${L(c)}!</span>` : ` <span class="cap">You capture their ${L(c)}!</span>`; });
+    if (r.lost) m += ` <span class="hurt">They take your ${L(r.lost)}! Win the battle to get it back.</span>`;
     setMsg(m);
     if (r.wars) await warSpoils(r, yL, oL);
     busy = false;
     renderBattle();
     save();
 
-    if (B.over === 'win') {
-      renderBattleButtons();
-      await sleep(600);
-      $('foeMed').classList.add('dead');
-      const [x, y] = centerOf($('foeMed'));
-      burst(x, y, { n: 40, spread: 180 });
-      banner('Victory'); Snd.duck(3); Snd.win(); buzz([30, 50, 30, 50, 80]);
-      await sleep(1500);
-      winFight();
-    } else if (B.over === 'lose') {
-      renderBattleButtons();
+    if (B.over === 'win') victory();
+    else if (B.over === 'lose') {
+      busy = true; renderBattleButtons();
       await sleep(500);
       $('sBattle').classList.add('fallen');
       banner('Defeat', true); Snd.music(null); Snd.lose(); buzz(300);
       await sleep(1700);
+      busy = false;
       endRun(false);
     }
   }
 
-  // the war's prize card flies to its new owner's pile
+  // the war's prize cards fly to their new owner's pile
   async function warSpoils(r, yL, oL) {
     const fly = async (el, to, glow) => {
       if (!el || !to) return;
@@ -2305,121 +2567,192 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
       }
       el.style.visibility = 'hidden';
     };
-    if (r.captured) { Snd.capture(); await fly(oL.children[r.capIdx], $('youPile'), 'drop-shadow(0 0 14px rgba(255,215,106,.95))'); }
-    if (r.lost) { Snd.steal(); await fly(yL.children[r.lostIdx], $('foePile'), 'drop-shadow(0 0 14px rgba(224,87,79,.95))'); }
+    for (let i = 0; i < r.caps.length; i++) {
+      banner(r.caps[i].back ? 'Won back' : 'Captured'); Snd.capture();
+      await fly(oL.children[r.capIdx[i]], $('youPile'), 'drop-shadow(0 0 14px rgba(255,215,106,.95))');
+    }
+    if (r.lost) { banner('Taken', true); Snd.steal(); await fly(yL.children[r.lostIdx], $('foePile'), 'drop-shadow(0 0 14px rgba(224,87,79,.95))'); }
     await sleep(250);
     $('warDim').classList.remove('on');
   }
 
+  async function victory() {
+    busy = true; renderBattleButtons();
+    await sleep(600);
+    $('foeMed').classList.add('dead');
+    const [x, y] = centerOf($('foeMed'));
+    burst(x, y, { n: 40, spread: 180 });
+    banner('Victory'); Snd.duck(3); Snd.win(); buzz([30, 50, 30, 50, 80]);
+    await sleep(1500);
+    busy = false;
+    winFight();
+  }
   function winFight() {
-    const f = B.f;
-    run.lastGold = winBattle(run);
+    const f = B.f, node = nodeHere();
+    const { g, back } = winBattle(run, B);
     B = null;
-    if (f.boss) return endRun(true);
-    run.pending = f.actBoss ? [] : makeOffers(run);  // bosses pay out their relic prize instead of a reward pick
-    run.beat = f.name;
-    const pz = nodeAt(run).prize;
-    if (pz && !pz.claimed) run.prizePending = run.at;
-    save();
-    showReward();
+    if (f.final) return endRun(true);
+    const base = { g, foe: f.name, back: back.map(L) };
+    if (node.t === 'boss') run.pending = { ...base, k: 'boss', choices: relicChoices(run) };
+    else if (node.t === 'elite') run.pending = { ...base, k: 'relic', choices: relicChoices(run, 2) };
+    else run.pending = { ...base, k: 'prize', p: node.prize };
+    save(); showReward();
   }
 
-  /* reward */
+  /* rewards: a battle's prize or relic, or new cards from a draft */
   function offerView(o) {
-    if (o.k === 'card') return o.cs.length === 1  // a single card (level prize) or a pair (Recruits)
-      ? { vis: cardHTML(o.cs[0], 'mini'), kind: 'New card', t: `${RN[o.cs[0].v] || o.cs[0].v} of ${NAMES[o.cs[0].s]}`, d: `Add the ${full(o.cs[0])} to your deck.` }
-      : { vis: o.cs.map(c => cardHTML(c, 'mini')).join(''), kind: 'New cards', t: 'Recruits', d: `Add ${o.cs.map(L).join(' and ')} to your deck.` };
+    if (o.k === 'card') return { vis: cardHTML(o.c, 'mini'), kind: o.c.ch ? `Card · ${CHARMS[o.c.ch].n} charm` : 'New card', t: full(o.c), d: o.c.ch ? CHARMS[o.c.ch].d : `Add the ${full(o.c)} to your deck.` };
+    if (o.k === 'gold') return { vis: '<span class="icon">🪙</span>', kind: 'Prize', t: `${o.n} gold`, d: 'For the store. Click to collect.' };
+    if (o.k === 'tonic') return { vis: `<span class="icon" data-tonic="${o.t}">${TONICS[o.t].i}</span>`, kind: 'Prize · tonic', t: TONICS[o.t].n, d: `${TONICS[o.t].d} Drink it during a battle.` };
+    if (o.k === 'charm') return { vis: `<span class="icon charm-icon" data-charm="${o.ch}">${CHARMS[o.ch].i}</span>`, kind: 'Prize · charm', t: CHARMS[o.ch].n, d: `${CHARMS[o.ch].d} You pick the card.` };
     if (o.k === 'relic') { const R = RELICS[o.r]; return { vis: `<span class="icon" data-relic="${o.r}">${R.i}</span>`, kind: 'Relic', t: R.n, d: R.d }; }
-    if (o.k === 'gold') return { vis: '<span class="icon">🪙</span>', kind: 'Gold', t: `${o.n} gold`, d: 'Spend it at the next store.' };
-    if (o.k === 'charm') { const C = CHARMS[o.c]; return { vis: `<span class="icon charm-icon" data-charm="${o.c}">${C.i}</span>`, kind: 'Card charm', t: C.n, d: `${C.d} You pick the card.` }; }
-    if (o.k === 'heal') return { vis: '<span class="icon">❤️</span>', kind: 'Heal', t: 'Rest', d: `Heal ${o.n} HP. You're at ${run.hp} of ${run.maxHp}.` };
-    if (o.k === 'temper') { const up = c => ({ ...c, v: Math.min(14, c.v + 5) }); return { vis: o.cs.map(c => cardHTML(up(c), 'mini')).join(''), kind: 'Upgrade', t: 'Temper', d: `${o.cs.map(c => `${L(c)} becomes ${L(up(c))}`).join(', ')}.` }; }
-    if (o.k === 'cull') return { vis: o.cs.map(c => cardHTML(c, 'mini')).join(''), kind: 'Thin your deck', t: 'Cull', d: `Remove ${o.cs.map(L).join(', ')} so your strong cards come up more often.` };
   }
-  function showPrize() {
-    const pz = run.map.nodes[run.prizePending].prize, v = offerView(pz);
-    $('prizeFrom').textContent = `For beating the ${short(run.map.nodes[run.prizePending].foe.name)}`;
-    $('prizeVis').innerHTML = pz.k === 'card' ? cardHTML(pz.cs[0], 'full') : v.vis;
-    $('prizeName').textContent = pz.k === 'relic' ? `Relic: ${v.t}` : v.t;
-    $('prizeDesc').textContent = pz.k === 'card' ? `The ${full(pz.cs[0])} joins your deck.` : pz.k === 'relic' && has(run, pz.r) ? 'You already have this relic, so you get 30 gold instead.' : v.d;
-    $('prizeClaim').textContent = pz.k === 'charm' ? 'Choose a card' : 'Claim';
-    $('prizePop').hidden = false; $('prizeClaim').focus({ preventScroll: true });
-    setTimeout(() => { Snd.rare(); const [x, y] = centerOf($('prizeVis')); burst(x, y, { n: 40, spread: 170 }); }, 250);
-  }
-  let claiming = false;
-  $('prizeClaim').addEventListener('click', async () => {
-    if (claiming || !run || run.prizePending == null) return;
-    claiming = true;
-    const pz = run.map.nodes[run.prizePending].prize;
-    let idx;
-    if (pz.k === 'charm') { $('prizePop').hidden = true; idx = await pickCard(pz.c); if (idx == null) { $('prizePop').hidden = false; claiming = false; return; } }
-    claimPrize(run, pz, idx); run.prizePending = null; save();
-    Snd.coin(); $('prizePop').hidden = true; claiming = false;
-    if (!run.pending.length) { choose(null); return; }  // boss: straight back to the map
-    $('rewardSub').textContent = `+${run.lastGold || 0} gold (you have ${run.gold || 0}). Choose one reward.`;
-  });
   function showReward() {
-    Snd.music('menu');
-    if (run.prizePending != null) setTimeout(showPrize, 500);
-    $('skipBtn').hidden = !run.pending.length;
-    $('rewardTitle').textContent = `The ${short(run.beat)} falls.`;
-    $('rewardSub').textContent = run.pending.length ? `+${run.lastGold || 0} gold (you have ${run.gold || 0}). Choose one reward.` : `+${run.lastGold || 0} gold (you have ${run.gold || 0}). A boss's prize is waiting.`;
-    setAct(nodeAt(run).act);
-    $('rewardMed').textContent = nodeAt(run).foe.glyph + VS;
+    Snd.music('menu'); setAct(run.act);
+    const P = run.pending;
+    const G = { recruit: ['Recruits', 'Choose one to join your deck, or skip.'], suit: [`${P.s ? SYMS[P.s] + VS : ''} Draft`, `Choose one of these ${P.s ? SUITNAME[P.s] : ''}, or skip.`],
+      blind: ['Blind Draw', 'Only the suits show. Pick one and see what you get.'], trial: ['A rare card', 'Your reward for passing the trial.'] };
+    const gain = P.k === 'gain', rev = P.k === 'reveal';
+    $('rewardTitle').textContent = gain ? G[P.t][0] : rev ? 'You drew...' : `The ${short(P.foe)} falls.`;
+    $('rewardMed').textContent = gain || rev ? (P.t === 'suit' ? SYMS[P.s] + VS : P.t === 'trial' ? '🗿' : '🃏') : foeGlyph({ name: P.foe });
+    $('rewardSub').textContent = gain ? G[P.t][1] : rev ? `The ${full(P.c)}${P.c.v >= 11 ? '. Lucky!' : P.c.v <= 5 ? '. Oh dear.' : '.'} It joins your deck.`
+      : `+${P.g} gold (you have ${run.gold}).${P.back && P.back.length ? ` You win back your ${P.back.join(', ')}.` : ''} ${P.k === 'prize' ? 'Your prize:' : 'Claim a relic.'}`;
     $('offers').innerHTML = '';
-    run.pending.forEach((o, i) => {
-      const v = offerView(o);
+    const list = P.k === 'boss' || P.k === 'relic' ? P.choices.map(r => ({ k: 'relic', r })) : gain ? P.cards.map(c => ({ k: 'card', c, blind: P.t === 'blind' })) : rev ? [{ k: 'card', c: P.c }] : [P.p];
+    $('offers').style.setProperty('--n', Math.max(1, list.length));
+    list.forEach((o, i) => {
+      const v = o.blind ? { vis: cardHTML(null, 'mini', true), kind: 'Face down', t: `A card of ${SUITNAME[o.c.s]} ${SYMS[o.c.s]}${VS}`, d: 'Anything from a 3 to an Ace.' } : offerView(o);
       const b = document.createElement('button');
       b.className = 'offer'; b.type = 'button'; b.style.setProperty('--d', `${120 + i * 110}ms`);
-      b.innerHTML = `<div class="vis">${v.vis}</div><div><span class="kind">${v.kind}</span><b>${v.t}</b><span class="d">${v.d}</span></div>`;
+      b.innerHTML = `<div class="vis">${v.vis}</div><div><span class="kind">${v.kind}</span><b>${v.t}</b><span class="d">${rev ? 'Click to continue.' : v.d}</span></div>`;
       b.addEventListener('click', () => choose(i, b));
       $('offers').append(b);
     });
+    $('skipBtn').hidden = P.k === 'prize' || rev;
+    $('skipBtn').textContent = gain ? 'Skip' : 'Skip the relic';
+    $('rewardKeys').innerHTML = list.length > 1 ? `<kbd>1</kbd>${list.length > 2 ? ' <kbd>2</kbd> <kbd>3</kbd>' : ' <kbd>2</kbd>'} choose${$('skipBtn').hidden ? '' : ' &nbsp;·&nbsp; <kbd>S</kbd> skip'}` : '<kbd>Enter</kbd> continue';
     show('sReward');
+    if (rev) { const c = $('offers').querySelector('.card'); if (c && !reduce) c.animate([{ transform: 'rotateY(180deg) scale(.8)' }, { transform: 'rotateY(0deg) scale(1)' }], { duration: 600, easing: 'cubic-bezier(.3,.7,.3,1)' }); setTimeout(() => { if (P.c.v >= 11) { Snd.rare(); const [x, y] = centerOf(c); burst(x, y, { n: 30 }); } else Snd.flick(); }, 350); }
+    if (P.k === 'prize' || P.k === 'relic' || P.k === 'boss') setTimeout(() => { Snd.rare(); const o = $('offers').firstElementChild; if (o) { const [x, y] = centerOf(o); burst(x, y, { n: 30, spread: 150 }); } }, 400);
+    if (!list.length) setTimeout(() => choose(null), 400);
   }
   let choosing = false;
   async function choose(i, btn) {
-    if (!run || !run.pending || choosing || run.prizePending != null) return;
+    if (!run || !run.pending || choosing) return;
     choosing = true;
-    let idx;
-    if (i != null && run.pending[i].k === 'charm') { idx = await pickCard(run.pending[i].c); if (idx == null) { choosing = false; return; } }
+    const P = run.pending;
     if (btn) {
       Snd.pick(); buzz(20);
       [...$('offers').children].forEach(b => b.classList.add(b === btn ? 'chosen' : 'faded'));
       const [x, y] = centerOf(btn); burst(x, y, { n: 20, spread: 110 });
-      await sleep(550);
+      await sleep(420);
     }
-    if (i != null) applyOffer(run, run.pending[i], idx);
-    run.pending = null;
-    clearNode(run);
-    save(); choosing = false;
-    showMap();
+    choosing = false;
+    if (P.k === 'boss') {
+      run.pending = null;
+      if (i != null && P.choices[i]) gainRelic(run, P.choices[i]);
+      nextAct(run); run.walkSeen = null; save();
+      showMap(); setTimeout(() => { banner(`Act ${ROMAN[run.act]}`); Snd.war(); }, 300);
+      return;
+    }
+    if (P.k === 'gain') {
+      if (i == null) { run.pending = null; save(); return showMap(); }
+      const c = addCard(run, P.cards[i]);
+      if (P.t === 'blind') { run.pending = { k: 'reveal', c }; save(); return showReward(); }
+      run.pending = null; save(); return showMap();
+    }
+    if (P.k === 'reveal') { run.pending = null; save(); return showMap(); }
+    if (P.k === 'relic') { if (i != null && P.choices[i]) gainRelic(run, P.choices[i]); run.pending = null; save(); return showMap(); }
+    const p = P.p;
+    if (p.k === 'charm') {
+      const c = await pickCard({ title: `${CHARMS[p.ch].i} ${CHARMS[p.ch].n} charm`, sub: `${CHARMS[p.ch].d} Pick the card to carry it. A card holds one charm.` });
+      if (!c) return;
+      charmCard(run, c.id, p.ch); Snd.rare(); run.pending = null; save(); return showMap();
+    }
+    const full_ = applyPrize(run, p);
+    if (p.k === 'gold' || full_) Snd.coin();
+    run.pending = null; save(); showMap();
   }
 
-  /* card picker: choose which card carries a charm */
-  let pickResolve = null;
-  function pickCard(charm) {
+  /* card picker: choose a card from your deck */
+  let pickResolve = null, pickCancelable = true;
+  function pickCard({ title, sub, filter, cancel = false }) {
     return new Promise(res => {
-      pickResolve = res;
-      const C = CHARMS[charm];
-      $('pickTitle').textContent = `Give ${C.n} to a card`;
-      $('pickSub').textContent = `${C.i} ${C.d} Each card can carry one charm; picking a charmed card replaces its charm.`;
-      const order = run.deck.map((c, i) => i).sort((a, b) => run.deck[b].v - run.deck[a].v || run.deck[a].s.localeCompare(run.deck[b].s));
-      $('pickGrid').innerHTML = order.map(i => `<button class="pick-card" type="button" data-i="${i}" aria-label="${full(run.deck[i])}">${cardHTML(run.deck[i], 'tiny')}</button>`).join('');
+      pickResolve = res; pickCancelable = cancel;
+      $('pickTitle').textContent = title;
+      $('pickSub').textContent = sub;
+      $('pickCancel').hidden = !cancel;
+      const cards = run.deck.filter(filter || (() => true)).sort((a, b) => b.v - a.v || a.s.localeCompare(b.s));
+      $('pickGrid').innerHTML = cards.map(c => `<button class="pick-card" type="button" data-id="${c.id}" aria-label="${full(c)}">${cardHTML(c, 'tiny')}</button>`).join('');
       $('picker').hidden = false;
       const f = $('pickGrid').querySelector('button'); if (f) f.focus({ preventScroll: true });
     });
   }
   function closePicker(v) { $('picker').hidden = true; const r = pickResolve; pickResolve = null; if (r) r(v); }
-  $('pickGrid').addEventListener('click', e => { const b = e.target.closest('.pick-card'); if (b) { Snd.pick(); closePicker(+b.dataset.i); } });
+  $('pickGrid').addEventListener('click', e => { const b = e.target.closest('.pick-card'); if (b) { Snd.pick(); const [x, y] = centerOf(b); burst(x, y, { n: 24, spread: 90 }); closePicker(run.deck.find(c => c.id === b.dataset.id) || null); } });
   $('pickCancel').addEventListener('click', () => { Snd.tap(); closePicker(null); });
 
-  /* store (after each act boss) */
+  /* events, campfires, chests, trials and the other stops along the road */
+  function eventDef() {
+    const E = run.event;
+    if (E.t === 'event') { const X = EVENTS[E.ev]; return { t: X.t, i: X.i, text: X.text, choices: () => X.choices }; }
+    if (E.t === 'chest') return { ...CHEST, choices: () => CHEST.choices };
+    if (E.t === 'trial') { const T = TRIALS[E.tr], x = T.need ? T.need(run) : 0; return { t: T.n, i: T.i, text: 'A carved stone face stares at you. "Prove yourself," it rumbles, "and I will share my treasures."', choices: () => [
+      { l: 'Take the trial', d: T.d(x), go: r => { const res = runTrial(r, E.tr); return { text: res.pass ? 'The stone face smiles. You pass! Choose a rare card.' : 'The stone face frowns. You fail, and it falls silent.', reveal: res.cs, offer: res.pass ? rareCards() : null, good: res.pass, bad: !res.pass }; } },
+      { l: 'Walk past', d: 'Not today.', go: () => ({ text: 'You leave the stone to its thoughts.' }) }] }; }
+    return NODES[E.t];
+  }
+  const evStatus = () => { $('evStatus').innerHTML = `❤️ ${Math.max(0, run.hp)} / ${run.maxHp} &nbsp;·&nbsp; 🪙 ${run.gold} &nbsp;·&nbsp; 🃏 ${run.deck.length} cards${run.tonics.length ? ` &nbsp;·&nbsp; ${run.tonics.map(t => `<span data-tonic="${t}">${TONICS[t].i}</span>`).join(' ')}` : ''}`; };
+  function showEvent(msg) {
+    const D = eventDef(), st = run.event.st;
+    $('evMed').textContent = D.i; $('evTitle').textContent = D.t; $('evText').textContent = D.text;
+    evStatus();
+    $('evResult').hidden = !msg; if (msg) $('evResult').innerHTML = msg;
+    $('evGo').hidden = true;
+    const box = $('evChoices'); box.innerHTML = ''; box.hidden = false;
+    D.choices(run, st).forEach((c, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ev-choice'; b.style.setProperty('--d', `${150 + i * 90}ms`);
+      b.innerHTML = `<b>${c.l}</b><span>${c.d}</span><kbd>${i + 1}</kbd>`;
+      const pool = c.filter ? run.deck.filter(c.filter) : run.deck;
+      if ((c.can && !c.can(run)) || (c.pick && !pool.length)) b.disabled = true;
+      b.addEventListener('click', () => pickChoice(c));
+      box.append(b);
+    });
+    if (!($('sEvent').hidden === false && msg)) { Snd.music('menu'); setAct(run.act); show('sEvent'); if (run.event.t === 'rest') Snd.heal(); }
+    const f = box.querySelector('button:not(:disabled)'); if (f) f.focus({ preventScroll: true });
+  }
+  let evBusy = false;
+  async function pickChoice(c) {
+    if (evBusy || !run || !run.event) return;
+    evBusy = true;
+    Snd.pick();
+    const st = run.event.st;
+    let card = null;
+    if (c.pick) { card = await pickCard({ title: c.l, sub: c.d, filter: c.filter, cancel: true }); if (!card) { evBusy = false; return; } }
+    let res = c.go(run, card, st);
+    if (typeof res === 'string') res = { text: res };
+    evBusy = false;
+    const reveal = res.reveal && res.reveal.length ? `<span class="reveal">${res.reveal.map(x => cardHTML(x, 'tiny')).join('')}</span>` : '';
+    const good = res.good || /relic|Inside you find|win!/i.test(res.text);
+    if (good) { Snd.rare(); const [x, y] = centerOf($('evMed')); burst(x, y, { n: 30, spread: 130 }); }
+    if (res.bad) { Snd.hurt(false); once($('sEvent'), 'shake', 420); }
+    if (/gold/i.test(res.text)) Snd.coin();
+    if (res.again) { save(); return showEvent(res.text); }
+    run.event = null;
+    if (res.offer) run.pending = { k: 'gain', t: 'trial', cards: res.offer };
+    save();
+    evStatus();
+    $('evChoices').hidden = true;
+    $('evResult').innerHTML = res.text + reveal; $('evResult').hidden = false;
+    $('evGo').hidden = false; $('evGo').textContent = run.hp <= 0 ? 'Your march ends here' : res.offer ? 'Choose your card' : 'Continue';
+    $('evGo').focus({ preventScroll: true });
+  }
+  function eventDone() { if (!run) return; if (run.hp <= 0) return endRun(false); if (run.pending) return showReward(); showMap(); }
+
+  /* store */
   function showStore() {
-    Snd.music('shop');
-    const a = ACTS[nodeAt(run).act];
-    setAct(nodeAt(run).act);
-    $('storeAct').textContent = `${a.n}: ${a.name}`;
+    Snd.music('shop'); setAct(run.act);
+    $('storeAct').textContent = `Act ${ROMAN[run.act]}: ${ACTS[run.act].name}`;
     $('storeSub').textContent = pick(KEEPER_LINES);
     setTimeout(() => Snd.bell(), 250);
     renderStore(true);
@@ -2440,46 +2773,60 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     const steps = 12; let k = 0;
     const t = setInterval(() => { k++; el.textContent = Math.round(from + (to - from) * k / steps); if (k >= steps) clearInterval(t); }, 35);
   }
+  const bagFull = () => run.tonics.length >= tonicCap(run);
+  function wareView(it) {
+    if (it.k === 'card') return { vis: cardHTML(it.c, 'mini'), kind: it.c.ch ? `Card · ${CHARMS[it.c.ch].n}` : 'Card', t: `${RN[it.c.v] || it.c.v} of ${NAMES[it.c.s]}`, d: it.c.ch ? `With a ${CHARMS[it.c.ch].n} charm: ${CHARMS[it.c.ch].d}` : 'Joins your deck.' };
+    if (it.k === 'relic') { const R = RELICS[it.r]; return { vis: `<span class="icon" data-relic="${it.r}">${R.i}</span>`, kind: 'Relic', t: R.n, d: R.d }; }
+    if (it.k === 'charm') { const C = CHARMS[it.ch]; return { vis: `<span class="icon charm-icon" data-charm="${it.ch}">${C.i}</span>`, kind: 'Card charm', t: C.n, d: `${C.d} Goes on a card you pick.` }; }
+    if (it.k === 'tonic') { const T = TONICS[it.t]; return { vis: `<span class="icon" data-tonic="${it.t}">${T.i}</span>`, kind: 'Tonic', t: T.n, d: `${T.d}${bagFull() ? ' Your bag is full.' : ''}` }; }
+    return { vis: '<span class="icon">✂️</span>', kind: 'Thin your deck', t: 'Remove a card', d: 'Take a card you pick out of your deck. Costs more each time.' };
+  }
   function renderStore(anim) {
     if (anim) shownGold = null;
     countGold(run.gold || 0);
     $('storeItems').innerHTML = '';
-    run.store.items.forEach((it, i) => {
-      if ((it.k === 'temper' || it.k === 'cull') && !it.sold) it.cs = lowest3(run);
-      const v = offerView(it), poor = !it.sold && (run.gold || 0) < it.price;
+    run.store.forEach((it, i) => {
+      const v = wareView(it), poor = !it.sold && ((run.gold || 0) < it.price || (it.k === 'tonic' && bagFull()));
       const b = document.createElement('button');
-      b.type = 'button'; b.className = `store-item${it.sold ? ' sold' : ''}${poor ? ' poor' : ''}`; b.disabled = it.sold;
-      b.style.setProperty('--d', anim ? `${80 + i * 70}ms` : '-1s');
+      b.type = 'button'; b.className = `store-item${it.sold ? ' sold' : ''}${poor ? ' poor' : ''}`; b.disabled = !!it.sold;
+      b.style.setProperty('--d', anim ? `${80 + i * 60}ms` : '-1s');
       b.innerHTML = `<span class="n">${i + 1}</span><div class="vis">${v.vis}</div><div><span class="kind">${v.kind}</span><b>${v.t}</b><span class="d">${v.d}</span>`
         + `<span class="price">${it.sold ? 'Paid' : `🪙 ${it.price}`}</span></div>${it.sold ? '<span class="stamp">Sold</span>' : ''}`;
       b.addEventListener('click', () => storeBuy(i, b));
       $('storeItems').append(b);
     });
   }
+  let buying = false;
   async function storeBuy(i, btn) {
-    const it = run.store.items[i];
-    if (!it || it.sold) return;
-    if ((run.gold || 0) < it.price) { Snd.hurt(false); once(btn, 'shake', 420); return; }
-    let idx;
-    if (it.k === 'charm') { idx = await pickCard(it.c); if (idx == null) return; }
-    buyItem(run, i, idx); save();
+    const it = run.store[i];
+    if (!it || it.sold || buying) return;
+    if ((run.gold || 0) < it.price || (it.k === 'tonic' && bagFull())) { Snd.hurt(false); once(btn, 'shake', 420); return; }
+    let card = null;
+    if (it.k === 'charm' || it.k === 'remove') {
+      buying = true;
+      card = await pickCard(it.k === 'charm' ? { title: `${CHARMS[it.ch].i} ${CHARMS[it.ch].n} charm`, sub: `${CHARMS[it.ch].d} Pick the card to carry it. A card holds one charm.`, cancel: true }
+        : { title: 'Remove a card', sub: 'This card leaves your deck for good.', cancel: true });
+      buying = false;
+      if (!card) return;
+    }
+    buyItem(run, it, card && card.id); save();
     Snd.coin();
     const [x, y] = centerOf(btn); burst(x, y, { n: 24, colors: ['#ffd76a', '#f7dc9a', '#fffaf0'], spread: 120 });
     renderStore(false); once(document.querySelector('.gold-pill'), 'bump', 520);
     const nb = $('storeItems').children[i]; if (nb) { nb.classList.add('just-sold'); setTimeout(() => Snd.hit(false), 120); }
   }
-  $('storeLeave').addEventListener('click', () => { if (!run) return; run.store = null; clearNode(run); save(); Snd.pick(); showMap(); });
+  $('storeLeave').addEventListener('click', () => { if (!run) return; run.store = null; save(); Snd.pick(); showMap(); });
 
   /* end */
   function endRun(won) {
     const r = record();
-    r.runs++; r.best = Math.max(r.best, won ? STEPS : run.step + 1); if (won) r.wins++;
+    r.runs++; r.bestAct = Math.max(r.bestAct || 0, won ? 3 : run.act + 1); if (won) r.wins++;
     store(REC, r);
-    const f = nodeAt(run).foe;
-    $('endMed').textContent = won ? '\u265A' + VS : f.glyph + VS;
+    const foe = B && B.f ? B.f : null;
+    $('endMed').textContent = won ? '♚' + VS : foe ? foeGlyph(foe) : '💀';
     $('endTitle').textContent = won ? 'The King is dead.' : 'You fell.';
-    $('endSub').textContent = won ? 'Three acts, one life, and the crown is yours.' : `The ${short(f.name)} ended your march in ${ACTS[nodeAt(run).act].n}, step ${run.step + 1} of ${STEPS}.`;
-    $('endStats').innerHTML = [[run.stats.wars, 'wars'], [run.stats.captured || 0, 'cards captured'], [run.stats.dealt, 'damage dealt']]
+    $('endSub').textContent = won ? 'Three acts, one life, and the crown is yours.' : `${foe ? `The ${short(foe.name)}` : 'The road'} ended your march in Act ${ROMAN[run.act]}, ${ACTS[run.act].name}.`;
+    $('endStats').innerHTML = [[run.stats.battles || 0, 'battles won'], [run.relics.length, 'relics'], [run.stats.captured || 0, 'cards captured']]
       .map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('');
     run = null; B = null; clearSlot();
     show('sEnd');
@@ -2492,13 +2839,15 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
 
   /* deck sheet */
   function openSheet() {
+    if (!run) return;
     Snd.tap();
     const cards = [...run.deck].sort((a, b) => b.v - a.v || a.s.localeCompare(b.s));
     $('sheetTitle').textContent = `Your deck (${cards.length})`;
     $('deckGrid').innerHTML = cards.map(c => cardHTML(c, 'tiny')).join('');
-    $('relicList').innerHTML = run.relics.length
-      ? run.relics.map(r => `<li data-relic="${r}"><span class="med">${RELICS[r].i}</span><div><b>${RELICS[r].n}</b><small>${RELICS[r].d}</small></div></li>`).join('')
-      : '<li><span class="med">?</span><div><small>None yet. Win a battle to pick one.</small></div></li>';
+    const tot = run.totem ? `<li data-totem="1"><span class="med">${SYMS[run.totem.s]}${VS}</span><div><b>${suitName(run.totem.s)} totem: ${CHARMS[run.totem.ch].n}</b><small>All your ${SUITNAME[run.totem.s]} are ${CHARMS[run.totem.ch].n}: ${CHARMS[run.totem.ch].d}</small></div></li>` : '';
+    const rel = run.relics.map(r => `<li data-relic="${r}"><span class="med">${RELICS[r].i}</span><div><b>${RELICS[r].n}</b><small>${RELICS[r].d}</small></div></li>`).join('');
+    const ton = run.tonics.map(t => `<li><span class="med">${TONICS[t].i}</span><div><b>${TONICS[t].n}</b><small>${TONICS[t].d} Drink it in battle.</small></div></li>`).join('');
+    $('relicList').innerHTML = tot + rel + ton || '<li><span class="med">?</span><div><small>No relics or tonics yet.</small></div></li>';
     $('sheet').hidden = false; $('sheetClose').focus();
   }
 
@@ -2510,21 +2859,23 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
   $('quitBtn').addEventListener('click', () => { try { window.pywebview.api.quit(); } catch (e) {} });
   addEventListener('pywebviewready', () => { $('quitBtn').hidden = false; });
   $('slotsBack').addEventListener('click', () => { Snd.tap(); showTitle(); });
-  $('fightBtn').addEventListener('click', () => { if (selNode != null && choicesOf(run).includes(selNode)) goNode(selNode); else selectNode(choicesOf(run)[0]); });
-  $('nextFoe').addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (b) selectNode(+b.dataset.pick); });
+  $('fightBtn').addEventListener('click', () => { if (selNode != null && canGo(selNode)) goNode(selNode); else { const R = run.row + 1, ch = reachable(run); if (ch.length) selectNode(R + ':' + ch[0]); } });
+  $('nextFoe').addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (b) selectNode(b.dataset.pick); });
   $('flipBtn').addEventListener('click', doFlip);
   $('youPile').addEventListener('click', doFlip);
   $('burnBtn').addEventListener('click', doBurn);
   $('skipBtn').addEventListener('click', () => choose(null));
+  $('evGo').addEventListener('click', eventDone);
   $('againBtn').addEventListener('click', () => startRun(slot || 1));
   $('homeBtn').addEventListener('click', showTitle);
   $('mapDeckBtn').addEventListener('click', openSheet);
   $('battleDeckBtn').addEventListener('click', openSheet);
+  $('evDeckBtn').addEventListener('click', openSheet);
   $('sheetClose').addEventListener('click', () => { $('sheet').hidden = true; });
   document.querySelectorAll('.sound-btn').forEach(b => b.addEventListener('click', () => { Snd.toggle(); syncSoundBtns(); syncSettingsUI(); }));
   let abandonArmed = false;
   $('abandonBtn').addEventListener('click', () => {
-    if (!abandonArmed) { abandonArmed = true; $('abandonBtn').textContent = 'Tap again to abandon'; setTimeout(() => { abandonArmed = false; if (run) $('abandonBtn').textContent = 'Abandon run'; }, 3000); return; }
+    if (!abandonArmed) { abandonArmed = true; $('abandonBtn').textContent = 'Click again to abandon'; setTimeout(() => { abandonArmed = false; if (run) $('abandonBtn').textContent = 'Abandon run'; }, 3000); return; }
     abandonArmed = false; clearSlot(); run = null; showTitle();
   });
 
@@ -2560,7 +2911,7 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
   }
   function openSettings() {
     Snd.tap(); syncSettingsUI();
-    $('menuRow').hidden = !(visible('sPack') || visible('sMap') || visible('sBattle') || visible('sReward') || visible('sStore') || visible('sEnd'));
+    $('menuRow').hidden = !(visible('sPack') || visible('sMap') || visible('sEvent') || visible('sBattle') || visible('sReward') || visible('sStore') || visible('sEnd'));
     $('settings').hidden = false; $('setClose').focus();
   }
   function closeSettings() { Snd.tap(); $('settings').hidden = true; }
@@ -2588,8 +2939,7 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
     let handled = true;
     if (e.key === 'F11') setSetting('fullscreen', !SET.fullscreen);
     else if (k === 'm') { Snd.toggle(); syncSoundBtns(); syncSettingsUI(); }
-    else if (!$('prizePop').hidden) { if (go || k === 'escape') { if (!e.repeat) click('prizeClaim'); } else handled = false; }
-    else if (!$('picker').hidden) { if (k === 'escape') { Snd.tap(); closePicker(null); } else handled = false; }
+    else if (!$('picker').hidden) { if (k === 'escape') { if (pickCancelable) { Snd.tap(); closePicker(null); } } else handled = false; }
     else if (!$('settings').hidden) { if (k === 'escape') closeSettings(); else handled = false; }
     else if (k === 'escape' && visible('sSlots')) { Snd.tap(); showTitle(); }
     else if (k === 'escape' && visible('sMap') && $('lpop')) closeLevel();
@@ -2612,21 +2962,38 @@ if(typeof module!=='undefined') module.exports={newRun,newBattle,playRound,burn,
       else handled = false;
     }
     else if (visible('sMap')) {
-      const n = '123'.indexOf(k), ch = choicesOf(run), at = ch.indexOf(selNode);
-      if (k === 'escape' && $('lpop')) closeLevel();
-      else if (n >= 0 && ch[n] != null) selectNode(ch[n]);
+      const R = run.row + 1, ch = reachable(run).map(x => R + ':' + x), n = '123'.indexOf(k), at = ch.indexOf(selNode);
+      if (n >= 0 && ch[n] != null) selectNode(ch[n]);
       else if (/^arrow(up|down|left|right)$/.test(k)) selectNode(ch[at < 0 ? 0 : (at + (k === 'arrowdown' || k === 'arrowright' ? 1 : ch.length - 1)) % ch.length]);
       else if (go) { if (!e.repeat) click('fightBtn'); }
       else if (k === 'd') click('mapDeckBtn'); else handled = false;
     }
-    else if (visible('sBattle')) { if (go || k === 'f') { if (!e.repeat) click('flipBtn'); } else if (k === 'b') { if (!e.repeat) click('burnBtn'); } else if (k === 'd') click('battleDeckBtn'); else handled = false; }
+    else if (visible('sBattle')) {
+      const n = '1234'.indexOf(k);
+      if (go || k === 'f') { if (!e.repeat) click('flipBtn'); }
+      else if (k === 'b') { if (!e.repeat) click('burnBtn'); }
+      else if (n >= 0) { if (!e.repeat) drinkTonic(n); }
+      else if (k === 'd') click('battleDeckBtn'); else handled = false;
+    }
+    else if (visible('sEvent')) {
+      const n = '1234'.indexOf(k);
+      if (n >= 0 && !$('evChoices').hidden) { const b = $('evChoices').children[n]; if (b && !b.disabled) b.click(); }
+      else if (go && !$('evGo').hidden) { if (!e.repeat) click('evGo'); }
+      else if (k === 'd') openSheet(); else handled = false;
+    }
     else if (visible('sStore')) {
-      const n = '123456'.indexOf(k);
+      const n = '12345678'.indexOf(k);
       if (n >= 0) { const b = $('storeItems').children[n]; if (b) b.click(); }
       else if (go) { const a = document.activeElement; if (a && a.classList.contains('store-item')) a.click(); else click('storeLeave'); }
+      else if (k === 'd') openSheet();
       else handled = false;
     }
-    else if (visible('sReward')) { const n = '123'.indexOf(k); if (n >= 0) { const o = $('offers').children[n]; if (o) o.click(); } else if (k === 's') click('skipBtn'); else handled = false; }
+    else if (visible('sReward')) {
+      const n = '123'.indexOf(k), os = $('offers').children;
+      if (n >= 0) { const o = os[n]; if (o) o.click(); }
+      else if (go && os.length === 1) { if (!e.repeat) os[0].click(); }
+      else if (k === 's') click('skipBtn'); else handled = false;
+    }
     else if (visible('sEnd')) { if (go) click('againBtn'); else if (k === 'h') click('homeBtn'); else handled = false; }
     else handled = false;
     if (handled) e.preventDefault();
