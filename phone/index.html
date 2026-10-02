@@ -547,6 +547,15 @@
   .hand-card:disabled { opacity: .55; }
   .quirk.flashq { animation: flashq 1.2s; }
   @keyframes flashq { 20% { color: var(--brass-hi); text-shadow: 0 0 12px rgba(255,200,100,.9); } }
+
+  /* skill cards */
+  .card.skill .front { background: linear-gradient(155deg, #fff6dc 0%, #f0dcaa 100%); }
+  .skill-face { position: absolute; inset: 15% 9% 13%; display: grid; place-items: center; align-content: center; gap: 4%; border-radius: calc(var(--cw) * .06);
+    background: radial-gradient(circle at 50% 40%, rgba(224,180,90,.4), rgba(224,180,90,.08) 72%); box-shadow: inset 0 0 0 calc(var(--cw) * .02) rgba(170,125,50,.65); }
+  .skill-face .sk-i { font-size: calc(var(--cw) * .42); line-height: 1; }
+  .skill-face .sk-n { font-size: calc(var(--cw) * .14); font-weight: 900; font-style: italic; color: #3a1209; letter-spacing: -.01em; line-height: 1; }
+  .tiny .skill-face .sk-n { display: none; }
+  .tiny .skill-face .sk-i { font-size: calc(var(--cw) * .5); }
   @media (prefers-reduced-motion: reduce) {
     .tonic.armed, .choice, .node.can .med, .awning, .bell, .screen.enter, .fan .card, .pack-stage button.pack, .slot, .offer, .march li.now .med, .end .med.huge, .sheet, .sheet-in { animation: none; }
     .banner span, .banner::before { animation-duration: .01s; }
@@ -731,13 +740,16 @@ const RELICS = {
   thief:{n:"Thief's Glove",i:'🧤',d:'Wars you win capture two cards instead of one.'},
   aegis:{n:'Aegis',i:'🔰',d:'The first hit you take each battle deals no damage.'},
   belt:{n:'Trophy Belt',i:'🏆',d:'+2 max HP after every battle you win.'},
-  flask:{n:'Bandolier',i:'🎽',d:'Carry up to 4 tonics instead of 3.'}
+  flask:{n:'Bandolier',i:'🎽',d:'Carry up to 4 tonics instead of 3.'},
+  drum:{n:'War Drum',i:'🥁',d:'Cards within 1 rank of each other start a war. Wars you start give your card +2.'},
+  colours:{n:'Clash of Colours',i:'🎌',d:"When your card's suit matches the enemy's, it's a war. Wars you start give your card +2."}
 };
 const CHARMS = {
   gilded:{n:'Gilded',i:'🪙',d:'+2 gold whenever this card wins.'},
   keen:{n:'Keen',i:'🔪',d:'+3 damage whenever this card wins.'},
   mending:{n:'Mending',i:'💚',d:'Heal 2 whenever this card wins.'},
-  steady:{n:'Steady',i:'⚓',d:'This card wins ties.'}
+  steady:{n:'Steady',i:'⚓',d:'This card wins ties.'},
+  twin:{n:'Twin',i:'👯',d:'This card starts a war with any card 1 rank above or below it, with +2 in that war.'}
 };
 const SUITNAME = {S:'spades',H:'hearts',D:'diamonds',C:'clubs'};
 const SEALS = {
@@ -750,9 +762,23 @@ const SEALS = {
   wild:{n:'Wild Seal',i:'🌈',d:'Counts as every suit.'},
   lucky:{n:'Lucky Seal',i:'⭐',d:'1 in 4 chance to count 4 ranks higher.'},
   thorn:{n:'Thorn Seal',i:'🌵',d:'When it loses, the enemy takes 3 damage too.'},
-  ghost:{n:'Ghost Seal',i:'👻',d:"While it is your next card, you can see the enemy's next card."}
+  ghost:{n:'Ghost Seal',i:'👻',d:"While it is your next card, you can see the enemy's next card."},
+  battle:{n:'Battle Seal',i:'🪖',d:'This card always starts a war when flipped, and your war card gets +2.'}
 };
 const SEAL_IDS = Object.keys(SEALS);
+/* skill cards: specialists with their own rule, hired from Mercenaries, stores and now and then a draft */
+const SKILLS = {
+  medic:{n:'Medic',i:'⚕️',v:2,d:'Always loses, but you take no damage and heal 6.'},
+  bomb:{n:'Bomb',i:'💣',v:5,d:'When it wins, it always deals exactly 8 damage.'},
+  squire:{n:'Squire',i:'🐎',v:4,d:'When it loses, you take no damage.'},
+  assassin:{n:'Assassin',i:'🥷',v:3,d:'Beats any J, Q or K.'},
+  trickster:{n:'Trickster',i:'🎭',v:7,d:"Swaps ranks with the enemy's card."},
+  merchant:{n:'Merchant',i:'🧳',v:6,d:'Win or lose, +4 gold.'},
+  berserker:{n:'Berserker',i:'🪓',v:9,d:'Double damage when it wins, but you lose 2 HP every time it is flipped.'},
+  herald:{n:'Herald',i:'🎺',v:8,d:'Always starts a war, and your war card gets +2.'}
+};
+const SKILL_IDS = Object.keys(SKILLS);
+const skillCard = (id, s) => { id=id||pick(SKILL_IDS); return {v:SKILLS[id].v, s:s||pick(SUITS), sk:id}; };
 /* perks: win fights for XP; each level up, choose 1 of 3 */
 const PERKS = {
   tough:{n:'Toughness',i:'💪',d:'+8 max HP, and heal 8 now. You can take it again.',stack:true},
@@ -763,7 +789,8 @@ const PERKS = {
   scav:{n:'Scavenger',i:'💰',d:'+50% gold from battles.'},
   tactic:{n:'Tactician',i:'🎯',d:'Your first card each battle counts 3 ranks higher.'},
   wind:{n:'Second Wind',i:'🌬️',d:'Once per battle, when you drop below a quarter of your HP, heal 10.'},
-  sealer:{n:'Sealbearer',i:'🔏',d:'Put a random seal on a card you pick.',stack:true}
+  sealer:{n:'Sealbearer',i:'🔏',d:'Put a random seal on a card you pick.',stack:true},
+  hot:{n:'Hot Blooded',i:'🩸',d:'Every 4th round of a battle is a war, and your war card gets +2.'}
 };
 const hasPerk = (run,p) => (run.perks||[]).includes(p);
 const isSuit = (c,s) => c.s===s || c.sl==='wild';
@@ -776,7 +803,8 @@ const TONICS = {
   heal:{n:'Healing Tonic',i:'🧪',d:'Heal 12 HP.'},
   fire:{n:'Fire Tonic',i:'💥',d:'Hit the enemy for 10.'},
   luck:{n:'Luck Tonic',i:'🍀',d:'Your next card counts 5 ranks higher.'},
-  iron:{n:'Iron Tonic',i:'🧱',d:'The next hit you take deals no damage.'}
+  iron:{n:'Iron Tonic',i:'🧱',d:'The next hit you take deals no damage.'},
+  horn:{n:'War Horn',i:'📯',d:'Your next flip starts a war, and your war card gets +2.'}
 };
 const QUIRKS = {
   armored:'Armored: takes 1 less damage from every hit.',
@@ -824,8 +852,8 @@ const pick = a => a[Math.floor(Math.random()*a.length)];
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const rankLabel = v => v<=10 ? String(v) : {11:'J',12:'Q',13:'K',14:'A'}[v];
 const nid = () => Math.random().toString(36).slice(2,9);
-// balanced 2026-09-29 by simulation (tools/balance_sim.js), with seals and perks: a careful player wins ~49%, a casual one ~36%; regular fights ramp up steadily, elites and bosses are the peaks
-const TUNE = { hp:20, hpStep:5.3, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
+// balanced 2026-09-29 by simulation (tools/balance_sim.js), with seals, perks, boss styles and war triggers: a careful player wins ~49%, a casual one ~39%; regular fights ramp up steadily, elites and bosses are the peaks
+const TUNE = { hp:21, hpStep:5.5, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
 
 function foeStats(act,row,name,elite){
   const t=act*3+Math.floor(row/3)+(elite?.7:0);
@@ -836,7 +864,7 @@ function foeStats(act,row,name,elite){
 function rollPrize(){ const r=Math.random(); return r<.45?{k:'gold', n:rint(8,14)}:r<.72?{k:'tonic', t:pick(Object.keys(TONICS))}:r<.88?{k:'charm', ch:pick(Object.keys(CHARMS))}:{k:'seal', sl:pick(SEAL_IDS)}; }
 
 /* map, Inscryption style: rows repeat card-gain, utility, battle; you choose between different spots in each row */
-const GAIN = ['recruit','suit','blind','trial'];
+const GAIN = ['recruit','suit','blind','trial','mercs'];
 const UTIL = ['rest','pack','altar','carver','fungi','goo','stones','sealer','store','event','chest'];
 function rowKinds(act,r){
   if(r===ROWS-1) return {pool:['rest','store','pack'], n:3};
@@ -915,7 +943,11 @@ function effE(b,c){ let v=c.v; if(b.f.q==='royal'&&v>=11&&v<=13) v+=2; return v;
 function compare(run,b,pc,ec,luck){
   const D=b.decree&&b.decree.k;
   if(has(run,'sling') && pc.v<=3 && ec.v===14 && D!=='low') return 1;
-  let a=effP(run,pc)+(luck||0), e=effE(b,ec);
+  if(pc.sk==='medic') return -1;
+  if(pc.sk==='assassin' && ec.v>=11 && ec.v<=13) return 1;
+  let a=effP(run,pc), e=effE(b,ec);
+  if(pc.sk==='trickster'){ const t=a; a=e; e=t; }
+  a+=(luck||0);
   if(D==='suit'){ if(isSuit(pc,b.decree.s)) a+=3; if(ec.s===b.decree.s) e+=3; }
   if(a!==e) return (a>e)!==(D==='low') ? 1 : -1;
   if(D==='crown') return -1;
@@ -934,10 +966,24 @@ function useTonic(run,b,i){
   else if(t==='fire'){ b.eHp-=10; r.dmg=10; run.stats.dealt+=10; if(b.eHp<=0) b.over='win'; }
   else if(t==='luck') b.luck=5;
   else if(t==='iron') b.block=1;
+  else if(t==='horn') b.horn=1;
   return r;
 }
 function gainTonic(run,t){ if(run.tonics.length>=tonicCap(run)) return false; run.tonics.push(t); return true; }
 const bestOf = cs => cs.reduce((m,c)=>!m||c.v>m.v?c:m, null);
+// ways to start a war besides a tie; returns why, or null
+function warTrigger(run,b,pc,ec,luck){
+  if(pc.sk==='medic') return null;
+  if(b.horn){ b.horn=0; return 'War Horn'; }
+  if(pc.sk==='herald') return 'Herald';
+  if(pc.sl==='battle') return 'Battle Seal';
+  const gap=Math.abs(effP(run,pc)+(luck||0)-effE(b,ec));
+  if(charmOf(run,pc)==='twin' && gap<=1) return 'Twin';
+  if(has(run,'drum') && gap<=1) return 'War Drum';
+  if(has(run,'colours') && isSuit(pc,ec.s)) return 'Clash of Colours';
+  if(hasPerk(run,'hot') && b.round%4===0) return 'Hot Blooded';
+  return null;
+}
 function playRound(run,b,hi){
   b.round++; run.stats.rounds++;
   const D=b.decree&&b.decree.k;
@@ -946,7 +992,8 @@ function playRound(run,b,hi){
   let pc=roll(b.hand && b.f.style==='hand' && b.hand.length ? b.hand.splice(Math.min(hi||0, b.hand.length-1),1)[0] : take(b,'p')), ec=take(b,'e');
   const flipped=[pc];
   const used={p:[pc],e:[ec]}; const steps=[{t:'flip',pc,ec,luck}];
-  let wars=0, cmp=compare(run,b,pc,ec,luck), stale=false, curLuck=luck;
+  const why=warTrigger(run,b,pc,ec,luck); steps[0].why=why;
+  let wars=0, cmp=why ? 0 : compare(run,b,pc,ec,luck), stale=false, curLuck=luck;
   while(cmp===0){
     if(avail(b,'p')<1 || avail(b,'e')<1){ stale=true; break; }
     wars++; run.stats.wars++; curLuck=0;
@@ -957,10 +1004,12 @@ function playRound(run,b,hi){
     pc=roll(take(b,'p')); ec=take(b,'e'); flipped.push(pc);
     used.p.push(...pd,pc); used.e.push(...ed,ec);
     steps.push({t:'war',pd,ed,pc,ec});
-    cmp=compare(run,b,pc,ec);
+    cmp=compare(run,b,pc,ec,why?2:0);  // wars you start give your deciding card +2
   }
-  const r={cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, thorn:0, gold:0, caps:[], lost:null, blocked:null, luck:curLuck, pc, ec};
+  const r={why, cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, thorn:0, gold:0, caps:[], lost:null, blocked:null, luck:curLuck, pc, ec};
   r.sealGold=flipped.filter(c=>c&&c.sl==='gold').length*3; run.gold+=r.sealGold;
+  r.skillGold=flipped.filter(c=>c&&c.sk==='merchant').length*4; run.gold+=r.skillGold;
+  r.rage=flipped.filter(c=>c&&c.sk==='berserker').length*2; run.hp-=r.rage;
   if(!stale){
     const base=Math.max(1,Math.abs(effP(run,pc)+curLuck-effE(b,ec))) + 3*wars;
     const armor = b.f.q==='wall'?2:(b.f.q==='armored'||b.f.q==='royal')?1:0;
@@ -976,6 +1025,8 @@ function playRound(run,b,hi){
       if(pc.sl==='red'){ r.red=true; d*=2; }  // strikes twice
       if(D==='faces' && pc.v<11 && pc.sl!=='stone') d=1;
       if(D==='double') d*=2;
+      if(pc.sk==='berserker') d*=2;
+      if(pc.sk==='bomb') d=8;
       r.dmg=d; b.eHp-=d; run.stats.dealt+=d;
       if(has(run,'fang')) r.heal+=1;
       if(has(run,'locket')&&isSuit(pc,'H')) r.heal+=2;
@@ -1000,9 +1051,12 @@ function playRound(run,b,hi){
       if(b.f.q==='warlike'&&wars) d*=2;
       if(has(run,'buckler')) d=Math.max(1,d-1);
       if(D==='double') d*=2;
-      if(b.block){ b.block=0; r.blocked='tonic'; d=0; }
+      if(pc.sk==='medic'){ d=0; r.medic=true; }
+      else if(pc.sk==='squire'){ d=0; r.squire=true; }
+      else if(b.block){ b.block=0; r.blocked='tonic'; d=0; }
       else if(b.aegis){ b.aegis=false; r.blocked='aegis'; d=0; }
       r.dmg=d; run.hp-=d;
+      if(r.medic){ r.medicHeal=Math.min(6, run.maxHp-run.hp); run.hp+=r.medicHeal; }
       if(b.f.q==='vampire') r.eHeal=Math.floor(d/2);
       if(pc.sl==='thorn'){ r.thornSeal=3; b.eHp-=3; run.stats.dealt+=3; }
       if(has(run,'iron')&&isSuit(pc,'C')){ r.back=Math.max(1,3-armor); b.eHp-=r.back; run.stats.dealt+=r.back; }
@@ -1027,6 +1081,7 @@ function playRound(run,b,hi){
   }
   if(b.f.style==='decree'){ r.decree=b.decree; b.decree=rollDecree(); }
   if(b.f.style==='hand') refillHand(b);
+  if(b.eHp>0 && !avail(b,'e')){ b.eHp=0; r.routed=true; }  // you captured every card they had
   if(b.eHp<=0) b.over='win'; else if(run.hp<=0) b.over='lose';
   return {steps, r};
 }
@@ -1071,6 +1126,7 @@ function makeStore(run){
   items.push({k:'tonic', t:pick(Object.keys(TONICS)), price:14});
   items.push({k:'charm', ch:pick(Object.keys(CHARMS)), price:22+a*3});
   items.push({k:'seal', sl:pick(SEAL_IDS), price:26+a*3});
+  items.push({k:'card', c:skillCard(), price:24+a*4});
   items.push({k:'remove', price:30+run.removals*15});
   return items;
 }
@@ -1124,7 +1180,7 @@ const REST = {t:'Campfire', i:'🔥', text:'A safe place to rest. The fire crack
   {l:'Brew', d:'Gain a random tonic.', go:r=>{ const t=pick(Object.keys(TONICS)); return gainTonic(r,t)?`You brew a ${TONICS[t].n}.`:'Your bag is full.'; }}]};
 /* card-gain and utility spots */
 function gainRange(run,up=0){ const t=run.act*3+Math.floor(Math.max(0,run.row)/3); return [Math.min(12,5+Math.floor(t*.8)+up), Math.min(14,9+t+up)]; }
-function randCard(run,up=0,s){ const [lo,hi]=gainRange(run,up); const c={v:rint(lo,hi), s:s||pick(SUITS)}; if(Math.random()<.15) c.ch=pick(Object.keys(CHARMS)); if(Math.random()<.1) c.sl=pick(SEAL_IDS); return c; }
+function randCard(run,up=0,s){ if(Math.random()<.06) return skillCard(null,s); const [lo,hi]=gainRange(run,up); const c={v:rint(lo,hi), s:s||pick(SUITS)}; if(Math.random()<.15) c.ch=pick(Object.keys(CHARMS)); if(Math.random()<.1) c.sl=pick(SEAL_IDS); return c; }
 function runTrial(run,id){ const T=TRIALS[id], x=T.need?T.need(run):0, cs=shuffle(run.deck.slice()).slice(0,T.draw); return {cs, x, pass:T.test(run,cs,x)}; }
 const TRIALS = {
   might:{n:'Trial of Might', i:'💪', d:x=>`Draw 3 cards from your deck. Pass if their ranks add up to ${x} or more.`, need:r=>24+r.act*3, draw:3, test:(r,cs,x)=>cs.reduce((s,c)=>s+c.v,0)>=x},
@@ -1137,12 +1193,14 @@ const SYMS = {S:'♠',H:'♥',D:'♦',C:'♣'};
 function gainCards(run,n){
   if(n.t==='suit') return [0,1,2].map(()=>randCard(run,1,n.s));
   if(n.t==='blind') return [0,1,2].map(()=>({v:rint(3,14), s:pick(SUITS)}));
+  if(n.t==='mercs') return shuffle(SKILL_IDS.slice()).slice(0,3).map(id=>skillCard(id));
   return [0,1,2].map(()=>randCard(run));
 }
 const lbl = c => rankLabel(c.v)+SYMS[c.s];
 const dupPairs = run => { const by={}; run.deck.forEach(c=>{ (by[c.v]=by[c.v]||[]).push(c); }); return Object.values(by).filter(a=>a.length>1).map(a=>[a[0],a[1]]).sort((a,b)=>b[0].v-a[0].v).slice(0,3); };
 const NODES = {
   recruit:{t:'Recruits', i:'🃏', map:'Recruits', info:'Choose 1 of 3 new cards.'},
+  mercs:{t:'Mercenaries', i:'🏴', map:'Mercenaries', info:'Hire 1 of 3 skill cards: specialists with their own rules.'},
   suit:{t:'Suit Draft', i:'♠', map:'Draft', info:n=>`Choose 1 of 3 ${SUITNAME[n.s]}, a little stronger than usual.`},
   blind:{t:'Blind Draw', i:'🂠', map:'Blind Draw', info:'Three face-down cards. You only see their suits. Could be an Ace, could be a 2.'},
   trial:{t:'Trial', i:'🗿', map:'Trial', info:n=>`${TRIALS[n.tr].n}. Pass the test to choose a rare card.`},
@@ -1195,7 +1253,7 @@ const NODES = {
       : [{l:'Etch a charm', d:'You have no charmed cards. Pay 15 gold for a random charm on a card you pick.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`The stones etch a ${CHARMS[c.ch].n} charm into your ${lbl(c)}.`, good:true}; }},
           {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
 };
-if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
+if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
 
 
 </script>
@@ -1446,6 +1504,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
   function faceHTML(c, size) {
     const r = rankLabel(c.v), s = sym(c.s);
     const corners = `<span class="corner tl">${r}<small>${s}</small></span><span class="corner br">${r}<small>${s}</small></span>`;
+    if (c.sk && SKILLS[c.sk]) return corners + `<div class="skill-face" data-skill="${c.sk}"><span class="sk-i">${SKILLS[c.sk].i}</span><span class="sk-n">${SKILLS[c.sk].n}</span></div>`;
     let mid;
     if (size !== 'full') mid = c.v > 10 && c.v < 14 ? `<span class="simple letter">${r}</span>` : `<span class="simple">${s}</span>`;
     else if (c.v === 14) mid = `<div class="ace${c.s === 'S' ? ' spade' : ''}"><span>${s}</span></div>`;
@@ -1462,8 +1521,8 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
   const artImg = f => `<img class="art" src="${ART_DIR}${f}.png" alt="" draggable="false" onload="if(this.naturalWidth>120)this.classList.add('hd')" onerror="const c=this.closest('.card');if(c)c.classList.remove('art');if(this.nextElementSibling)this.nextElementSibling.hidden=false;this.remove()">`;
   function cardEl(c, { size = 'full', down = false } = {}) {
     const el = document.createElement('div');
-    const art = c && MY_CARDS.has(artFile(c));
-    el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}${art ? ' art' : ''}`;
+    const art = c && !c.sk && MY_CARDS.has(artFile(c));
+    el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}${art ? ' art' : ''}${c && c.sk ? ' skill' : ''}`;
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', down || !c ? 'Face-down card' : full(c));
     el.innerHTML = `<div class="fc front">${art ? artImg(artFile(c)) + `<span class="art-fallback" hidden>${faceHTML(c, size)}</span>` : c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}${c && c.sl && SEALS[c.sl] ? `<span class="seal-badge">${SEALS[c.sl].i}</span>` : ''}</div><div class="fc backf"></div>`;
@@ -1746,6 +1805,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
         await sleep(560);
       } else {
         banner(si > 1 ? 'War again' : 'War'); Snd.war(); buzz([40, 60, 40]);
+        if (si === 1 && steps[0].why) setMsg(`${steps[0].why}! It's a war.`);
         once($('sBattle'), 'shake', 420);
         await sleep(750);
         for (let i = 0; i < Math.max(st.pd.length, st.ed.length); i++) {
@@ -1776,7 +1836,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
       Snd.hit(big); buzz(big ? 60 : 25);
       if (big) once($('sBattle'), 'shake', 420);
       const [x, y] = centerOf(oL.lastElementChild); burst(x, y, { n: big ? 30 : 16, spread: big ? 150 : 90 });
-      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ' (with luck)' : ''} beats ${L(ec)}.`;
+      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck && !(r.why && r.wars) ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ' (with luck)' : r.why && r.wars ? ' (+2)' : ''} beats ${L(ec)}.`;
       m = `${r.wars ? warTxt(r.wars) + 'won. ' : ''}${lead} <span class="dmg">${r.dmg} damage.</span>`;
       if (r.heal) m += ` You heal ${r.heal}.`;
       if (r.gold) { m += ` +${r.gold} gold.`; setTimeout(bumpGold, 300); }
@@ -1812,6 +1872,16 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
     if (r.retry) m += ` Purple Seal: your ${L(r.retry)} goes back on top.`;
     if (r.willSaved) m += " Iron Will: they can't take your card.";
     if (r.wind) { m += ` Second Wind: +${r.wind} HP.`; setTimeout(() => { popup('youRow', `+${r.wind}`, 'heal'); Snd.heal(); }, 520); }
+    if (r.why && r.wars) m = `${r.why}! ` + m;
+    if (r.routed) m += ' They have no cards left. Routed!';
+    if (r.medic) m += ` Your Medic takes no damage${r.medicHeal ? ` and heals ${r.medicHeal}` : ''}.`;
+    if (r.squire) m += ' Your Squire takes the blow: no damage.';
+    if (pc.sk === 'bomb' && r.cmp === 1) m += ' The Bomb hits for a flat 8!';
+    if (pc.sk === 'berserker' && r.cmp === 1) m += ' Berserker: double damage!';
+    if (pc.sk === 'assassin' && r.cmp === 1 && ec.v >= 11 && ec.v <= 13) m += ' The Assassin strikes down a noble!';
+    if (pc.sk === 'trickster') m += ' Trickster: the ranks are swapped!';
+    if (r.skillGold) { m += ` +${r.skillGold} gold (Merchant).`; setTimeout(bumpGold, 300); }
+    if (r.rage) m += ` Berserker rage costs you ${r.rage} HP.`;
     if (r.decree) m = `${r.decree.k === 'suit' ? `${capSuit(r.decree.s)} favoured` : DECREES[r.decree.k].n}: ` + m;
     if (r.cut) m += ' You cut her vines back!';
     if (r.bloom) { m += ` The Thornwitch blooms! You take ${r.bloom}.`; setTimeout(() => { banner('Bloom', true); popup('youRow', `−${r.bloom}`, 'hurt'); Snd.hurt(true); buzz([60, 40, 60]); once($('sBattle'), 'shake', 420); }, 500); }
@@ -1856,7 +1926,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
   const SPOT = { battle: 'Battle', elite: 'Elite', event: 'Mystery', store: 'Store', chest: 'Chest', boss: 'Boss' };
   const SPOT_ICON = { event: '❓', store: '⚖️', chest: '🧰' };
   Object.keys(NODES).forEach(k => { SPOT[k] = NODES[k].map; SPOT_ICON[k] = NODES[k].i; });
-  const CAT = { recruit: 'gain', suit: 'gain', blind: 'gain', trial: 'gain', battle: 'fight', elite: 'fight', boss: 'fight' };
+  const CAT = { recruit: 'gain', mercs: 'gain', suit: 'gain', blind: 'gain', trial: 'gain', battle: 'fight', elite: 'fight', boss: 'fight' };
   const nodeIcon = n => n.t === 'suit' ? SYMS[n.s] + VS : n.t === 'trial' ? TRIALS[n.tr].i : SPOT_ICON[n.t] || foeGlyph(n.foe);
   const actOf = r => r.v >= 2 ? r.act : (r.floor < 3 ? 0 : r.floor < 6 ? 1 : 2);
   const CHEST = { t: 'Treasure Chest', i: '🧰', text: 'An iron-bound chest sits in the grass, its lock rusted through.', choices: [
@@ -1985,7 +2055,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
     run.row = sel.r; run.col = sel.k; run.path.push([sel.r, sel.k]); sel = null;
     Snd.pick();
     if (n.t === 'store') { run.store = makeStore(run); save(); return showStore(); }
-    if (['recruit', 'suit', 'blind'].includes(n.t)) { run.pending = { k: 'gain', t: n.t, s: n.s, cards: gainCards(run, n) }; save(); return showReward(); }
+    if (['recruit', 'suit', 'blind', 'mercs'].includes(n.t)) { run.pending = { k: 'gain', t: n.t, s: n.s, cards: gainCards(run, n) }; save(); return showReward(); }
     if (n.t === 'event' || n.t === 'chest' || n.t === 'trial' || NODES[n.t]) { run.event = { t: n.t, ev: n.ev, tr: n.tr, st: {} }; save(); return showEvent(); }
     B = newBattle(run, n.foe); save(); showBattle(true);
   }
@@ -2083,6 +2153,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
     if (res.t === 'heal') { popup('youRow', `+${res.heal}`, 'heal'); once($('youHp'), 'healflash', 600); setMsg(`${T.n}: you heal ${res.heal}.`); }
     else if (res.t === 'fire') { popup('foeRow', `−${res.dmg}`); once($('foeMed'), 'hit', 460); Snd.hit(true); const [x, y] = centerOf($('foeMed')); burst(x, y, { n: 30, colors: ['#ff8a2a', '#ffcf5a', '#ff4d1a'] }); setMsg(`${T.n}: the enemy takes ${res.dmg}.`); }
     else if (res.t === 'luck') setMsg(`${T.n}: your next card counts 5 ranks higher.`);
+    else if (res.t === 'horn') setMsg(`${T.n}: your next flip starts a war.`);
     else setMsg(`${T.n}: the next hit you take deals nothing.`);
     renderBattle(); save();
     if (B.over === 'win') victory();
@@ -2112,6 +2183,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
 
   /* rewards: prize or relic, then a card */
   function offerView(o) {
+    if (o.k === 'card' && o.c.sk) { const S = SKILLS[o.c.sk]; return { vis: cardHTML(o.c, 'mini'), kind: 'Skill card', t: `${S.i} ${S.n}`, d: `${S.d} Counts as the ${full(o.c)}.` }; }
     if (o.k === 'card') return { vis: cardHTML(o.c, 'mini'), kind: ['Card', o.c.ch ? `${CHARMS[o.c.ch].n} charm` : '', o.c.sl ? SEALS[o.c.sl].n : ''].filter(Boolean).join(' · '), t: full(o.c),
       d: [o.c.ch ? CHARMS[o.c.ch].d : '', o.c.sl ? SEALS[o.c.sl].d : ''].filter(Boolean).join(' ') || 'Joins your deck.' };
     if (o.k === 'seal') return { vis: `<span class="icon">${SEALS[o.sl].i}</span>`, kind: 'Prize: seal', t: SEALS[o.sl].n, d: `${SEALS[o.sl].d} Tap, then pick a card for it.` };
@@ -2123,7 +2195,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
   }
   function showReward() {
     const P = run.pending;
-    const G = { recruit: ['Recruits', 'Choose one to join your deck, or skip.'], suit: [`${P.s ? SYMS[P.s] : ''} Draft`, `Choose one of these ${P.s ? SUITNAME[P.s] : ''}, or skip.`],
+    const G = { recruit: ['Recruits', 'Choose one to join your deck, or skip.'], mercs: ['Mercenaries', 'Hire one specialist, or skip.'], suit: [`${P.s ? SYMS[P.s] : ''} Draft`, `Choose one of these ${P.s ? SUITNAME[P.s] : ''}, or skip.`],
       blind: ['Blind Draw', 'Only the suits show. Pick one and see what you get.'], trial: ['A rare card', 'Your reward for passing the trial.'] };
     const gain = P.k === 'gain', rev = P.k === 'reveal', perk = P.k === 'perk';
     $('rewardTitle').textContent = perk ? `Level ${P.lvl}!` : gain ? G[P.t][0] : rev ? 'You drew...' : `The ${short(P.foe)} falls.`;
@@ -2217,6 +2289,7 @@ if(typeof module!=='undefined') module.exports={STYLES,DECREES,BLOOM,rollDecree,
 
   /* the store */
   function wareView(it) {
+    if (it.k === 'card' && it.c.sk) { const S = SKILLS[it.c.sk]; return { vis: cardHTML(it.c, 'mini'), t: `${S.i} ${S.n}`, d: `${S.d} Counts as the ${full(it.c)}.` }; }
     if (it.k === 'card') return { vis: cardHTML(it.c, 'mini'), t: `${rankLabel(it.c.v)}${sym(it.c.s)}${it.c.ch ? ' ' + CHARMS[it.c.ch].i : ''}${it.c.sl ? ' ' + SEALS[it.c.sl].i : ''}`,
       d: `${full(it.c)}${it.c.ch ? ` with a ${CHARMS[it.c.ch].n} charm` : ''}${it.c.sl ? `${it.c.ch ? ' and' : ' with'} a ${SEALS[it.c.sl].n}` : ''}.` };
     if (it.k === 'seal') { const S = SEALS[it.sl]; return { vis: `<span class="icon">${S.i}</span>`, t: S.n, d: `${S.d} Goes on a card you pick.` }; }

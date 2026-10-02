@@ -40,7 +40,7 @@ window.SIM = function (N = 500, mode = 'smart') {
   const score = (run, n) => {
     if (!smartRoute) return Math.random();
     const hpf = run.hp / run.maxHp;
-    const s = { recruit: 5, suit: 5.5, blind: 4, trial: 4.5, rest: hpf < .6 ? 9 : 4, store: run.gold >= 45 ? 7 : 2, pack: run.tonics.length < 2 ? 5 : 2, altar: 4, carver: 5, fungi: 5, goo: 4, stones: 3, sealer: 5.5, event: 3.5, chest: 6, battle: 5, elite: hpf > .7 ? 5.5 : 1 };
+    const s = { recruit: 5, mercs: 5, suit: 5.5, blind: 4, trial: 4.5, rest: hpf < .6 ? 9 : 4, store: run.gold >= 45 ? 7 : 2, pack: run.tonics.length < 2 ? 5 : 2, altar: 4, carver: 5, fungi: 5, goo: 4, stones: 3, sealer: 5.5, event: 3.5, chest: 6, battle: 5, elite: hpf > .7 ? 5.5 : 1 };
     return (s[n.t] || 3) + Math.random();
   };
   function doEvent(run, E, n) {
@@ -81,7 +81,7 @@ window.SIM = function (N = 500, mode = 'smart') {
       } else if (n.t === 'store') {
         const st = makeStore(run), rank = { remove: 0, relic: 1, seal: 2, card: 3, charm: 4, tonic: 5 };
         (smart ? [...st].sort((a, b) => rank[a.k] - rank[b.k]) : st).forEach(it => { if (run.gold >= it.price && (!smart || it.k !== 'card' || it.c.v > deckAvg(run) + 2)) buyItem(run, it, it.k === 'remove' ? weakestC(run).id : it.k === 'seal' ? bestUnsealed(run).id : bestC(run).id); });
-      } else if (['recruit', 'suit', 'blind'].includes(n.t)) {
+      } else if (['recruit', 'suit', 'blind', 'mercs'].includes(n.t)) {
         const cs = gainCards(run, n); const c = smart ? [...cs].sort((a, b) => b.v - a.v)[0] : R(cs);
         if (!smart || n.t === 'blind' || c.v > deckAvg(run)) addCard(run, c);
       } else {
