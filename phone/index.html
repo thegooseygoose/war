@@ -556,6 +556,12 @@
   .skill-face .sk-n { font-size: calc(var(--cw) * .14); font-weight: 900; font-style: italic; color: #3a1209; letter-spacing: -.01em; line-height: 1; }
   .tiny .skill-face .sk-n { display: none; }
   .tiny .skill-face .sk-i { font-size: calc(var(--cw) * .5); }
+  /* what started the war */
+  .banner { grid-auto-flow: row; align-content: center; gap: 14px; }
+  .banner em { font-style: normal; font-weight: 900; font-size: clamp(1.1rem, 5vw, 1.9rem); color: #fff4d8; background: rgba(20,5,9,.9); padding: 8px 20px; border-radius: 999px;
+    box-shadow: inset 0 0 0 2px var(--brass-hi), 0 0 30px rgba(255,190,90,.5); animation: flash 1.2s forwards; }
+  .proc { animation: proc 1.8s; }
+  @keyframes proc { 15%, 55% { transform: scale(1.35); box-shadow: 0 0 0 3px var(--brass-hi), 0 0 22px rgba(255,200,100,.95); } 35% { transform: scale(1.15); } }
   @media (prefers-reduced-motion: reduce) {
     .tonic.armed, .choice, .node.can .med, .awning, .bell, .screen.enter, .fan .card, .pack-stage button.pack, .slot, .offer, .march li.now .med, .end .med.huge, .sheet, .sheet-in { animation: none; }
     .banner span, .banner::before { animation-duration: .01s; }
@@ -1563,10 +1569,10 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
   }
   const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
 
-  function banner(text, red) {
+  function banner(text, red, sub) {
     const b = document.createElement('div');
     b.className = `banner${red ? ' red' : ''}`;
-    b.innerHTML = `<span>${text}</span>`;
+    b.innerHTML = `<span>${text}</span>${sub ? `<em>${sub}</em>` : ''}`;
     document.body.append(b);
     setTimeout(() => b.remove(), 1250);
   }
@@ -1720,6 +1726,14 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
 
   /* map */
 
+  // what started a war that wasn't a tie, for the banner, the message and the glowing icon
+  const WHY = { 'War Horn': ['tonic', 'horn'], 'Battle Seal': ['seal', 'battle'], 'Herald': ['skill card', 'herald'], 'Twin': ['charm', 'twin'],
+    'War Drum': ['relic', 'drum'], 'Clash of Colours': ['relic', 'colours'], 'Hot Blooded': ['perk', 'hot'] };
+  function whyInfo(why) {
+    const [kind, id] = WHY[why] || [], T = { tonic: TONICS, seal: SEALS, 'skill card': SKILLS, charm: CHARMS, relic: RELICS, perk: PERKS }[kind];
+    const x = T && T[id]; if (!x) return null;
+    return { kind, id, i: x.i, label: `${x.i} ${x.n} (${kind})`, text: `${x.i} ${x.n} (${kind}): ${x.d.replace(' Wars you start give your card +2.', '').replace(/, (and your war card gets|with) \+2( in that war)?\./, '.')}` };
+  }
   /* battle */
   const handMode = () => !!(B && B.hand && B.f.style === 'hand');
   const capSuit = s => SUITNAME[s][0].toUpperCase() + SUITNAME[s].slice(1);
@@ -1804,8 +1818,9 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
         Snd.flick();
         await sleep(560);
       } else {
-        banner(si > 1 ? 'War again' : 'War'); Snd.war(); buzz([40, 60, 40]);
-        if (si === 1 && steps[0].why) setMsg(`${steps[0].why}! It's a war.`);
+        const wi = si === 1 && whyInfo(steps[0].why);
+        banner(si > 1 ? 'War again' : 'War', false, wi && wi.label); Snd.war(); buzz([40, 60, 40]);
+        if (wi) { setMsg(`${wi.text} Your card gets +2.`); const chip = [...$('battleRelics').querySelectorAll('.relic-chip')].find(c => c.getAttribute('aria-label') === (wi.kind === 'perk' ? PERKS : RELICS)[wi.id]?.n); if (chip) once(chip, 'proc', 1800); }
         once($('sBattle'), 'shake', 420);
         await sleep(750);
         for (let i = 0; i < Math.max(st.pd.length, st.ed.length); i++) {
@@ -1872,7 +1887,7 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
     if (r.retry) m += ` Purple Seal: your ${L(r.retry)} goes back on top.`;
     if (r.willSaved) m += " Iron Will: they can't take your card.";
     if (r.wind) { m += ` Second Wind: +${r.wind} HP.`; setTimeout(() => { popup('youRow', `+${r.wind}`, 'heal'); Snd.heal(); }, 520); }
-    if (r.why && r.wars) m = `${r.why}! ` + m;
+    if (r.why && r.wars) { const wi = whyInfo(r.why); m = `${wi ? wi.label : r.why}: ` + m; }
     if (r.routed) m += ' They have no cards left. Routed!';
     if (r.medic) m += ` Your Medic takes no damage${r.medicHeal ? ` and heals ${r.medicHeal}` : ''}.`;
     if (r.squire) m += ' Your Squire takes the blow: no damage.';
