@@ -19,15 +19,18 @@ def resource_path(rel):
 def page_url():
     # The webview keeps an HTTP cache in the storage folder, so after an update it
     # could keep showing the old page or old card art. A content hash in the URL
-    # (page + sprites/cards) forces a fresh load, and the page adds it to art URLs.
+    # (page + sprites/cards + art/) forces a fresh load, and the page adds it to art URLs.
     path = resource_path("index.html")
     h = hashlib.md5()
     with open(path, "rb") as f:
         h.update(f.read())
-    art = resource_path(os.path.join("sprites", "cards"))
-    for name in sorted(os.listdir(art)) if os.path.isdir(art) else []:
-        with open(os.path.join(art, name), "rb") as f:
-            h.update(name.encode() + f.read())
+    for folder in (os.path.join("sprites", "cards"), "art"):  # card art and every icon in art/
+        root = resource_path(folder)
+        for dirpath, dirs, files in sorted(os.walk(root)):
+            dirs.sort()
+            for name in sorted(files):
+                with open(os.path.join(dirpath, name), "rb") as f:
+                    h.update(name.encode() + f.read())
     return path + "?v=" + h.hexdigest()[:10]
 
 
@@ -83,7 +86,7 @@ def main():
         height=720,
         min_size=(800, 450),
         maximized=True,
-        background_color="#2a0a11",
+        background_color="#0b0d0f",
         js_api=Api(),
     )
     webview.start(http_server=True, http_port=int(os.environ.get("WAR_PORT", 47813)), private_mode=False, storage_path=storage)

@@ -5,7 +5,7 @@ a = Analysis(
     ['launcher.py'],
     pathex=[],
     binaries=[],
-    datas=[('index.html', '.'), ('fonts', 'fonts'), ('sprites/cards', 'sprites/cards')],
+    datas=[('index.html', '.'), ('fonts', 'fonts'), ('sprites/cards', 'sprites/cards'), ('art', 'art')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
