@@ -167,6 +167,23 @@
     color: #fff4d8; -webkit-text-stroke: 1px rgba(80,20,10,.6); text-shadow: 0 3px 0 rgba(0,0,0,.45), 0 0 22px rgba(255,180,80,.55);
     animation: pop 1.1s cubic-bezier(.2,.8,.2,1) forwards; }
   .pop.hurt { color: #ffc2b8; text-shadow: 0 3px 0 rgba(0,0,0,.45), 0 0 22px rgba(255,60,40,.6); }
+  .dmgpop { position: fixed; z-index: 29; pointer-events: none; display: grid; justify-items: center; gap: 4px; transform: translate(-50%, -50%);
+    animation: dmgpop 1.9s cubic-bezier(.2,.8,.2,1) forwards; font-style: italic; }
+  .dmgpop .tot { font-size: clamp(4rem, 22vw, 6rem); font-weight: 900; line-height: .95; color: #fff4d8; -webkit-text-stroke: 2px #5a2a0a;
+    text-shadow: 0 5px 0 rgba(0,0,0,.5), 0 0 30px rgba(255,180,80,.7); }
+  .dmgpop.hurt .tot { color: #ffc2b8; -webkit-text-stroke: 2px #4a0a08; text-shadow: 0 5px 0 rgba(0,0,0,.5), 0 0 30px rgba(255,60,40,.75); }
+  .dmgpop .eq { font-size: clamp(1.3rem, 6vw, 1.8rem); font-weight: 900; font-style: normal; background: rgba(20,5,9,.88); padding: 3px 14px; border-radius: 999px;
+    box-shadow: inset 0 0 0 1.5px rgba(224,180,90,.5); white-space: nowrap; }
+  .dmgpop .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 86vw; }
+  .dmgpop .chips span { font-size: .85rem; font-weight: 800; font-style: normal; padding: 2px 9px; border-radius: 999px; background: rgba(20,5,9,.88); white-space: nowrap; }
+  .b-base { color: #fff4d8; }
+  .b-up { color: #6ff0d0; text-shadow: 0 0 10px rgba(80,240,200,.55); }
+  .b-down { color: #a9a3b8; }
+  .dmgpop .chips .b-up { box-shadow: inset 0 0 0 1.5px rgba(111,240,208,.6); }
+  .dmgpop .chips .b-down { box-shadow: inset 0 0 0 1.5px rgba(169,163,184,.5); }
+  .msg .b-up { font-weight: 800; }
+  @keyframes dmgpop { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 22% { transform: translate(-50%, -50%) scale(1); }
+    80% { opacity: 1; transform: translate(-50%, -54%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -70%) scale(.95); } }
   .pop.heal { color: var(--heal); font-size: 1.7rem; text-shadow: 0 2px 0 rgba(0,0,0,.4); }
   @keyframes pop { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.4); } 18% { opacity: 1; transform: translate(-50%, -55%) scale(1.25); } 30% { transform: translate(-50%, -55%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -140%) scale(.95); } }
 
@@ -561,11 +578,16 @@
   .banner em { font-style: normal; font-weight: 900; font-size: clamp(1.1rem, 5vw, 1.9rem); color: #fff4d8; background: rgba(20,5,9,.9); padding: 8px 20px; border-radius: 999px;
     box-shadow: inset 0 0 0 2px var(--brass-hi), 0 0 30px rgba(255,190,90,.5); animation: flash 1.2s forwards; }
   .proc { animation: proc 1.8s; }
+  .procshake { animation: procshake .65s; position: relative; z-index: 2; }
+  @keyframes procshake { 0% { transform: scale(1); } 10% { transform: scale(1.4) rotate(-16deg); box-shadow: 0 0 0 3px var(--brass-hi), 0 0 24px rgba(255,200,100,.95); } 25% { transform: scale(1.4) rotate(14deg); } 40% { transform: scale(1.45) rotate(-14deg); } 55% { transform: scale(1.45) rotate(12deg); } 70% { transform: scale(1.5) rotate(-9deg); } 85% { transform: scale(1.5) rotate(6deg); } 100% { transform: scale(1.55); box-shadow: 0 0 0 3px var(--brass-hi), 0 0 30px rgba(255,220,130,1); } }
+  .relicfly { position: fixed; z-index: 31; pointer-events: none; line-height: 1; font-size: 1.05rem; transform: translate(-50%, -50%); filter: drop-shadow(0 0 16px rgba(255,200,100,.95)); }
+  .banner i.bicon { font-style: normal; line-height: 1; font-size: clamp(4.5rem, 24vw, 7rem); filter: drop-shadow(0 0 22px rgba(255,200,100,.95)); animation: stamp 1.2s cubic-bezier(.2,.9,.2,1) forwards; }
   @keyframes proc { 15%, 55% { transform: scale(1.35); box-shadow: 0 0 0 3px var(--brass-hi), 0 0 22px rgba(255,200,100,.95); } 35% { transform: scale(1.15); } }
   @media (prefers-reduced-motion: reduce) {
     .tonic.armed, .choice, .node.can .med, .awning, .bell, .screen.enter, .fan .card, .pack-stage button.pack, .slot, .offer, .march li.now .med, .end .med.huge, .sheet, .sheet-in { animation: none; }
     .banner span, .banner::before { animation-duration: .01s; }
     .pop { animation: none; opacity: 0; }
+    .dmgpop { animation: fade .3s reverse 1.6s forwards; }
     .shake, .med.hit { animation: none; }
   }
 </style>
@@ -1019,20 +1041,29 @@ function playRound(run,b,hi){
   if(!stale){
     const base=Math.max(1,Math.abs(effP(run,pc)+curLuck-effE(b,ec))) + 3*wars;
     const armor = b.f.q==='wall'?2:(b.f.q==='armored'||b.f.q==='royal')?1:0;
+    // damage breakdown: the plain card gap (plus the war rule) is the base, everything else is listed as a part
+    const rawGap=Math.max(1,Math.abs(pc.v-ec.v));
+    r.base=rawGap+3*wars; r.parts=[]; r.baseWar=wars;
+    const tag=(T,k)=>T[k]?`${T[k].i} ${T[k].n}`:k;
+    const boostNames=()=>{ const n=[]; if(pc.sl==='stone') n.push(tag(SEALS,'stone')); else { if(has(run,'crown')&&pc.v>=11&&pc.v<=13) n.push(tag(RELICS,'crown')); if(has(run,'prism')&&isSuit(pc,'D')) n.push(tag(RELICS,'prism')); if(pc.lk) n.push(tag(SEALS,'lucky')); }
+      if(curLuck) n.push('🍀 Luck'); if(b.f.q==='royal'&&ec.v>=11&&ec.v<=13) n.push('👑 Royal foe'); return n.join(', ')||'Rank boosts'; };
+    let d;
+    const part=(l,nd)=>{ if(nd!==d) r.parts.push({l, n:nd-d}); d=nd; };
     if(cmp===1){
-      let d=base;
-      if(has(run,'whetstone')) d+=1;
-      if(has(run,'spade')&&isSuit(pc,'S')) d+=3;
-      if(charmOf(run,pc)==='keen') d+=3;
-      if(has(run,'banner')&&wars) d*=2;
-      if(has(run,'gambit')&&b.round===1) d*=3;
-      if(pc.sl==='glass') d*=3;
-      d=Math.max(1,d-armor);
-      if(pc.sl==='red'){ r.red=true; d*=2; }  // strikes twice
-      if(D==='faces' && pc.v<11 && pc.sl!=='stone') d=1;
-      if(D==='double') d*=2;
-      if(pc.sk==='berserker') d*=2;
-      if(pc.sk==='bomb') d=8;
+      d=r.base;
+      part(boostNames(), base);
+      if(has(run,'whetstone')) part(tag(RELICS,'whetstone'), d+1);
+      if(has(run,'spade')&&isSuit(pc,'S')) part(tag(RELICS,'spade'), d+3);
+      if(charmOf(run,pc)==='keen') part(tag(CHARMS,'keen'), d+3);
+      if(has(run,'banner')&&wars) part(tag(RELICS,'banner')+' ×2', d*2);
+      if(has(run,'gambit')&&b.round===1) part(tag(RELICS,'gambit')+' ×3', d*3);
+      if(pc.sl==='glass') part(tag(SEALS,'glass')+' ×3', d*3);
+      if(armor) part(`🛡️ ${b.f.q==='wall'?'Wall':b.f.q==='royal'?'Royal armor':'Armored'}`, Math.max(1,d-armor));
+      if(pc.sl==='red'){ r.red=true; part(tag(SEALS,'red')+' ×2', d*2); }  // strikes twice
+      if(D==='faces' && pc.v<11 && pc.sl!=='stone') part('📜 Decree', 1);
+      if(D==='double') part('📜 Decree ×2', d*2);
+      if(pc.sk==='berserker') part(tag(SKILLS,'berserker')+' ×2', d*2);
+      if(pc.sk==='bomb') part(tag(SKILLS,'bomb'), 8);
       r.dmg=d; b.eHp-=d; run.stats.dealt+=d;
       if(has(run,'fang')) r.heal+=1;
       if(has(run,'locket')&&isSuit(pc,'H')) r.heal+=2;
@@ -1051,12 +1082,13 @@ function playRound(run,b,hi){
       }
       if(pc.sl==='glass' && Math.random()<.25 && run.deck.length>6){ const i=used.p.indexOf(pc); if(i>=0) used.p.splice(i,1); removeCard(run,pc.id); r.shatter=pc; }
     } else {
-      let d=base;
-      if(b.f.q==='brute') d+=2;
-      if(b.f.q==='frenzy') d+=b.frenzy++;
-      if(b.f.q==='warlike'&&wars) d*=2;
-      if(has(run,'buckler')) d=Math.max(1,d-1);
-      if(D==='double') d*=2;
+      d=r.base;
+      part(boostNames(), base);
+      if(b.f.q==='brute') part('💪 Brute', d+2);
+      if(b.f.q==='frenzy') part('🌀 Frenzy', d+b.frenzy++);
+      if(b.f.q==='warlike'&&wars) part('⚔️ Warlike ×2', d*2);
+      if(has(run,'buckler')) part(tag(RELICS,'buckler'), Math.max(1,d-1));
+      if(D==='double') part('📜 Decree ×2', d*2);
       if(pc.sk==='medic'){ d=0; r.medic=true; }
       else if(pc.sk==='squire'){ d=0; r.squire=true; }
       else if(b.block){ b.block=0; r.blocked='tonic'; d=0; }
@@ -1569,12 +1601,34 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
   }
   const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
 
-  function banner(text, red, sub) {
+  function banner(text, red, sub, icon) {
     const b = document.createElement('div');
     b.className = `banner${red ? ' red' : ''}`;
-    b.innerHTML = `<span>${text}</span>${sub ? `<em>${sub}</em>` : ''}`;
+    b.innerHTML = `${icon ? `<i class="bicon">${icon}</i>` : ''}<span>${text}</span>${sub ? `<em>${sub}</em>` : ''}`;
     document.body.append(b);
-    setTimeout(() => b.remove(), 1250);
+    setTimeout(() => b.remove(), icon ? 1500 : 1250);
+  }
+  // the relic that forced a war shakes in its slot, then flies up over the cards
+  async function relicCall(chip, icon) {
+    if (!chip || reduce) return;
+    chip.classList.remove('proc', 'procshake'); void chip.offsetWidth; chip.classList.add('procshake');
+    buzz([20, 40, 20, 40, 20]);
+    await sleep(650);
+    chip.classList.remove('procshake');
+    const [x0, y0] = centerOf(chip), [x1, y1] = centerOf($('field'));
+    const f = document.createElement('div');
+    f.className = 'relicfly'; f.textContent = icon;
+    f.style.left = `${x0}px`; f.style.top = `${y0}px`;
+    document.body.append(f);
+    const big = Math.min(innerWidth * .24, 112) / 17;
+    const a = f.animate([
+      { transform: 'translate(-50%,-50%) scale(1.5) rotate(0deg)' },
+      { transform: `translate(calc(-50% + ${(x1 - x0) * .55}px), calc(-50% + ${(y1 - y0) * .6 - 60}px)) scale(${big * .7}) rotate(-20deg)`, offset: .6 },
+      { transform: `translate(calc(-50% + ${x1 - x0}px), calc(-50% + ${y1 - y0}px)) scale(${big}) rotate(0deg)` }
+    ], { duration: 480, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+    await a.finished.catch(() => {});
+    f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: 'forwards' });
+    setTimeout(() => f.remove(), 170);
   }
   function once(el, cls, ms = 500) { if (cls === 'shake' && !SET.shake) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms); }
 
@@ -1770,6 +1824,25 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
     $('burnBtn').disabled = busy || B.burns <= 0 || !!B.over;
     $('flipBtn').disabled = busy || !!B.over;
   }
+  // big damage number over the losing card, with base in cream and bonuses in teal, reductions in grey
+  const sgn = n => (n > 0 ? '+' : '−') + Math.abs(n);
+  function dmgEq(r) {
+    const up = r.parts.filter(x => x.n > 0).reduce((a, x) => a + x.n, 0), down = r.parts.filter(x => x.n < 0).reduce((a, x) => a + x.n, 0);
+    if (!up && !down) return '';
+    return `<span class="b-base">${r.base}</span>${up ? ` <span class="b-up">${sgn(up)}</span>` : ''}${down ? ` <span class="b-down">${sgn(down)}</span>` : ''}`;
+  }
+  function dmgPop(at, r, hurt) {
+    const p = document.createElement('div');
+    p.className = `dmgpop${hurt ? ' hurt' : ''}`;
+    const eq = dmgEq(r);
+    const chips = [`<span class="b-base">${r.base - 3 * r.baseWar} cards</span>`, ...(r.baseWar ? [`<span class="b-base">+${3 * r.baseWar} war</span>`] : []),
+      ...r.parts.map(x => `<span class="${x.n > 0 ? 'b-up' : 'b-down'}">${sgn(x.n)} ${x.l}</span>`)];
+    p.innerHTML = `<div class="tot">−${r.dmg}</div>${eq ? `<div class="eq">${eq}</div>` : ''}${eq || r.baseWar ? `<div class="chips">${chips.join('')}</div>` : ''}`;
+    const [x, y] = at ? centerOf(at) : [innerWidth / 2, innerHeight / 2];
+    p.style.left = `${x}px`; p.style.top = `${Math.max(90, y)}px`;
+    document.body.append(p); setTimeout(() => p.remove(), 2000);
+  }
+  function dmgMsg(r) { const eq = dmgEq(r); return eq ? ` (${eq})` : ''; }
   function popup(row, text, cls) {
     const p = document.createElement('div');
     p.className = `pop ${cls || ''}`; p.textContent = text;
@@ -1819,10 +1892,15 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
         await sleep(560);
       } else {
         const wi = si === 1 && whyInfo(steps[0].why);
-        banner(si > 1 ? 'War again' : 'War', false, wi && wi.label); Snd.war(); buzz([40, 60, 40]);
-        if (wi) { setMsg(`${wi.text} Your card gets +2.`); const chip = [...$('battleRelics').querySelectorAll('.relic-chip')].find(c => c.getAttribute('aria-label') === (wi.kind === 'perk' ? PERKS : RELICS)[wi.id]?.n); if (chip) once(chip, 'proc', 1800); }
+        if (wi) {
+          setMsg(`${wi.text} Your card gets +2.`);
+          const chip = [...$('battleRelics').querySelectorAll('.relic-chip')].find(c => c.getAttribute('aria-label') === (wi.kind === 'perk' ? PERKS : RELICS)[wi.id]?.n);
+          await relicCall(chip, wi.i);
+          if (chip) once(chip, 'proc', 1800);
+        }
+        banner(si > 1 ? 'War again' : 'War', false, wi && wi.label, wi && wi.i); Snd.war(); buzz([40, 60, 40]);
         once($('sBattle'), 'shake', 420);
-        await sleep(750);
+        await sleep(wi ? 1000 : 750);
         for (let i = 0; i < Math.max(st.pd.length, st.ed.length); i++) {
           if (st.pd[i]) deal(yL, st.pd[i], true, youPileCard());
           if (st.ed[i]) deal(oL, st.ed[i], true, foePileCard());
@@ -1852,12 +1930,13 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
       if (big) once($('sBattle'), 'shake', 420);
       const [x, y] = centerOf(oL.lastElementChild); burst(x, y, { n: big ? 30 : 16, spread: big ? 150 : 90 });
       const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck && !(r.why && r.wars) ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ' (with luck)' : r.why && r.wars ? ' (+2)' : ''} beats ${L(ec)}.`;
-      m = `${r.wars ? warTxt(r.wars) + 'won. ' : ''}${lead} <span class="dmg">${r.dmg} damage.</span>`;
+      m = `${r.wars ? warTxt(r.wars) + 'won. ' : ''}${lead} <span class="dmg">${r.dmg} damage</span>${dmgMsg(r)}.`;
       if (r.heal) m += ` You heal ${r.heal}.`;
       if (r.gold) { m += ` +${r.gold} gold.`; setTimeout(bumpGold, 300); }
       if (r.thorn) { m += ` Thorns hit you for ${r.thorn}.`; setTimeout(() => popup('youRow', `−${r.thorn}`, 'hurt'), 450); }
       r.caps.forEach(c => { m += c.back ? ` You win back your ${L(c)}!` : ` You capture their ${L(c)}!`; });
       popup('foeRow', `−${r.dmg}`);
+      dmgPop(oL.lastElementChild, r);
       if (r.heal) { setTimeout(() => { popup('youRow', `+${r.heal}`, 'heal'); Snd.heal(); once($('youHp'), 'healflash', 600); }, 350); }
     } else if (r.cmp === -1) {
       const theirs = oL.lastElementChild;
@@ -1870,11 +1949,12 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
       if (big) once($('sBattle'), 'shake', 420);
       const [x, y] = centerOf(yL.lastElementChild); burst(x, y, { n: big ? 24 : 12, colors: ['#e0574f', '#ff9a8c', '#7a1020'], spread: big ? 130 : 80 });
       const lead = tie ? `Tie goes to the ${short(B.f.name)}.` : `${L(ec)} beats your ${L(pc)}.`;
-      m = `${r.wars ? warTxt(r.wars) + 'lost. ' : ''}${lead} ${r.blocked ? `Your ${r.blocked === 'aegis' ? 'Aegis' : 'Iron Tonic'} blocks the hit!` : `<span class="hurt">You take ${r.dmg}.</span>`}`;
+      m = `${r.wars ? warTxt(r.wars) + 'lost. ' : ''}${lead} ${r.blocked ? `Your ${r.blocked === 'aegis' ? 'Aegis' : 'Iron Tonic'} blocks the hit!` : `<span class="hurt">You take ${r.dmg}</span>${dmgMsg(r)}.`}`;
       if (r.back) m += ` Your club still hits for ${r.back}.`;
       if (r.eHeal) m += ` It heals ${r.eHeal}.`;
       if (r.lost) m += ` They take your ${L(r.lost)}! Win to get it back.`;
       popup('youRow', r.blocked ? 'Blocked' : `−${r.dmg}`, r.blocked ? 'heal' : 'hurt');
+      if (!r.blocked && !r.medic && !r.squire) dmgPop(yL.lastElementChild, r, true);
       if (r.back) setTimeout(() => { popup('foeRow', `−${r.back}`); Snd.hit(false); once($('foeMed'), 'hit', 460); }, 380);
     } else {
       m = 'Stalemate. Nobody has cards left for the war.';
