@@ -768,6 +768,23 @@
   .end.lost h2 { background: #ff4f5e !important; color: #1a0306 !important; box-shadow: inset 0 -3px 0 #a3202e, 0 2px 0 rgba(0,0,0,.5) !important; }
   .end .med.huge { animation: acIn .7s cubic-bezier(.2,1.3,.4,1) both; }
   @media (prefers-reduced-motion: reduce) { .fx-hazard i, .fx-hazard::before, .title h1, .end h2, .ac-act { animation: none !important; } }
+
+  /* the enemy card waits for OK; the ? beside the enemy's name brings it back */
+  .fi-ok { display: block; width: auto; min-width: 180px; margin: 16px auto 0; padding: 0 34px; min-height: 52px; }
+  .fi-now { margin-top: 10px; padding: 8px 12px; border-radius: 4px; color: var(--text); font-size: clamp(14px, 2.2vmin, 21px); line-height: 1.35; box-shadow: inset 0 0 0 1.5px rgba(255,79,94,.6); background: rgba(255,79,94,.08); }
+  .fi-now b { color: #ff9aa4; }
+  .foe-info { display: inline-grid; place-items: center; vertical-align: middle; margin-left: 10px; width: 1.15em; height: 1.15em; padding: 0; border-radius: 50%; font-family: var(--head); font-size: .62em; line-height: 1;
+    color: var(--neon); background: #0d1114; border: 2px solid var(--neon); box-shadow: 0 0 10px rgba(47,211,245,.45); cursor: pointer; animation: infoPing 2.4s ease-in-out 3; }
+  .foe-info:hover, .foe-info:focus-visible { background: var(--neon); color: #071418; }
+  @keyframes infoPing { 50% { box-shadow: 0 0 0 6px rgba(47,211,245,.18), 0 0 18px rgba(47,211,245,.8); } }
+  #foeMed { cursor: pointer; }
+  .foe-head h2 { white-space: normal; }
+
+  .foe-head > div:has(> #foeName) { display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; row-gap: 4px; min-width: 0; }
+  .foe-head #foeName { flex-basis: 100%; order: 2; }
+  .foe-info { order: 1; margin: 0 !important; width: auto !important; height: auto !important; padding: 3px 12px 1px; border-radius: 999px !important; font-size: 15px !important; letter-spacing: .08em; text-transform: uppercase; display: inline-flex !important; align-items: center; gap: 6px; flex: none; }
+  .foe-info b { font-size: 1.25em; line-height: 1; }
+  .stage .foe-info { font-size: 22px !important; padding: 4px 16px 2px; }
 </style>
 </head>
 <body>
@@ -838,7 +855,7 @@
   <div>
     <div class="foe-head">
       <div class="med big" id="foeMed"></div>
-      <div><small id="floorLabel"></small><h2 id="foeName"></h2></div>
+      <div><small id="floorLabel"></small><h2 id="foeName"></h2><button class="foe-info" id="foeInfo" type="button" aria-label="What does this enemy do?" title="What does this enemy do?"><b>?</b> Info</button></div>
       <div class="tools"><button class="ghost icon-btn sound-btn" type="button" aria-label="Sound">🔊</button><button class="ghost icon-btn set-btn" type="button" aria-label="Options">⚙️</button><button class="ghost" id="battleDeckBtn" type="button">Deck</button></div>
     </div>
     <p class="quirk" id="foeQuirk"></p>
@@ -1737,15 +1754,13 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
           A: { chords: 'Am Am F F C G E E', mel: ['E5:4 A5:4 B5:4 C6:4', 'B5:8 -:4 G5:4', 'A5:4 C6:4 F5:8', '-:8 E5:4 F5:4', 'G5:6 E5:2 C5:8', 'D5:4 E5:4 G5:8', 'B4:4 D5:4 G#5:4 B5:4', 'G#5:12 -:4'] },
           B: { chords: 'Dm Dm Am Am F G Am Am', mel: ['F5:4 A5:4 D6:8', 'C6:4 A5:4 F5:8', 'E5:4 A5:4 C6:8', 'B5:4 A5:4 E5:8', 'F5:4 A5:4 C6:4 A5:4', 'B5:4 G5:4 D5:8', 'C5:4 E5:4 A5:8', '-:16'] } },
         form: [{ s: 'A', blips: 1 }, { s: 'A', lead: 1, blips: 1, bass: 1 }, { s: 'B', lead: 1, arp: 1, bass: 1, drums: 1 }, { s: 'A', lead: 1, blips: 1, bass: 1, drums: 1 }] },
-      // regular battles: driving techno
-      battle: { bpm: 128, pad: .009, padType: 'sawtooth', lead: 'square', leadVol: .045, bassMode: 'arp16', blipRate: .2,
-        kick: 'x...x...x...x...', snare: '....x.......x...', fill: '....x...x.x.xxxx', hat: '..x...x...x...x.', hat16: 1,
+      // regular battles: ambient and tense; slow pulse, glassy bell melody, soft arps and data chatter
+      battle: { bpm: 92, pad: .015, padType: 'triangle', lead: 'bell', leadVol: .06, bassMode: 'pulse', blipRate: .3, soft: 1, arpEvery: 2, arpType: 'triangle',
+        kick: 'x.........x.....', snare: '........x.......', fill: '........x...x.x.', hat: '....x.......x...',
         sec: {
-          A: { chords: 'Em Em C C D D Bm B', mel: ['E5:2 E5:2 G5:2 B5:2 A5:2 G5:2 E5:4', 'D5:2 E5:2 G5:4 F#5:4 D5:4', 'C5:2 E5:2 G5:2 C6:2 B5:4 G5:4', 'A5:4 G5:2 E5:2 C5:8',
-            'D5:2 F#5:2 A5:2 D6:2 B5:4 A5:4', 'F#5:4 A5:4 D5:8', 'B4:2 D5:2 F#5:2 B5:2 A5:4 F#5:4', 'B5:4 A5:4 F#5:4 D#5:4'] },
-          B: { chords: 'C D Em Em C D B B', mel: ['G5:4 G5:2 A5:2 B5:8', 'A5:4 F#5:4 D5:8', 'E5:2 G5:2 B5:2 E6:2 D6:4 B5:4', 'G5:12 -:4',
-            'C6:4 B5:2 A5:2 G5:8', 'A5:4 B5:2 A5:2 F#5:8', 'G5:4 F#5:4 E5:4 D#5:4', 'F#5:8 B4:8'] } },
-        form: [{ s: 'A', drums: 1, bass: 1, blips: 1 }, { s: 'A', lead: 1, drums: 1, bass: 1 }, { s: 'B', lead: 1, drums: 1, bass: 1, arp: 1, stab: 1 }, { s: 'A', lead: 1, drums: 1, bass: 1, arp: 1, blips: 1 }] },
+          A: { chords: 'Em Em C C D D Bm B', mel: ['B4:8 E5:8', 'G5:8 F#5:4 E5:4', 'E5:16', 'G5:4 E5:4 C5:8', 'D5:8 F#5:8', 'A5:8 G5:4 F#5:4', 'F#5:16', 'D#5:8 B4:8'] },
+          B: { chords: 'C D Em Em C D B B', mel: ['G5:8 C6:8', 'A5:8 F#5:8', 'B5:12 -:4', 'G5:4 F#5:4 E5:8', 'E5:8 G5:8', 'F#5:8 A5:8', 'B5:8 A5:4 F#5:4', 'D#5:16'] } },
+        form: [{ s: 'A', blips: 1, arp: 1 }, { s: 'A', lead: 1, bass: 1, blips: 1 }, { s: 'B', lead: 1, bass: 1, arp: 1, bells: 1, drums: 1 }, { s: 'A', lead: 1, bass: 1, drums: 1, blips: 1 }] },
       // the store: a chill idle loop
       shop: { bpm: 90, pad: .01, padType: 'triangle', lead: 'chip', leadVol: .05, bassMode: 'bounce', blipRate: .12,
         kick: 'x.....x...x.....', snare: '....x.......x...', fill: '....x.......x.x.', hat: 'x.x.x.x.x.x.x.x.',
@@ -1792,7 +1807,7 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
       const tr = track, s = step % 16, barAll = Math.floor(step / 16), secN = Math.floor(barAll / 8) % tr.form.length, bar = barAll % 8;
       const part = tr.form[secN], sc = tr.sec[part.s], ch = sc.ch[bar], last = bar === 7;
       const tones = [ch.root, ch.root + ch.third, ch.root + 7];
-      const pump = part.drums && !part.half ? (s % 4 === 0 ? .4 : s % 4 === 1 ? .75 : 1) : 1;  // sidechain-style pumping on the kick
+      const pump = part.drums && !part.half && !tr.soft ? (s % 4 === 0 ? .4 : s % 4 === 1 ? .75 : 1) : 1;  // sidechain-style pumping on the kick
       // pad
       if (s === 0) {
         const notes = [...tones, ch.root + 12].map(p => 48 + ((p + 12) % 12) + (p >= 12 ? 12 : 0));
@@ -1813,9 +1828,10 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
         }
       } else if (s === 0) held({ type: 'sine', f: hz(root - 12), t, dur: spb * 15, vol: .1, attack: .4, release: .6 });
       // arpeggio: 16th-note square up and down the chord, through the echo
-      if (part.arp) {
-        const seq = [0, 1, 2, 3, 2, 1, 2, 3][s % 8], m = 72 + ((tones.concat(ch.root + 12)[seq] + 12) % 12) + (seq === 3 ? 12 : 0);
-        chipv({ f: hz(m), t, dur: spb * .55, vol: .022 * pump, lp: 3000, echo: .5, pan: s % 2 ? .4 : -.4 });
+      const ae = tr.arpEvery || 1;
+      if (part.arp && s % ae === 0) {
+        const seq = [0, 1, 2, 3, 2, 1, 2, 3][(s / ae) % 8], m = 72 + ((tones.concat(ch.root + 12)[seq] + 12) % 12) + (seq === 3 ? 12 : 0);
+        chipv({ type: tr.arpType || 'square', f: hz(m), t, dur: spb * .55 * ae, vol: (tr.arpType === 'triangle' ? .034 : .022) * pump, lp: 3000, echo: .5, pan: (s / ae) % 2 ? .4 : -.4 });
       }
       // data chatter: short high beeps on chord tones, like a computer processing
       if (part.blips && hash(step * 7.13 + secN) < tr.blipRate) {
@@ -1830,10 +1846,10 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
       if (part.drums || (last && tr.lead !== 'bell')) {
         if (part.half) { if (s === 0 || (s === 10 && bar % 2)) kick(t, .6, 'mus'); if (s === 8) snare(t, .7, 'mus', .8); }
         else {
-          if (tr.kick[s] === 'x') kick(t, .55, 'mus');
+          if (tr.kick[s] === 'x') kick(t, tr.soft ? .3 : .55, 'mus');
           const sn = (last ? tr.fill : tr.snare)[s];
-          if (sn === 'x') snare(t, last && s > 8 ? .45 : .6, 'mus', .6);
-          if (last && s >= 12 && part.drums) for (let k = 1; k < 4; k++) chipv({ type: 'square', f: 180 + k * 40, t: t + k * spb / 4, dur: spb / 5, vol: .03, lp: 3000, crush: 1 });
+          if (sn === 'x') snare(t, (last && s > 8 ? .45 : .6) * (tr.soft ? .55 : 1), 'mus', tr.soft ? .9 : .6);
+          if (last && s >= 12 && part.drums && !tr.soft) for (let k = 1; k < 4; k++) chipv({ type: 'square', f: 180 + k * 40, t: t + k * spb / 4, dur: spb / 5, vol: .03, lp: 3000, crush: 1 });
         }
         if (tr.hat[s] === 'x' || (tr.hat16 && part.drums && !part.half)) hat(t, tr.hat[s] === 'x' ? (s % 4 === 2 ? 1 : .6) : .3, 'mus', s % 2 ? .3 : -.3);
       }
@@ -1980,7 +1996,7 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
   const FX = (() => {
     let cur = null;
     const audible = () => { const m = Snd.meter && Snd.meter(); return !!(m && m.state === 'running'); };
-    function overlay(cls, html, ms) {
+    function overlay(cls, html, ms, sticky) {
       if (cur) cur.finish();
       return new Promise(res => {
         const el = document.createElement('div');
@@ -1989,8 +2005,9 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
         let timer = 0;
         const finish = () => { if (!cur || cur.el !== el) return; cur = null; clearTimeout(timer); el.classList.add('out'); setTimeout(() => el.remove(), 260); res(); };
         cur = { el, finish };
-        el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); Snd.unlock(); finish(); });
-        timer = setTimeout(finish, reduce ? Math.min(ms, 900) : ms);
+        el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); Snd.unlock(); if (!sticky || e.target.closest('.fx-ok')) finish(); });
+        if (sticky) { const ok = el.querySelector('.fx-ok'); if (ok) setTimeout(() => ok.focus({ preventScroll: true }), 50); }
+        else timer = setTimeout(finish, reduce ? Math.min(ms, 900) : ms);
       });
     }
     addEventListener('keydown', e => { if (!cur) return; e.preventDefault(); e.stopImmediatePropagation(); Snd.unlock(); if (!e.repeat) cur.finish(); }, { capture: true });
@@ -2007,7 +2024,7 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
     }
 
     // a battle opens with the enemy's card slamming in
-    function foeIntro(f, kind, act, row) {
+    function foeIntro(f, kind, act, row, opts = {}) {
       const boss = kind === 'boss', elite = kind === 'elite', S = f.style && STYLES[f.style];
       const tag = boss ? (f.final ? 'Final boss' : 'Boss') : elite ? 'Elite' : 'Hostile';
       const html = `<div class="fi-card ${boss ? 'boss' : elite ? 'elite' : ''}">
@@ -2018,9 +2035,10 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
         <div class="fi-quirk">${f.q ? QUIRKS[f.q] : 'No tricks. Just cards.'}</div>
         ${S ? `<div class="fi-style">${S.i} <b>${S.n}:</b> ${S.d}</div>` : ''}
         ${f.intro ? `<i class="fi-quote">${f.intro}</i>` : ''}
-        <div class="fi-skip">tap or press any key</div></div>`;
-      setTimeout(() => { if (boss) Snd.war(); else Snd.hit(elite); }, 60);
-      return overlay('fx-foe', html, boss ? 3600 : elite ? 2400 : 1600);
+        ${opts.extra ? `<div class="fi-now"><b>Right now:</b> ${opts.extra}</div>` : ''}
+        <button class="primary fi-ok fx-ok" type="button">OK</button></div>`;
+      if (!opts.quiet) setTimeout(() => { if (boss) Snd.war(); else Snd.hit(elite); }, 60);
+      return overlay('fx-foe', html, 0, true);
     }
 
     // entering an act: a full-screen title card with a line of story and a loading bar
@@ -2070,6 +2088,14 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
     return { busy: () => !!cur, skip: () => { if (cur) cur.finish(); }, boot, foeIntro, actCard, wipe, hitFlash, warAlert, runLog, countUp };
   })();
 
+  // the ? beside the enemy's name (or its portrait) brings its card back up
+  function foeInfo() {
+    if (!B || !run || FX.busy()) return;
+    const f = B.f, node = run.map[run.row][run.col], base = f.q ? QUIRKS[f.q] : 'No tricks. Just cards.', now = f.style === 'hand' ? '' : quirkLine().slice(base.length).trim();
+    Snd.tap(); FX.foeIntro(f, node.t, run.act, run.row, { quiet: true, extra: now });
+  }
+  $('foeInfo').addEventListener('click', foeInfo);
+  $('foeMed').addEventListener('click', foeInfo);
   function show(id) {
     const was = document.querySelector('.screen:not([hidden])');
     if (was && was.id !== id) FX.wipe();
@@ -2660,7 +2686,7 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
     $('battleRelics').innerHTML = relicIcons();
     $('yLane').innerHTML = ''; $('oLane').innerHTML = '';
     $('yLane').className = 'lane'; $('oLane').className = 'lane';
-    setMsg(fresh && f.intro ? `<i>${f.intro}</i> ${STYLES[f.style] ? STYLES[f.style].d : ''}` : fresh || B.round === 0 ? 'Flip to attack. Win a war to capture their best card. Tap a script twice to drink it.' : 'Battle resumed.');
+    setMsg(fresh && f.intro ? `<i>${f.intro}</i> ${STYLES[f.style] ? STYLES[f.style].d : ''}` : fresh || B.round === 0 ? 'Flip to attack. Win a war to capture their best card. Tap a script twice to run it.' : 'Battle resumed.');
     renderBattle();
     show('sBattle');
     if (fresh) { busy = true; renderBattleButtons(); FX.foeIntro(f, node.t, run.act, run.row).then(() => { busy = false; if (B) renderBattle(); }); }
