@@ -4,3 +4,4 @@ dist/
 dist_v2/
 __pycache__/
 *.pyc
+dist_v3/
