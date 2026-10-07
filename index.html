@@ -1163,6 +1163,12 @@
   .foe-info { order: 1; margin: 0 !important; width: auto !important; height: auto !important; padding: 3px 12px 1px; border-radius: 999px !important; font-size: 15px !important; letter-spacing: .08em; text-transform: uppercase; display: inline-flex !important; align-items: center; gap: 6px; flex: none; }
   .foe-info b { font-size: 1.25em; line-height: 1; }
   .stage .foe-info { font-size: 22px !important; padding: 4px 16px 2px; }
+
+  /* the enemy's next card(s): one normally, two with the Scanner or a Ghost Chip, a "?" when hidden */
+  .peek-stack { display: flex; align-items: flex-start; }
+  .peek-stack .card:first-child { z-index: 1; }
+  .peek-stack .card + .card { margin-left: calc(var(--cw) * -.55); transform: translateY(14%) scale(.88); filter: brightness(.65); }
+  .hidden-card { display: grid; place-items: center; font-family: var(--head); font-size: calc(var(--cwb) * .38); color: #ff4f5e; border: 2px dashed rgba(255,79,94,.65); border-radius: 6px; background: rgba(255,79,94,.06); }
 </style>
 </head>
 <body>
@@ -1174,7 +1180,7 @@
   <div class="fan" id="fan" aria-hidden="true"></div>
   <h1>War</h1>
   <p class="sub">The Long March</p>
-  <p class="rules">Three layers of the network to the Motherboard, one life. Both sides flip, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Choose your route: recruits, drafts and tests for new cards, then chargers, labs, black boxes and strange hackers along the way, then a fight. Build your deck as you go.</p>
+  <p class="rules">Three layers of the network to the Motherboard, one life. Each round you play a card from your hand of three against the enemy's next card, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Choose your route: recruits, drafts and tests for new cards, then chargers, labs, black boxes and strange hackers along the way, then a fight. Build your deck as you go.</p>
   <nav class="menu" aria-label="Main menu">
     <button class="menu-btn main" id="continueBtn" type="button" hidden><span>Continue</span><small id="continueSub"></small></button>
     <button class="menu-btn" id="newRunBtn" type="button"><span>New Run</span><small>Start fresh in any of the 3 save slots</small></button>
@@ -1282,7 +1288,7 @@
     <button class="primary" id="flipBtn" type="button">Flip</button>
     <button class="secondary" id="burnBtn" type="button">Burn</button>
   </div>
-  <p class="keys"><kbd>Space</kbd> flip &nbsp;·&nbsp; <kbd>B</kbd> burn &nbsp;·&nbsp; <kbd>1</kbd>–<kbd>4</kbd> script or card<br><kbd>I</kbd> enemy info &nbsp;·&nbsp; <kbd>D</kbd> deck &nbsp;·&nbsp; <kbd>Esc</kbd> options</p>
+  <p class="keys"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> play a card &nbsp;·&nbsp; <kbd>B</kbd> new hand &nbsp;·&nbsp; <kbd>Q</kbd>–<kbd>R</kbd> scripts<br><kbd>I</kbd> enemy info &nbsp;·&nbsp; <kbd>D</kbd> deck &nbsp;·&nbsp; <kbd>Esc</kbd> options</p>
 </section>
 
 <section class="screen reward" id="sReward" hidden>
@@ -1337,7 +1343,7 @@
       <div class="set-row"><span>Keyboard hints</span><button class="tog" type="button" data-set="hints"></button></div>
       <div class="set-row" id="menuRow"><span>Save and go to the main menu</span><button class="ghost" type="button" id="toMenu">Main menu</button></div>
       <div class="set-row"><span>Best-run records</span><button class="ghost" type="button" id="resetRec">Reset</button></div>
-      <p class="set-note">Controls: Space flip, B burn, 1 to 4 run a script, I enemy info, D deck, 1 2 3 pick a spot or reward, S skip, M mute, F11 fullscreen, Esc options.</p>
+      <p class="set-note">Controls: 1 2 3 play a card from your hand, B new hand, Q W E R run a script, I enemy info, D deck, 1 2 3 pick a spot or reward, S skip, M mute, F11 fullscreen, Esc options.</p>
       <p class="set-note">Controller: D-pad or stick to move, A to press, B to go back, X to burn, View to see your deck, Start for options.</p>
       <p class="set-note" id="padNote"></p>
     </section>
@@ -1355,7 +1361,7 @@ const RELICS = {
   prism:{n:'Prism Lens',i:'💎',d:'Diamonds count as 2 ranks higher.'},
   iron:{n:'Hydraulic Club',i:'🔨',d:'When one of your clubs loses, it still hits for 3.'},
   banner:{n:'War Beacon',i:'📡',d:'Wars you win deal double damage.'},
-  spyglass:{n:'Scanner',i:'🔭',d:"See the enemy's next card."},
+  spyglass:{n:'Scanner',i:'🔭',d:"See the enemy's next two cards, even when they are hidden."},
   satchel:{n:'Extra RAM',i:'💾',d:'+2 Burns each battle.'},
   mirror:{n:'Mirror Code',i:'🪞',d:'You win every tie.'},
   bandages:{n:'Repair Kit',i:'🔧',d:'Heal 6 after each battle.'},
@@ -1365,7 +1371,7 @@ const RELICS = {
   gambit:{n:'First Strike',i:'🚀',d:'The first round of each battle deals triple damage.'},
   stout:{n:'Titan Frame',i:'🦾',d:'+12 max HP, and heal 12 now.'},
   purse:{n:'Crypto Wallet',i:'👛',d:'+6 credits after every battle.'},
-  ember:{n:'Incinerator',i:'🔥',d:'Every card you burn hits the enemy for 3.'},
+  ember:{n:'Incinerator',i:'🔥',d:'Every burn hits the enemy for 3.'},
   thief:{n:'Data Glove',i:'🧤',d:'Wars you win capture two cards instead of one.'},
   aegis:{n:'Energy Shield',i:'🔰',d:'The first hit you take each battle deals no damage.'},
   belt:{n:'Trophy Drive',i:'🏆',d:'+2 max HP after every battle you win.'},
@@ -1391,7 +1397,7 @@ const SEALS = {
   wild:{n:'Wild Chip',i:'🌈',d:'Counts as every suit.'},
   lucky:{n:'Lucky Chip',i:'⭐',d:'1 in 4 chance to count 4 ranks higher.'},
   thorn:{n:'Spike Chip',i:'🌵',d:'When it loses, the enemy takes 3 damage too.'},
-  ghost:{n:'Ghost Chip',i:'👻',d:"While it is your next card, you can see the enemy's next card."},
+  ghost:{n:'Ghost Chip',i:'👻',d:"While it is in your hand, you can see the enemy's next two cards, even when they are hidden."},
   battle:{n:'Battle Chip',i:'🪖',d:'This card always starts a war when flipped, and your war card gets +2.'}
 };
 const SEAL_IDS = Object.keys(SEALS);
@@ -1462,7 +1468,7 @@ const ACTS = [
 /* each act boss fights in its own style */
 const BLOOM = 6;
 const STYLES = {
-  hand:{n:'Port Duel', i:'🚪', d:'You hold 3 cards and see its next card before you choose which to play. Burn swaps your whole hand.'},
+  hand:{n:'Hidden Hand', i:'🚪', d:'Its next card stays hidden, so you cannot see what you are playing against. Read its card range and guess.'},
   bloom:{n:'Outbreak', i:'🦠', d:`Her virus breaks out every ${BLOOM} rounds and hits you for 12. Winning a war pushes the outbreak back by 3 rounds.`},
   decree:{n:'Protocols', i:'💻', d:'Before every round the Motherboard runs a new protocol, like low cards win or double stakes.'}
 };
@@ -1481,8 +1487,8 @@ const pick = a => a[Math.floor(Math.random()*a.length)];
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const rankLabel = v => v<=10 ? String(v) : {11:'J',12:'Q',13:'K',14:'A'}[v];
 const nid = () => Math.random().toString(36).slice(2,9);
-// balanced 2026-09-29 by simulation (tools/balance_sim.js), with seals, perks, boss styles and war triggers: a careful player wins ~49%, a casual one ~39%; regular fights ramp up steadily, elites and bosses are the peaks
-const TUNE = { hp:21, hpStep:5.5, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
+// balanced 2026-10-05 by simulation (tools/balance_sim.js) for hand-of-3 fights: careful play wins ~49%, casual ~39%, random card picks ~2% (skill now matters far more than the shuffle)
+const TUNE = { hp:22, hpStep:6.5, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
 
 function foeStats(act,row,name,elite){
   const t=act*3+Math.floor(row/3)+(elite?.7:0);
@@ -1562,11 +1568,14 @@ function makeBattle(run,foe){
   return {f:foe, eHp:foe.hp, eMax:foe.hp, pDraw:shuffle(run.deck.map(c=>({...c}))), pDisc:[], eDraw:shuffle(ed), eDisc:[],
     burns:2+(has(run,'satchel')?2:0)+(run.bonusBurns||0)+(hasPerk(run,'quarter')?1:0), round:0, over:null, luck:hasPerk(run,'tactic')?3:0, block:0, aegis:has(run,'aegis'), frenzy:0, stolen:[], purpled:[], will:false, wind:false};
 }
-function startStyle(b){ if(b.f.style==='hand') refillHand(b); if(b.f.style==='bloom') b.bloom=0; if(b.f.style==='decree') b.decree=rollDecree(); return b; }
+function startStyle(b){ refillHand(b);  /* every fight is played from a hand of 3 */ if(b.f.style==='bloom') b.bloom=0; if(b.f.style==='decree') b.decree=rollDecree(); return b; }
 function refill(b,s){ if(!b[s+'Draw'].length && b[s+'Disc'].length){ b[s+'Draw']=shuffle(b[s+'Disc']); b[s+'Disc']=[]; } }
 function peek(b,s){ refill(b,s); return b[s+'Draw'][0]||null; }
 function take(b,s){ refill(b,s); return b[s+'Draw'].shift()||null; }
 const avail = (b,s) => b[s+'Draw'].length + b[s+'Disc'].length;
+// how many of the enemy's next cards you can see: 1 normally, none in the Port Warden's hidden-hand fight, 2 with the Scanner or a Ghost Chip in hand
+function foeSight(run,b){ return has(run,'spyglass') || (b.hand||[]).some(c=>c.sl==='ghost') ? 2 : b.f.style==='hand' ? 0 : 1; }
+function peekN(b,s,n){ refill(b,s); return b[s+'Draw'].slice(0,n); }
 function effP(run,c){ if(c.sl==='stone') return 10; let v=c.v; if(has(run,'crown')&&v>=11&&v<=13) v+=2; if(has(run,'prism')&&isSuit(c,'D')) v+=2; if(c.lk) v+=4; return v; }
 function effE(b,c){ let v=c.v; if(b.f.q==='royal'&&v>=11&&v<=13) v+=2; return v; }
 function compare(run,b,pc,ec,luck){
@@ -1584,7 +1593,7 @@ function compare(run,b,pc,ec,luck){
 }
 function burn(run,b){
   if(b.burns<=0) return null;
-  if(b.hand && b.f.style==='hand'){ b.pDisc.push(...b.hand); b.hand=[]; b.burns--; refillHand(b); return {c:null, hit:0, hand:true}; } const c=take(b,'p'); if(!c) return null; b.pDisc.push(c); b.burns--;
+  if(b.hand){ b.pDisc.push(...b.hand); b.hand=[]; b.burns--; refillHand(b); let hit=0; if(has(run,'ember')){ hit=3; b.eHp-=3; run.stats.dealt+=3; if(b.eHp<=0) b.over='win'; } return {c:null, hit, hand:true}; } const c=take(b,'p'); if(!c) return null; b.pDisc.push(c); b.burns--;
   let hit=0; if(has(run,'ember')){ hit=3; b.eHp-=3; run.stats.dealt+=3; if(b.eHp<=0) b.over='win'; }
   return {c, hit};
 }
@@ -1618,7 +1627,7 @@ function playRound(run,b,hi){
   const D=b.decree&&b.decree.k;
   const luck=b.luck; b.luck=0;
   const roll=c=>{ if(c) c.lk = c.sl==='lucky' && Math.random()<.25; return c; };  // a Lucky seal rolls each time it's flipped
-  let pc=roll(b.hand && b.f.style==='hand' && b.hand.length ? b.hand.splice(Math.min(hi||0, b.hand.length-1),1)[0] : take(b,'p')), ec=take(b,'e');
+  let pc=roll(b.hand && b.hand.length ? b.hand.splice(Math.min(hi||0, b.hand.length-1),1)[0] : take(b,'p')), ec=take(b,'e');
   const flipped=[pc];
   const used={p:[pc],e:[ec]}; const steps=[{t:'flip',pc,ec,luck}];
   const why=warTrigger(run,b,pc,ec,luck); steps[0].why=why;
@@ -1720,7 +1729,7 @@ function playRound(run,b,hi){
     if(b.bloom>=BLOOM){ b.bloom=0; run.hp-=12; r.bloom=12; }
   }
   if(b.f.style==='decree'){ r.decree=b.decree; b.decree=rollDecree(); }
-  if(b.f.style==='hand') refillHand(b);
+  if(b.hand) refillHand(b);
   if(b.eHp>0 && !avail(b,'e')){ b.eHp=0; r.routed=true; }  // you captured every card they had
   if(b.eHp<=0) b.over='win'; else if(run.hp<=0) b.over='lose';
   return {steps, r};
@@ -1893,7 +1902,7 @@ const NODES = {
       : [{l:'Flash a mod', d:'You have no modded cards. Pay 15 credits for a random mod on a card you pick.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`The pads flash a ${CHARMS[c.ch].n} mod into your ${lbl(c)}.`, good:true}; }},
           {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
 };
-if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
+if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,skillCard,STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
 
 </script>
 <script>
@@ -3012,13 +3021,13 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
   }
   /* battle */
   const nodeHere = () => run.map[run.row][run.col];
-  const handMode = () => !!(B && B.hand && B.f.style === 'hand');
+  const handMode = () => !!(B && B.hand);
   const decreeText = d => d.k === 'suit' ? `${suitName(d.s)} count 3 higher this round, for both sides.` : `${DECREES[d.k].n}. ${DECREES[d.k].d}`;
   function quirkLine() {
     const f = B.f, base = f.q ? QUIRKS[f.q] : 'No tricks. Just cards.';
     if (f.style === 'bloom') { const n = BLOOM - (B.bloom || 0); return `${base} 🦠 Outbreak in ${n} round${n === 1 ? '' : 's'} for 12 damage. Win a war to push it back by 3.`; }
     if (f.style === 'decree' && B.decree) return `${base} 💻 Protocol: ${decreeText(B.decree)}`;
-    if (f.style === 'hand') return `${base} 🚪 Port Duel: pick a card from your hand. You can see its next card.`;
+    if (f.style === 'hand') return `${base} 🚪 Hidden Hand: you can't see its next card. Its cards run ${rankLabel(f.lo)} to ${rankLabel(f.hi)}.`;
     return base;
   }
   function showBattle(fresh) {
@@ -3033,7 +3042,7 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
     $('battleRelics').innerHTML = relicIcons();
     $('yLane').innerHTML = ''; $('oLane').innerHTML = '';
     $('yLane').className = 'lane'; $('oLane').className = 'lane';
-    setMsg(fresh && f.intro ? `<i>${f.intro}</i> ${STYLES[f.style] ? STYLES[f.style].d : ''}` : fresh || B.round === 0 ? 'Flip to attack. Win a war to capture their best card. Run a script any time.' : 'Battle resumed.');
+    setMsg(fresh && f.intro ? `<i>${f.intro}</i> ${STYLES[f.style] ? STYLES[f.style].d : ''}` : fresh || B.round === 0 ? 'Pick a card from your hand to play it against their next card. Win a war to capture their best card.' : 'Battle resumed.');
     renderBattle();
     show('sBattle');
     if (fresh) { busy = true; renderBattleButtons(); FX.foeIntro(f, node.t, run.act, run.row).then(() => { busy = false; if (B) renderBattle(); }); }
@@ -3078,8 +3087,9 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
     $('handRow').hidden = !hand; $('flipBtn').hidden = hand;
     if (hand) $('handRow').innerHTML = `<span class="lbl">Your hand · pick a card to play</span><div class="hand-cards">${B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}<kbd>${i + 1}</kbd></button>`).join('')}</div>`;
     $('foeQuirk').textContent = quirkLine();
-    if (hand || has(run, 'spyglass') || (pn && pn.sl === 'ghost')) { const en = peek(B, 'e'); $('foePeek').innerHTML = en ? `${cardHTML(en, 'mini')}<span>Next</span>` : ''; }
-    else $('foePeek').innerHTML = '<div class="empty-slot"></div>';
+    const sight = foeSight(run, B), en = sight ? peekN(B, 'e', sight) : [];
+    $('foePeek').innerHTML = en.length ? `<div class="peek-stack">${en.map(c => cardHTML(c, 'mini')).join('')}</div><span>${en.length > 1 ? 'Next two' : 'Next'}</span>`
+      : `<div class="empty-slot hidden-card">?</div><span>${B.f.style === 'hand' ? 'Hidden' : ''}</span>`;
     $('burnBtn').textContent = `${hand ? 'New hand' : 'Burn'} ${B.burns}`;
     $('burnBtn').disabled = busy || B.burns <= 0 || !!B.over;
     $('flipBtn').disabled = busy || !!B.over;
@@ -3094,7 +3104,7 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
     let h = '';
     for (let i = 0; i < tonicCap(run); i++) {
       const t = run.tonics[i];
-      h += t ? `<button class="tonic${off ? ' off' : ''}" type="button" data-ti="${i}" data-tonic="${t}" aria-label="${TONICS[t].n}"${off ? ' aria-disabled="true"' : ''}>${TONICS[t].i}<kbd>${i + 1}</kbd></button>`
+      h += t ? `<button class="tonic${off ? ' off' : ''}" type="button" data-ti="${i}" data-tonic="${t}" aria-label="${TONICS[t].n}"${off ? ' aria-disabled="true"' : ''}>${TONICS[t].i}<kbd>${'QWER'[i]}</kbd></button>`
         : '<span class="tonic empty" aria-label="Empty script slot"></span>';
     }
     $('tonicBox').innerHTML = h;
@@ -3717,10 +3727,11 @@ if(typeof module!=='undefined') module.exports={SKILLS,SKILL_IDS,skillCard,STYLE
       else if (k === 'd') click('mapDeckBtn'); else handled = false;
     }
     else if (visible('sBattle')) {
-      const n = '1234'.indexOf(k);
-      if (go || k === 'f') { if (!e.repeat) click('flipBtn'); }
+      const n = '123'.indexOf(k), q = 'qwer'.indexOf(k);
+      if (go || k === 'f') { if (!e.repeat && !handMode()) click('flipBtn'); }
       else if (k === 'b') { if (!e.repeat) click('burnBtn'); }
-      else if (n >= 0) { if (!e.repeat) { if (handMode()) { if (n < 3) doFlip(n); } else drinkTonic(n); } }
+      else if (n >= 0) { if (!e.repeat) { if (handMode()) doFlip(n); else drinkTonic(n); } }
+      else if (q >= 0) { if (!e.repeat) drinkTonic(q); }
       else if (k === 'd') click('battleDeckBtn'); else handled = false;
     }
     else if (visible('sEvent')) {

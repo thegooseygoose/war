@@ -128,7 +128,7 @@ tests\   Tests (trials): the icon for each test.
   storage-test.png           Storage Test
 
 boss-styles\   Boss styles: the icon for each boss's way of fighting.
-  port-duel.png              Port Duel  -  You hold 3 cards and see its next card before you choose which to play. Burn swaps your wh
+  hidden-hand.png            Hidden Hand  -  The Port Warden's fight: its next card stays hidden.
   outbreak.png               Outbreak  -  Her virus breaks out every 6 rounds and hits you for 12. Winning a war pushes the outbreak
   protocols.png              Protocols  -  Before every round the Mainframe runs a new protocol, like low cards win or double stakes.
 

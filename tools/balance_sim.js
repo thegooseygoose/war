@@ -4,8 +4,9 @@
    then run  SIM(1000)            -> careful player (smart route, burns, tonics, good picks)
              SIM(1000, 'casual')  -> same choices, but a random route through the map
              SIM(1000, 'random')  -> picks everything at random
-   Targets (2026-09-29): careful ~50% wins, casual ~35%.
-   Boss styles: the Gate Duel bot plays the cheapest card that wins (or its weakest when none can). */
+   Targets (2026-10-05, TUNE hp 22 / hpStep 6.5): careful ~49% wins, casual ~39%, random ~2%.
+   Every fight is played from a hand of 3 (2026-10-05): the careful bot plays the cheapest card that beats the enemy's next card,
+   or dumps its weakest; in the Port Warden's hidden-hand fight it guesses from his card range. Random mode picks at random. */
 window.SIM = function (N = 500, mode = 'smart') {
   const smart = mode !== 'random', smartRoute = mode === 'smart';
   const R = a => a[Math.floor(Math.random() * a.length)];
@@ -17,23 +18,23 @@ window.SIM = function (N = 500, mode = 'smart') {
   function fight(run, foe) {
     const b = newBattle(run, foe); let g = 0;
     while (!b.over && g++ < 400) {
-      if (b.hand && b.f.style === 'hand') {  // Gate Duel: pick a card from the hand
-        let hi = 0;
-        if (smart) { const ec = peek(b, 'e'); const idx = b.hand.map((c, i) => i).sort((x, y) => b.hand[x].v - b.hand[y].v); hi = idx.find(i => compare(run, b, b.hand[i], ec, b.luck) === 1); if (hi == null) hi = idx[0]; }
-        else hi = Math.floor(Math.random() * b.hand.length);
-        playRound(run, b, hi); continue;
-      }
-      if (smart) {
-        const pn = peek(b, 'p');
+      if (smart) {  // scripts first
         if (run.tonics.includes('fire') && b.eHp <= 10) useTonic(run, b, run.tonics.indexOf('fire'));
         if (b.over) break;
         if (run.hp < run.maxHp * .35 && run.tonics.includes('heal')) useTonic(run, b, run.tonics.indexOf('heal'));
         if (run.hp < run.maxHp * .3 && run.tonics.includes('iron') && !b.block) useTonic(run, b, run.tonics.indexOf('iron'));
-        if (pn && pn.v <= 5 && pn.sl !== 'stone' && b.burns > 0) { burn(run, b); if (b.over) break; continue; }
-        const pn2 = peek(b, 'p');
-        if (pn2 && pn2.v <= 6 && run.tonics.includes('luck') && !b.luck) useTonic(run, b, run.tonics.indexOf('luck'));
       }
-      playRound(run, b);
+      if (!b.hand) { playRound(run, b); continue; }
+      let hi = 0;
+      if (smart) {  // play the cheapest card that wins; if none can, dump the weakest (or swap a bad hand)
+        const sight = foeSight(run, b), idx = b.hand.map((c, i) => i).sort((x, y) => b.hand[x].v - b.hand[y].v);
+        const ec = sight ? peek(b, 'e') : { v: Math.ceil((b.f.lo + b.f.hi) / 2) + 1, s: 'X' };
+        const win = idx.find(i => compare(run, b, b.hand[i], ec, b.luck) === 1);
+        if (win == null && b.burns > 0 && Math.max(...b.hand.map(c => c.v)) <= 6) { burn(run, b); if (b.over) break; continue; }
+        hi = win != null ? win : idx[0];
+        if (win != null && b.hand[win].v <= 6 && run.tonics.includes('luck') && !b.luck) useTonic(run, b, run.tonics.indexOf('luck'));
+      } else hi = Math.floor(Math.random() * b.hand.length);
+      playRound(run, b, hi);
     }
     return b;
   }
@@ -50,12 +51,12 @@ window.SIM = function (N = 500, mode = 'smart') {
       if (!cs.length) return;
       let c;
       if (!smart) c = R(cs);
-      else if (n.t === 'rest') c = st.times ? cs.find(x => /Leave/.test(x.l)) : run.hp < run.maxHp * .7 ? cs[0] : cs[1] || cs[0];
-      else c = cs.find(x => !/Leave|Walk|Refuse|Let them|leave/i.test(x.l) && !/Lose \d+ HP/.test(x.d) && !/Offer blood|Rob|Bet a card|Two 2s/.test(x.l + x.d)) || cs[cs.length - 1];
+      else if (n.t === 'rest') c = st.times ? (cs.find(x => /Leave|Unplug/.test(x.l)) || cs[cs.length - 1]) : run.hp < run.maxHp * .7 ? cs[0] : cs[1] || cs[0];
+      else c = cs.find(x => !/Leave|Walk|Refuse|Let them|leave|Unplug/i.test(x.l) && !/Lose \d+ HP/.test(x.d) && !/Offer blood|Rob|Strip them|Bet a card|Two 2s/.test(x.l + x.d)) || cs[cs.length - 1];
       const pool = run.deck.filter(c.filter || (() => true));
-      const card = !c.pick ? null : !smart ? R(pool) : /Sacrifice|Melt|Move a charm/.test(c.l) ? [...pool].sort((a, b) => a.v - b.v)[0]
-        : /Seal/.test(c.l) ? (pool.filter(x => !x.sl).sort((a, b) => b.v - a.v)[0] || pool[0])
-        : /Sharpen|charm|Keen|copy/i.test(c.l + c.d) ? [...pool].filter(x => x.v < 14).sort((a, b) => b.v - a.v)[0] || pool[0] : pool[0];
+      const card = !c.pick ? null : !smart ? R(pool) : /Sacrifice|Melt|Move a charm|Delete for|Scrap a card|Move a mod/.test(c.l) ? [...pool].sort((a, b) => a.v - b.v)[0]
+        : /Seal|Chip/.test(c.l) ? (pool.filter(x => !x.sl).sort((a, b) => b.v - a.v)[0] || pool[0])
+        : /Sharpen|charm|Keen|copy|Boost|Overclock|mod|Turbo|patch/i.test(c.l + c.d) ? [...pool].filter(x => x.v < 14).sort((a, b) => b.v - a.v)[0] || pool[0] : pool[0];
       let res = c.go(run, card, st); if (typeof res === 'string') res = { text: res };
       if (res && res.offer) addCard(run, smart ? [...res.offer].sort((a, b) => b.v - a.v)[0] : R(res.offer));
       if (!res || !res.again) break;
