@@ -1169,6 +1169,19 @@
   .peek-stack .card:first-child { z-index: 1; }
   .peek-stack .card + .card { margin-left: calc(var(--cw) * -.55); transform: translateY(14%) scale(.88); filter: brightness(.65); }
   .hidden-card { display: grid; place-items: center; font-family: var(--head); font-size: calc(var(--cwb) * .38); color: #ff4f5e; border: 2px dashed rgba(255,79,94,.65); border-radius: 6px; background: rgba(255,79,94,.06); }
+
+  /* store sign: hazard stripes instead of a circus awning */
+  .awning { height: 34px !important; background: repeating-linear-gradient(-45deg, #c8b57e 0 20px, #15191c 20px 40px) !important; -webkit-mask: none !important; mask: none !important;
+    box-shadow: 0 3px 0 var(--neon), 0 0 18px rgba(47,211,245,.35), 0 10px 20px rgba(0,0,0,.5) !important; }
+  .awning::after { display: none !important; }
+  .bell { filter: grayscale(1) sepia(1) saturate(5) hue-rotate(150deg) brightness(1.15); }
+  .keeper::before { content: "> " !important; font-family: "Share Tech Mono", Consolas, monospace; color: var(--neon); }
+
+  /* table colour option tints the backdrop: Cyber (gunmetal), Matrix (green), Violet (purple) */
+  :root { --felt: #1f2428; --felt-deep: #07090a; }
+  :root[data-table="forest"] { --felt: #14291d; --felt-deep: #030806; }
+  :root[data-table="midnight"] { --felt: #231b38; --felt-deep: #07050c; }
+  body { background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px), radial-gradient(120% 90% at 50% 45%, var(--felt) 0%, color-mix(in srgb, var(--felt) 45%, #000) 60%, var(--felt-deep) 100%) !important; background-color: var(--felt-deep) !important; }
 </style>
 </head>
 <body>
@@ -1272,7 +1285,7 @@
     </div>
     <div class="msg" id="bMsg" aria-live="polite"></div>
     <div class="row" id="youRow">
-      <button class="pilebtn" id="youPile" type="button" aria-label="Flip your next card"></button>
+      <button class="pilebtn" id="youPile" type="button" aria-label="Your draw pile"></button>
       <div class="lane" id="yLane"></div>
       <div class="side-slot" id="youPeek"></div>
     </div>
@@ -1344,7 +1357,7 @@
       <div class="set-row" id="menuRow"><span>Save and go to the main menu</span><button class="ghost" type="button" id="toMenu">Main menu</button></div>
       <div class="set-row"><span>Best-run records</span><button class="ghost" type="button" id="resetRec">Reset</button></div>
       <p class="set-note">Controls: 1 2 3 play a card from your hand, B new hand, Q W E R run a script, I enemy info, D deck, 1 2 3 pick a spot or reward, S skip, M mute, F11 fullscreen, Esc options.</p>
-      <p class="set-note">Controller: D-pad or stick to move, A to press, B to go back, X to burn, View to see your deck, Start for options.</p>
+      <p class="set-note">Controller: D-pad or stick to move, A to press, B to go back, X for a new hand, View to see your deck, Start for options.</p>
       <p class="set-note" id="padNote"></p>
     </section>
   </div>
@@ -1362,7 +1375,7 @@ const RELICS = {
   iron:{n:'Hydraulic Club',i:'🔨',d:'When one of your clubs loses, it still hits for 3.'},
   banner:{n:'War Beacon',i:'📡',d:'Wars you win deal double damage.'},
   spyglass:{n:'Scanner',i:'🔭',d:"See the enemy's next two cards, even when they are hidden."},
-  satchel:{n:'Extra RAM',i:'💾',d:'+2 Burns each battle.'},
+  satchel:{n:'Extra RAM',i:'💾',d:'+2 New Hands each battle.'},
   mirror:{n:'Mirror Code',i:'🪞',d:'You win every tie.'},
   bandages:{n:'Repair Kit',i:'🔧',d:'Heal 6 after each battle.'},
   crown:{n:'Admin Crown',i:'👑',d:'Your J, Q and K count as 2 ranks higher.'},
@@ -1371,7 +1384,7 @@ const RELICS = {
   gambit:{n:'First Strike',i:'🚀',d:'The first round of each battle deals triple damage.'},
   stout:{n:'Titan Frame',i:'🦾',d:'+12 max HP, and heal 12 now.'},
   purse:{n:'Crypto Wallet',i:'👛',d:'+6 credits after every battle.'},
-  ember:{n:'Incinerator',i:'🔥',d:'Every burn hits the enemy for 3.'},
+  ember:{n:'Incinerator',i:'🔥',d:'Every New Hand hits the enemy for 3.'},
   thief:{n:'Data Glove',i:'🧤',d:'Wars you win capture two cards instead of one.'},
   aegis:{n:'Energy Shield',i:'🔰',d:'The first hit you take each battle deals no damage.'},
   belt:{n:'Trophy Drive',i:'🏆',d:'+2 max HP after every battle you win.'},
@@ -1389,7 +1402,7 @@ const CHARMS = {
 const SUITNAME = {S:'spades',H:'hearts',D:'diamonds',C:'clubs'};
 const SEALS = {
   red:{n:'Red Chip',i:'🔴',d:'Strikes twice when it wins.'},
-  gold:{n:'Gold Chip',i:'🟡',d:'+3 credits every time it is flipped face up.'},
+  gold:{n:'Gold Chip',i:'🟡',d:'+3 credits every time it is played.'},
   blue:{n:'Blue Chip',i:'🔵',d:'Wars it wins capture 1 extra card.'},
   purple:{n:'Purple Chip',i:'🟣',d:'If it loses, it goes back on top of your deck for another try (once per battle).'},
   glass:{n:'Glass Chip',i:'💠',d:'Triple damage when it wins, but a 1 in 4 chance to shatter and leave your deck.'},
@@ -1398,7 +1411,7 @@ const SEALS = {
   lucky:{n:'Lucky Chip',i:'⭐',d:'1 in 4 chance to count 4 ranks higher.'},
   thorn:{n:'Spike Chip',i:'🌵',d:'When it loses, the enemy takes 3 damage too.'},
   ghost:{n:'Ghost Chip',i:'👻',d:"While it is in your hand, you can see the enemy's next two cards, even when they are hidden."},
-  battle:{n:'Battle Chip',i:'🪖',d:'This card always starts a war when flipped, and your war card gets +2.'}
+  battle:{n:'Battle Chip',i:'🪖',d:'This card always starts a war when played, and your war card gets +2.'}
 };
 const SEAL_IDS = Object.keys(SEALS);
 /* skill cards: specialist units with their own rule, hired from the Merc Hub, stores and now and then a draft */
@@ -1409,7 +1422,7 @@ const SKILLS = {
   assassin:{n:'Hacker',i:'🥷',v:3,d:'Beats any J, Q or K.'},
   trickster:{n:'Spoofer',i:'🎭',v:7,d:"Swaps ranks with the enemy's card."},
   merchant:{n:'Crypto Miner',i:'⛏️',v:6,d:'Win or lose, +4 credits.'},
-  berserker:{n:'Redline',i:'🪓',v:9,d:'Double damage when it wins, but you lose 2 HP every time it is flipped.'},
+  berserker:{n:'Redline',i:'🪓',v:9,d:'Double damage when it wins, but you lose 2 HP every time it is played.'},
   herald:{n:'Siren',i:'🚨',v:8,d:'Always starts a war, and your war card gets +2.'}
 };
 const SKILL_IDS = Object.keys(SKILLS);
@@ -1417,7 +1430,7 @@ const skillCard = (id, s) => { id=id||pick(SKILL_IDS); return {v:SKILLS[id].v, s
 /* perks: win fights for XP; each level up, choose 1 of 3 */
 const PERKS = {
   tough:{n:'Reinforced',i:'💪',d:'+8 max HP, and heal 8 now. You can take it again.',stack:true},
-  quarter:{n:'Quartermaster',i:'🔥',d:'+1 Burn every battle.'},
+  quarter:{n:'Quartermaster',i:'🔥',d:'+1 New Hand every battle.'},
   medic:{n:'Field Repair',i:'⛑️',d:'Heal 5 after every battle.'},
   pockets:{n:'Extra Slot',i:'👝',d:'Carry 1 more script.'},
   will:{n:'Iron Will',i:'🧠',d:"The first war you lose each battle can't take your card."},
@@ -1439,7 +1452,7 @@ const TONICS = {
   fire:{n:'EMP Script',i:'💥',d:'Hit the enemy for 10.'},
   luck:{n:'Luck Script',i:'🍀',d:'Your next card counts 5 ranks higher.'},
   iron:{n:'Shield Script',i:'🧱',d:'The next hit you take deals no damage.'},
-  horn:{n:'War Siren',i:'📯',d:'Your next flip starts a war, and your war card gets +2.'}
+  horn:{n:'War Siren',i:'📯',d:'The next card you play starts a war, and your war card gets +2.'}
 };
 const QUIRKS = {
   armored:'Armoured: takes 1 less damage from every hit.',
@@ -1814,7 +1827,7 @@ const EVENTS = {
     {l:'Take the stick', d:'Gain 60 credits. Two 2s join your deck.', go:r=>{ r.gold+=60; addCard(r,{v:2,s:pick(SUITS)}); addCard(r,{v:2,s:pick(SUITS)}); return 'The stick is warm. Two junk cards install into your deck. +60 credits.'; }},
     {l:'Refuse', d:'Nothing is free.', go:()=>'He melts back into the crowd.'}]},
   seer:{t:'The Oracle AI', i:'🔮', text:'A hologram flickers over a cracked console. "I have run your future," it says. "For a price."', choices:[
-    {l:'Pay 30 credits', d:'+1 Burn in every battle for the rest of the run.', can:r=>r.gold>=30, go:r=>{ r.gold-=30; r.bonusBurns=(r.bonusBurns||0)+1; return 'It tells you which cards to fear. +1 Burn every battle.'; }},
+    {l:'Pay 30 credits', d:'+1 New Hand in every battle for the rest of the run.', can:r=>r.gold>=30, go:r=>{ r.gold-=30; r.bonusBurns=(r.bonusBurns||0)+1; return 'It tells you which cards to fear. +1 New Hand every battle.'; }},
     {l:'Pay 10 credits', d:'Gain a Luck Script.', can:r=>r.gold>=10, go:r=>{ r.gold-=10; return gainTonic(r,'luck')?'It uploads a Luck Script.':'Your script slots are full. It keeps the credits anyway.'; }},
     {l:'Leave', d:'The future can wait.', go:()=>'"You\'ll be back," it calls.'}]},
   deserters:{t:'Rogue Bots', i:'🏳️', text:'Three battered bots sit by the data stream. "Take us with you. Or take our credits. We won\'t fight."', choices:[
@@ -1869,13 +1882,13 @@ const NODES = {
     text:'A black box hums with a red light. Something inside wants a card.',
     choices:()=>[
       {l:'Delete for armour', d:'Lose a card you pick. +8 max HP.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.maxHp+=8; r.hp+=8; return {text:`The ${lbl(c)} is deleted. You feel sturdier. +8 max HP.`}; }},
-      {l:'Delete for memory', d:'Lose a card you pick. +1 Burn in every battle.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.bonusBurns=(r.bonusBurns||0)+1; return {text:`The ${lbl(c)} is deleted. You see further ahead. +1 Burn every battle.`}; }},
+      {l:'Delete for memory', d:'Lose a card you pick. +1 New Hand in every battle.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.bonusBurns=(r.bonusBurns||0)+1; return {text:`The ${lbl(c)} is deleted. You see further ahead. +1 New Hand every battle.`}; }},
       {l:'Delete for credits', d:'Lose a card you pick. +40 credits.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.gold+=40; return {text:`The ${lbl(c)} is deleted and credits pour out. +40 credits.`}; }},
       {l:'Leave', d:'Some boxes are best left closed.', go:()=>({text:'You back away slowly.'})}]},
   carver:{t:'The Firmware Dev', i:'👩‍💻', map:'Firmware', info:'Flash firmware that mods every card of one suit.',
     text:'An old coder types without looking up. "Firmware," she says. "It will mod a whole suit. Only one at a time."',
     choices:(run,st)=>{ if(!st.opts){ const s=shuffle(SUITS.slice()), c=shuffle(Object.keys(CHARMS)); st.opts=[0,1,2].map(i=>({s:s[i], ch:c[i%c.length]})); }
-      return st.opts.map(o=>({l:`${SYMS[o.s]} ${CHARMS[o.ch].n} firmware`, d:`All your ${SUITNAME[o.s]} gain ${CHARMS[o.ch].n}: ${CHARMS[o.ch].d.replace('this card','they').replace('This card','They')}${run.totem?' Replaces your current firmware.':''}`,
+      return st.opts.map(o=>({l:`${SYMS[o.s]} ${CHARMS[o.ch].n} firmware`, d:`All your ${SUITNAME[o.s]} gain ${CHARMS[o.ch].n}: ${CHARMS[o.ch].d.replace(/this card wins/g, 'they win').replace(/This card wins/g, 'They win').replace(/This card starts/g, 'They start').replace(/below it/g, 'below them').replace(/this card/g, 'they').replace(/This card/g, 'They')}${run.totem?' Replaces your current firmware.':''}`,
         go:r=>{ r.totem={s:o.s, ch:o.ch}; return {text:`She flashes the ${SUITNAME[o.s]} firmware. Your ${SUITNAME[o.s]} are now ${CHARMS[o.ch].n}.`, good:true}; }})).concat([{l:'Leave', d:'No firmware today.', go:()=>({text:'She goes back to her typing.'})}]); }},
   fungi:{t:'The Fusion Lab', i:'⚛️', map:'Fusion Lab', info:'Fuse two cards of the same rank into one much stronger card.',
     text:'Two scientists in visors lean over a humming reactor. "Two the same," they say together. "Make them one."',
@@ -3135,7 +3148,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     if (!handMode()) Snd.burn(); buzz(15);
     if (c) { c.classList.add('burning'); const [x, y] = centerOf(c); burst(x, y, { n: 18, colors: ['#ff8a2a', '#ffcf5a', '#ff4d1a'], up: 1, spread: 40 }); await sleep(560); }
     const res = burn(run, B);
-    if (res && res.hand) { setMsg('You toss your hand and draw 3 new cards.'); Snd.flick(); }
+    if (res && res.hand) { setMsg(`You toss your hand and draw 3 new cards.${res.hit ? ` The incinerator hits for ${res.hit}.` : ''}`); Snd.flick(); }
     else setMsg(`Burned ${L(top)}.${res && res.hit ? ` The incinerator hits for ${res.hit}.` : ''}`);
     if (res && res.hit) { popup('foeRow', `−${res.hit}`); once($('foeMed'), 'hit', 460); }
     busy = false; renderBattle(); save();
@@ -3512,8 +3525,8 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     $('storeLeave').focus({ preventScroll: true });
   }
   const KEEPER_LINES = [
-    '"Welcome, soldier. Coin talks, and my prices listen."',
-    '"Road\'s long ahead. Best not walk it empty-handed."',
+    '"Welcome, user. Credits talk, and my prices listen."',
+    '"The network’s a long way down. Best not jack in empty-handed."',
     '"Fresh off the assembly line. No refunds if the Motherboard wins."',
     '"Credits spend the same on either side of a war."'
   ];
@@ -3760,7 +3773,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
 
 
   /* controller: Xbox-style pads through XInput (read by the launcher) and the browser's gamepad API.
-     D-pad / left stick moves a highlight between buttons, A presses it, B backs out, X burns in battle,
+     D-pad / left stick moves a highlight between buttons, A presses it, B backs out, X swaps your hand in battle,
      Start opens options, View (Back) opens the deck. */
   const Pad = (() => {
     const BIT = { a: 0x1000, b: 0x2000, x: 0x4000, y: 0x8000, lb: 0x100, rb: 0x200, back: 0x20, start: 0x10, up: 1, down: 2, left: 4, right: 8 };
