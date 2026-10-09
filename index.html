@@ -1182,6 +1182,39 @@
   :root[data-table="forest"] { --felt: #14291d; --felt-deep: #030806; }
   :root[data-table="midnight"] { --felt: #231b38; --felt-deep: #07050c; }
   body { background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px), radial-gradient(120% 90% at 50% 45%, var(--felt) 0%, color-mix(in srgb, var(--felt) 45%, #000) 60%, var(--felt-deep) 100%) !important; background-color: var(--felt-deep) !important; }
+
+  /* ===== inside the computer: circuit-board backdrop, chip-socket table, LED health bars, data flowing on the map ===== */
+  #pcb { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .hp .fill { background: repeating-linear-gradient(90deg, var(--neon) 0 7px, rgba(47,211,245,.35) 7px 9px) !important; box-shadow: 0 0 10px rgba(47,211,245,.45); }
+  .hp.foe .fill { background: repeating-linear-gradient(90deg, #ff4f5e 0 7px, rgba(255,79,94,.35) 7px 9px) !important; box-shadow: 0 0 10px rgba(255,79,94,.45); }
+  .slot-hp > span { background: repeating-linear-gradient(90deg, var(--neon) 0 7px, rgba(47,211,245,.35) 7px 9px) !important; }
+  @keyframes dataFlow { to { stroke-dashoffset: -25; } }
+  @media (prefers-reduced-motion: reduce) { #pcb { display: none; } }
+
+  .stage { z-index: 1; }
+  /* panels are program windows: a title bar with the process name and three status lights */
+  .panel[data-proc] { position: relative; padding-top: 44px !important; }
+  .panel[data-proc]::before { content: attr(data-proc); position: absolute; left: 0; right: 0; top: 0; height: 28px; padding: 3px 14px 0; display: flex; align-items: center;
+    font-family: "Share Tech Mono", Consolas, monospace; font-size: 15px; letter-spacing: .2em; color: #071418; background: var(--neon); border-radius: 5px 5px 0 0; }
+  .panel[data-proc]::after { content: ""; position: absolute; right: 14px; top: 10px; width: 9px; height: 9px; border-radius: 50%; background: #071418; box-shadow: -16px 0 0 #071418, -32px 0 0 rgba(7,20,24,.5); }
+  .panel.foe-panel[data-proc]::before { background: #ff4f5e; color: #1a0306; }
+  .panel.foe-panel[data-proc]::after { background: #1a0306; box-shadow: -16px 0 0 #1a0306, -32px 0 0 rgba(26,3,6,.5); }
+  /* the battle table is a chip socket: a silicon die with pins along the top and bottom */
+  .stage .field::before { border-radius: 12px !important;
+    background: linear-gradient(rgba(47,211,245,.045) 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(90deg, rgba(47,211,245,.045) 1px, transparent 1px) 0 0 / 16px 16px,
+      radial-gradient(ellipse 60% 55% at 50% 50%, rgba(150,234,255,.08), transparent 70%), rgba(6,9,11,.82) !important;
+    box-shadow: inset 0 0 0 2px rgba(47,211,245,.4), 0 0 30px rgba(47,211,245,.12) !important; outline: 1.5px dashed rgba(47,211,245,.18) !important; outline-offset: -12px !important; }
+  .stage .field::after { content: ""; position: absolute; inset: -13px 0; pointer-events: none;
+    background: repeating-linear-gradient(90deg, rgba(47,211,245,.5) 0 8px, transparent 8px 22px) top / 100% 11px no-repeat,
+      repeating-linear-gradient(90deg, rgba(47,211,245,.5) 0 8px, transparent 8px 22px) bottom / 100% 11px no-repeat; }
+  /* data flows along the roads you can take and have taken, and along some circuit traces */
+  .world .roads path.flow { fill: none; stroke: #e8fbff; stroke-width: 3; stroke-dasharray: 3 22; stroke-linecap: round; opacity: .9; animation: dataFlow 1.1s linear infinite; filter: drop-shadow(0 0 4px #2fd3f5); }
+  .world .pcbflow { stroke-dasharray: 4 40; animation: dataFlow 2.2s linear infinite; }
+  @media (prefers-reduced-motion: reduce) { .world .roads path.flow, .world .pcbflow { animation: none; display: none; } }
+
+  /* the Deck/sound tools stay in the screen corner even though the enemy panel is now a positioned window
+     (the scaled stage is the containing block for fixed elements inside it) */
+  .stage .foe-head .tools { position: fixed !important; top: 40px; right: 56px; z-index: 3; }
 </style>
 </head>
 <body>
@@ -1235,13 +1268,13 @@
 <section class="screen map" id="sMap" hidden>
   <div class="map-top">
     <div class="map-head"><div><span class="lbl" id="actLabel"></span><h2 id="actName">The March</h2></div><div class="tools"><button class="ghost icon-btn sound-btn" type="button" aria-label="Sound">🔊</button><button class="ghost icon-btn set-btn" type="button" aria-label="Options">⚙️</button><button class="ghost" id="mapDeckBtn" type="button">Deck</button></div></div>
-    <div class="panel army">
+    <div class="panel army" data-proc="USER.SYS">
       <span class="lbl" id="armyLbl">Your army</span>
       <div class="hp" id="mapHp" aria-label="Your health"><span class="ghostbar"></span><span class="fill"></span><b></b></div>
       <div class="stat-grid"><div><b id="mapDeckN"></b><span>cards</span></div><div><b id="mapRelicN"></b><span>upgrades</span></div><div class="gold"><b id="mapGoldN"></b><span>credits</span></div><div><b id="mapFloorN"></b><span>of 10 rows</span></div></div>
       <div class="relic-chips" id="mapRelics"></div>
     </div>
-    <div class="panel next-foe" id="nextFoe"></div>
+    <div class="panel next-foe" id="nextFoe" data-proc="ROUTE.EXE"></div>
   </div>
   <div class="march-right">
     <div class="world ladder" id="world" aria-label="Map of the march"></div>
@@ -1267,7 +1300,7 @@
 <section class="screen battle" id="sBattle" hidden>
   <div class="march-pips" id="battlePips" aria-hidden="true"></div>
   <div class="war-dim" id="warDim" aria-hidden="true"></div>
-  <div class="panel foe-panel">
+  <div class="panel foe-panel" data-proc="HOSTILE.PROC">
     <div class="foe-head">
       <div class="med big" id="foeMed"></div>
       <div><small id="floorLabel"></small><h2 id="foeName"></h2><button class="foe-info" id="foeInfo" type="button" aria-label="What does this enemy do?" title="What does this enemy do?"><b>?</b> Info</button></div>
@@ -1290,7 +1323,7 @@
       <div class="side-slot" id="youPeek"></div>
     </div>
   </div>
-  <div class="panel you-panel">
+  <div class="panel you-panel" data-proc="USER.SYS">
     <div class="you-head"><h3>You</h3><span id="youStats"></span></div>
     <div class="you-tools"><div class="relics" id="battleRelics"></div><div class="tonics" id="tonicBox" aria-label="Tonics"></div></div>
     <span class="lbl">Your health</span>
@@ -2431,6 +2464,80 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
   }
   function once(el, cls, ms = 500) { if (cls === 'shake' && !SET.shake) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms); }
 
+
+  /* inside the computer: a circuit board behind every screen, with data packets running along its traces.
+     Pure decoration: wrapped so that nothing in here can ever stop the game from starting. */
+  try { (() => {
+    const cv = document.createElement('canvas'); cv.id = 'pcb'; cv.setAttribute('aria-hidden', 'true'); document.body.prepend(cv);
+    const ctx = cv.getContext('2d'), G = 24, DIRS = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+    let W = 0, H = 0, dpr = 1, base = null, traces = [], packets = [], timer = 0;
+    function build() {
+      dpr = Math.min(1.5, devicePixelRatio || 1); W = Math.max(1, innerWidth); H = Math.max(1, innerHeight);
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      base = document.createElement('canvas'); base.width = cv.width; base.height = cv.height;
+      const b = base.getContext('2d'); b.scale(dpr, dpr); b.lineCap = 'round'; b.lineJoin = 'round';
+      let seed = 4242; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const cols = Math.ceil(W / G) + 1, rows = Math.ceil(H / G) + 1;
+      // chips first, so traces run out from under them
+      const chips = Math.max(3, Math.round(W * H / 110000));
+      for (let i = 0; i < chips; i++) {
+        const cw = (3 + Math.floor(rnd() * 4)) * G, ch = (2 + Math.floor(rnd() * 3)) * G, x = Math.floor(rnd() * cols) * G, y = Math.floor(rnd() * rows) * G;
+        b.fillStyle = 'rgba(8,11,13,.85)'; b.strokeStyle = 'rgba(47,211,245,.16)'; b.lineWidth = 1.5;
+        b.fillRect(x, y, cw, ch); b.strokeRect(x + .5, y + .5, cw, ch);
+        b.strokeStyle = 'rgba(47,211,245,.2)'; b.lineWidth = 2;
+        for (let px = x + 8; px < x + cw - 4; px += 10) { b.beginPath(); b.moveTo(px, y - 6); b.lineTo(px, y); b.moveTo(px, y + ch); b.lineTo(px, y + ch + 6); b.stroke(); }
+        b.fillStyle = 'rgba(47,211,245,.25)'; b.beginPath(); b.arc(x + 9, y + 9, 2.5, 0, 7); b.fill();
+      }
+      // traces: grid-aligned runs with 45-degree bends, a solder pad at each end
+      traces = [];
+      const n = Math.max(4, Math.round(cols * rows / 7));
+      for (let i = 0; i < n; i++) {
+        let x = Math.floor(rnd() * cols), y = Math.floor(rnd() * rows), d = Math.floor(rnd() * 4) * 2;
+        const pts = [[x * G, y * G]], len = 4 + Math.floor(rnd() * 10);
+        for (let k = 0; k < len; k++) {
+          if (rnd() < .22) d = (d + (rnd() < .5 ? 1 : 7)) % 8;
+          else if (d % 2 && rnd() < .6) d = (d + (rnd() < .5 ? 1 : 7)) % 8;   // diagonals are short
+          x += DIRS[d][0]; y += DIRS[d][1]; pts.push([x * G, y * G]);
+        }
+        traces.push(pts);
+        b.strokeStyle = `rgba(47,211,245,${(.07 + rnd() * .08).toFixed(3)})`; b.lineWidth = rnd() < .25 ? 3 : 1.6;
+        b.beginPath(); pts.forEach(([px, py], k) => k ? b.lineTo(px, py) : b.moveTo(px, py)); b.stroke();
+        for (const [px, py] of [pts[0], pts[pts.length - 1]]) { b.beginPath(); b.arc(px, py, 3.2, 0, 7); b.fillStyle = 'rgba(8,11,13,1)'; b.fill(); b.strokeStyle = 'rgba(47,211,245,.3)'; b.lineWidth = 1.4; b.stroke(); }
+      }
+      packets = [];
+      const np = Math.max(8, Math.round(W * H / 45000));
+      for (let i = 0; i < np; i++) packets.push(newPacket(true));
+      draw(0);
+    }
+    function newPacket(anywhere) {
+      const tr = traces[Math.floor(Math.random() * traces.length)] || [[0, 0], [G, 0]];
+      const segs = []; let total = 0;
+      for (let k = 1; k < tr.length; k++) { const l = Math.hypot(tr[k][0] - tr[k - 1][0], tr[k][1] - tr[k - 1][1]); segs.push(l); total += l; }
+      return { tr, segs, total, at: anywhere ? Math.random() * total : 0, speed: 60 + Math.random() * 90, hot: Math.random() < .12 };
+    }
+    function pointAt(p, dist) {
+      let k = 0; while (k < p.segs.length - 1 && dist > p.segs[k]) { dist -= p.segs[k]; k++; }
+      const a = p.tr[k], c = p.tr[k + 1], t = p.segs[k] ? Math.min(1, dist / p.segs[k]) : 0;
+      return [a[0] + (c[0] - a[0]) * t, a[1] + (c[1] - a[1]) * t];
+    }
+    function draw(dt) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); if (base) ctx.drawImage(base, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.lineCap = 'round';
+      for (let i = 0; i < packets.length; i++) {
+        const p = packets[i]; p.at += p.speed * dt;
+        if (p.at > p.total + 16) { packets[i] = newPacket(false); continue; }
+        const [x1, y1] = pointAt(p, Math.max(0, p.at - 16)), [x2, y2] = pointAt(p, Math.min(p.total, p.at));
+        const col = p.hot ? '255,79,94' : '47,211,245';
+        ctx.strokeStyle = `rgba(${col},.22)`; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.strokeStyle = `rgba(${p.hot ? '255,190,196' : '210,248,255'},.95)`; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      }
+    }
+    let last = 0;
+    function frame() { if (!document.hidden && !reduce) { if (innerWidth > 1 && (innerWidth !== W || innerHeight !== H)) build(); const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now; draw(dt); } else last = performance.now(); }
+    build(); last = performance.now();
+    if (!reduce) setInterval(frame, 33);  // ~30 fps; a timer, so it keeps its pace in any window state
+    addEventListener('resize', () => { clearTimeout(timer); timer = setTimeout(build, 200); });
+  })(); } catch (e) { console.warn('circuit backdrop off:', e); }
   /* presentation: boot-up intro, enemy intro cards, act screens, screen wipes, hit flashes, the war alert and the run log.
      Overlays dismiss themselves after a moment; any click, tap, key or controller button skips them. */
   const FX = (() => {
@@ -2616,7 +2723,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
         if (k === 1) { const c = rnd() < .5 ? 10 : -10; d += ` L${(horiz ? nx - Math.sign(len) * 10 : nx).toFixed(0)},${(horiz ? ny : ny - Math.sign(len) * 10).toFixed(0)}`; }
         d += ` L${nx.toFixed(0)},${ny.toFixed(0)}`; x = nx; y = ny; }
       if (!ok) continue;
-      g += `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round" opacity=".5"/><circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${w + 2.5}" fill="#0d1114" stroke="${col}" stroke-width="2" opacity=".75"/>`;
+      g += `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round" opacity=".5"/>${i % 4 === 0 ? `<path class="pcbflow" d="${d}" fill="none" stroke="#e8fbff" stroke-width="${w + .6}" stroke-linecap="round" opacity=".7"/>` : ''}<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${w + 2.5}" fill="#0d1114" stroke="${col}" stroke-width="2" opacity=".75"/>`;
       const [sx, sy] = d.slice(1).split(' ')[0].split(',').map(Number); g += `<circle cx="${sx}" cy="${sy}" r="${w + 1.5}" fill="${col}" opacity=".6"/>`;
     } };
     const chip = (x, y, w, h, col) => { let pins = '';
@@ -2727,7 +2834,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const walked = new Set(run.path.map(([a, b]) => a + ':' + b));
     let lines = '', halos = '', hits = '';
     const edge = (a, b, cls, to) => { const d = cubic(a, b); halos += `<path class="halo" d="${d}"/>`;
-      const av = cls.includes('avail'); lines += `<path class="${cls}" d="${d}"${av ? ` data-to="${to}"` : ''}/>`; if (av) hits += `<path class="hit" d="${d}" data-to="${to}"/>`; };
+      const av = cls.includes('avail'); lines += `<path class="${cls}" d="${d}"${av ? ` data-to="${to}"` : ''}/>`; if (av || cls.includes('done')) lines += `<path class="flow" d="${d}"/>`; if (av) hits += `<path class="hit" d="${d}" data-to="${to}"/>`; };
     M[0].forEach((n, k) => edge(CAMP, ptOf('0:' + k), walked.has('0:' + k) ? 'road done' : run.row === -1 ? 'road avail' : 'road', '0:' + k));
     M.forEach((row, r) => row.forEach((n, j) => n.next.forEach(k => {
       const a = r + ':' + j, b = (r + 1) + ':' + k;
