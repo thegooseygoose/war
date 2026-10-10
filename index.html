@@ -966,6 +966,11 @@
   .hand-card { position: relative; }
   .low-tag { position: absolute; top: -10px; right: -8px; z-index: 3; min-width: 30px; padding: 3px 7px 1px; border-radius: 999px; font-family: var(--head); font-size: 1.1rem; line-height: 1;
     font-weight: 600; color: #06231b; background: #6ff0d0; box-shadow: 0 0 0 2px #0b0e10, 0 0 12px rgba(111,240,208,.7); pointer-events: none; }
+  .low-tag { white-space: nowrap; }
+  .low-hint { flex-basis: 100%; max-width: 520px; margin: 14px auto 0; padding: 6px 12px; border-radius: 6px; text-align: center; font-size: .92rem; line-height: 1.35; color: var(--text);
+    background: rgba(111,240,208,.08); box-shadow: inset 0 0 0 1.5px rgba(111,240,208,.45); }
+  .low-hint b { color: #6ff0d0; }
+  .hand-row { flex-wrap: wrap; }
   @keyframes dmgpopIn { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 55% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
   @keyframes dmgpop { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 22% { transform: translate(-50%, -50%) scale(1); }
     80% { opacity: 1; transform: translate(-50%, -54%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -70%) scale(.95); } }
@@ -3225,7 +3230,13 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,foeSight,peek
   function lowTag(i) {
     const lb = lowBonus(B, i); if (!lb.n) return '';
     const why = [lb.swarm ? `Swarm +${lb.swarm}` : '', lb.streak ? `Streak +${lb.streak}` : ''].filter(Boolean).join(', ');
-    return `<span class="low-tag" title="${why}">+${lb.n}</span>`;
+    return `<span class="low-tag" title="${why}">${lb.swarm ? '🐜' : ''}${lb.streak ? '🔁' : ''} +${lb.n}</span>`;
+  }
+  // a line under the hand that explains the low-card bonuses while one is active
+  function lowHint() {
+    if (!B.hand.some((c, i) => lowBonus(B, i).n)) return '';
+    const sw = B.hand.some((c, i) => lowBonus(B, i).swarm), st = B.streak || 0;
+    return `<div class="low-hint">${sw ? '<b>🐜 Swarm:</b> a low card (6 or under) gets +2 for each other low card in your hand.' : ''}${sw && st ? ' ' : ''}${st ? `<b>🔁 Streak ${st}:</b> your next low card gets +${st} for playing low cards in a row.` : ''}</div>`;
   }
   function renderBattle() {
     hpBar('foeHp', B.eHp, B.eMax);
@@ -3239,7 +3250,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,foeSight,peek
     const pn = peek(B, 'p'), hand = handMode();
     $('youPeek').innerHTML = pn && !hand ? `${cardHTML(pn, 'mini')}<span>Next</span>` : '';
     $('handRow').hidden = !hand; $('flipBtn').hidden = hand;
-    if (hand) $('handRow').innerHTML = `<span class="lbl">Your hand · pick a card to play</span><div class="hand-cards">${B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}${lowTag(i)}<kbd>${i + 1}</kbd></button>`).join('')}</div>`;
+    if (hand) $('handRow').innerHTML = `<span class="lbl">Your hand · pick a card to play</span><div class="hand-cards">${B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}${lowTag(i)}<kbd>${i + 1}</kbd></button>`).join('')}</div>${lowHint()}`;
     $('foeQuirk').textContent = quirkLine();
     const sight = foeSight(run, B), en = sight ? peekN(B, 'e', sight) : [];
     $('foePeek').innerHTML = en.length ? `<div class="peek-stack">${en.map(c => cardHTML(c, 'mini')).join('')}</div><span>${en.length > 1 ? 'Next two' : 'Next'}</span>`
