@@ -4,7 +4,7 @@
    then run  SIM(1000)            -> careful player (smart route, burns, tonics, good picks)
              SIM(1000, 'casual')  -> same choices, but a random route through the map
              SIM(1000, 'random')  -> picks everything at random
-   Targets (2026-10-05, TUNE hp 22 / hpStep 6.5): careful ~49% wins, casual ~39%, random ~2%.
+   Targets (2026-10-10, TUNE hp 27 / hpStep 9, with Swarm/Streak): careful ~49% wins, casual ~38%, random ~3%.
    Every fight is played from a hand of 3 (2026-10-05): the careful bot plays the cheapest card that beats the enemy's next card,
    or dumps its weakest; in the Port Warden's hidden-hand fight it guesses from his card range. Random mode picks at random. */
 window.SIM = function (N = 500, mode = 'smart') {
@@ -29,7 +29,7 @@ window.SIM = function (N = 500, mode = 'smart') {
       if (smart) {  // play the cheapest card that wins; if none can, dump the weakest (or swap a bad hand)
         const sight = foeSight(run, b), idx = b.hand.map((c, i) => i).sort((x, y) => b.hand[x].v - b.hand[y].v);
         const ec = sight ? peek(b, 'e') : { v: Math.ceil((b.f.lo + b.f.hi) / 2) + 1, s: 'X' };
-        const win = idx.find(i => compare(run, b, b.hand[i], ec, b.luck) === 1);
+        const win = idx.find(i => compare(run, b, b.hand[i], ec, b.luck + lowBonus(b, i).n) === 1);
         if (win == null && b.burns > 0 && Math.max(...b.hand.map(c => c.v)) <= 6) { burn(run, b); if (b.over) break; continue; }
         hi = win != null ? win : idx[0];
         if (win != null && b.hand[win].v <= 6 && run.tonics.includes('luck') && !b.luck) useTonic(run, b, run.tonics.indexOf('luck'));

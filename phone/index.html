@@ -182,6 +182,14 @@
   .dmgpop .chips .b-up { box-shadow: inset 0 0 0 1.5px rgba(111,240,208,.6); }
   .dmgpop .chips .b-down { box-shadow: inset 0 0 0 1.5px rgba(169,163,184,.5); }
   .msg .b-up { font-weight: 800; }
+  .dmg-hold { position: fixed; inset: 0; z-index: 29; cursor: pointer; }
+  .dmg-hold.out { animation: fade .2s reverse forwards; }
+  .dmgpop.stay { animation: dmgpopIn .45s cubic-bezier(.2,.8,.2,1) forwards; pointer-events: auto; }
+  .dmg-next { width: auto; min-height: 44px; padding: 0 30px; margin-top: 8px; font-size: 1.2rem !important; }
+  .hand-card { position: relative; }
+  .low-tag { position: absolute; top: -10px; right: -8px; z-index: 3; min-width: 30px; padding: 3px 7px 1px; border-radius: 999px; font-family: var(--head); font-size: 1.1rem; line-height: 1;
+    font-weight: 600; color: #06231b; background: #6ff0d0; box-shadow: 0 0 0 2px #0b0e10, 0 0 12px rgba(111,240,208,.7); pointer-events: none; }
+  @keyframes dmgpopIn { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 55% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
   @keyframes dmgpop { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 22% { transform: translate(-50%, -50%) scale(1); }
     80% { opacity: 1; transform: translate(-50%, -54%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -70%) scale(.95); } }
   .pop.heal { color: var(--heal); font-size: 1.7rem; text-shadow: 0 2px 0 rgba(0,0,0,.4); }
@@ -583,6 +591,8 @@
   .relicfly { position: fixed; z-index: 31; pointer-events: none; line-height: 1; font-size: 1.05rem; transform: translate(-50%, -50%); filter: drop-shadow(0 0 16px rgba(100,224,255,.95)); }
   .banner i.bicon { font-style: normal; line-height: 1; font-size: clamp(4.5rem, 24vw, 7rem); filter: drop-shadow(0 0 22px rgba(100,224,255,.95)); animation: stamp 1.2s cubic-bezier(.2,.9,.2,1) forwards; }
   @keyframes proc { 15%, 55% { transform: scale(1.35); box-shadow: 0 0 0 3px var(--brass-hi), 0 0 22px rgba(100,224,255,.95); } 35% { transform: scale(1.15); } }
+  .choice.skip { opacity: .72; border-style: dashed; }
+  .skiptag { font-style: normal; font-weight: 800; color: var(--brass-hi); }
   @media (prefers-reduced-motion: reduce) {
     .tonic.armed, .choice, .node.can .med, .awning, .bell, .screen.enter, .fan .card, .pack-stage button.pack, .slot, .offer, .march li.now .med, .end .med.huge, .sheet, .sheet-in { animation: none; }
     .banner span, .banner::before { animation-duration: .01s; }
@@ -837,7 +847,7 @@
   <div class="fan" id="fan" aria-hidden="true"></div>
   <h1>War</h1>
   <p class="sub">The Long March</p>
-  <p class="rules">Three layers of the network to the Motherboard, one life. Each round you play a card from your hand of three against the enemy's next card, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Choose your route: recruits, drafts and tests for new cards, then chargers, labs, black boxes and strange hackers along the way, then a fight. Build your deck as you go.</p>
+  <p class="rules">Three layers of the network to the Motherboard, one life. Each round you play a card from your hand of three against the enemy's next card, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Low cards (6 or under) team up: each other low card in your hand gives +2 (Swarm), and low cards played in a row get +1, +2, +3 (Streak). Choose your route: recruits, drafts and tests for new cards, then chargers, labs, black boxes and strange hackers along the way, then a fight. Build your deck as you go.</p>
   <nav class="menu" aria-label="Main menu">
     <button class="menu-btn main" id="continueBtn" type="button" hidden><span>Continue</span><small id="continueSub"></small></button>
     <button class="menu-btn" id="newRunBtn" type="button"><span>New Run</span></button>
@@ -1111,6 +1121,12 @@ const DECREES = {
   suit:{n:'Priority suit', d:'Cards of the priority suit count 3 higher this round, for both sides.'}
 };
 const rollDecree = () => { const k=pick(Object.keys(DECREES)); return k==='suit' ? {k, s:pick(SUITS)} : {k}; };
+/* low cards (6 or lower) team up. Swarm: +2 ranks for each other low card in your hand. Streak: low cards played in a row get +1, +2, +3... */
+const LOW = 6;
+const isLow = c => !!c && c.v<=LOW && !c.sk && c.sl!=='stone';
+function lowBonus(b,hi){ const h=b.hand||[], i=Math.min(hi||0,h.length-1), c=h[i];
+  if(!isLow(c)) return {swarm:0, streak:0, n:0};
+  const swarm=2*h.filter((x,j)=>j!==i&&isLow(x)).length, streak=b.streak||0; return {swarm, streak, n:swarm+streak}; }
 function refillHand(b){ b.hand=b.hand||[]; while(b.hand.length<3){ const c=take(b,'p'); if(!c) break; b.hand.push(c); } }
 const ROWS = 10, COLS = 3;
 const rint = (a,b) => a + Math.floor(Math.random()*(b-a+1));
@@ -1118,8 +1134,8 @@ const pick = a => a[Math.floor(Math.random()*a.length)];
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const rankLabel = v => v<=10 ? String(v) : {11:'J',12:'Q',13:'K',14:'A'}[v];
 const nid = () => Math.random().toString(36).slice(2,9);
-// balanced 2026-10-05 by simulation (tools/balance_sim.js) for hand-of-3 fights: careful play wins ~49%, casual ~39%, random card picks ~2% (skill now matters far more than the shuffle)
-const TUNE = { hp:22, hpStep:6.5, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
+// balanced 2026-10-10 by simulation (tools/balance_sim.js) with Swarm/Streak low-card bonuses: careful play wins ~49%, casual ~38%, random card picks ~3%
+const TUNE = { hp:27, hpStep:9, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
 
 function foeStats(act,row,name,elite){
   const t=act*3+Math.floor(row/3)+(elite?.7:0);
@@ -1256,9 +1272,10 @@ function warTrigger(run,b,pc,ec,luck){
 function playRound(run,b,hi){
   b.round++; run.stats.rounds++;
   const D=b.decree&&b.decree.k;
-  const luck=b.luck; b.luck=0;
+  const low=b.hand&&b.hand.length ? lowBonus(b,hi) : {swarm:0,streak:0,n:0}, tonicLuck=b.luck, luck=b.luck+low.n; b.luck=0;
   const roll=c=>{ if(c) c.lk = c.sl==='lucky' && Math.random()<.25; return c; };  // a Lucky seal rolls each time it's flipped
   let pc=roll(b.hand && b.hand.length ? b.hand.splice(Math.min(hi||0, b.hand.length-1),1)[0] : take(b,'p')), ec=take(b,'e');
+  b.streak = isLow(pc) ? (b.streak||0)+1 : 0;
   const flipped=[pc];
   const used={p:[pc],e:[ec]}; const steps=[{t:'flip',pc,ec,luck}];
   const why=warTrigger(run,b,pc,ec,luck); steps[0].why=why;
@@ -1275,7 +1292,7 @@ function playRound(run,b,hi){
     steps.push({t:'war',pd,ed,pc,ec});
     cmp=compare(run,b,pc,ec,why?2:0);  // wars you start give your deciding card +2
   }
-  const r={why, cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, thorn:0, gold:0, caps:[], lost:null, blocked:null, luck:curLuck, pc, ec};
+  const r={why, cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, thorn:0, gold:0, caps:[], lost:null, blocked:null, luck:curLuck, swarm:wars?0:low.swarm, streak:wars?0:low.streak, pc, ec};
   r.sealGold=flipped.filter(c=>c&&c.sl==='gold').length*3; run.gold+=r.sealGold;
   r.skillGold=flipped.filter(c=>c&&c.sk==='merchant').length*4; run.gold+=r.skillGold;
   r.rage=flipped.filter(c=>c&&c.sk==='berserker').length*2; run.hp-=r.rage;
@@ -1287,7 +1304,7 @@ function playRound(run,b,hi){
     r.base=rawGap+3*wars; r.parts=[]; r.baseWar=wars;
     const tag=(T,k)=>T[k]?`${T[k].i} ${T[k].n}`:k;
     const boostNames=()=>{ const n=[]; if(pc.sl==='stone') n.push(tag(SEALS,'stone')); else { if(has(run,'crown')&&pc.v>=11&&pc.v<=13) n.push(tag(RELICS,'crown')); if(has(run,'prism')&&isSuit(pc,'D')) n.push(tag(RELICS,'prism')); if(pc.lk) n.push(tag(SEALS,'lucky')); }
-      if(curLuck) n.push('🍀 Luck'); if(b.f.q==='royal'&&ec.v>=11&&ec.v<=13) n.push('👑 Admin foe'); return n.join(', ')||'Rank boosts'; };
+      if(curLuck&&tonicLuck) n.push('🍀 Luck'); if(curLuck&&low.swarm) n.push('🐜 Swarm'); if(curLuck&&low.streak) n.push('🔁 Streak'); if(b.f.q==='royal'&&ec.v>=11&&ec.v<=13) n.push('👑 Admin foe'); return n.join(', ')||'Rank boosts'; };
     let d;
     const part=(l,nd)=>{ if(nd!==d) r.parts.push({l, n:nd-d}); d=nd; };
     if(cmp===1){
@@ -1532,7 +1549,7 @@ const NODES = {
       : [{l:'Flash a mod', d:'You have no modded cards. Pay 15 credits for a random mod on a card you pick.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`The pads flash a ${CHARMS[c.ch].n} mod into your ${lbl(c)}.`, good:true}; }},
           {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
 };
-if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,skillCard,STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
+if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,foeSight,peekN,SKILLS,SKILL_IDS,skillCard,STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
 
 
 </script>
@@ -2393,6 +2410,11 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     for (let i = layers - 1; i >= 0; i--) h += cardEl(null, { size: 'mini', down: true }).outerHTML.replace('class="card', `style="transform:translate(${i * 1.5}px,${i * 1.5}px) rotateY(180deg)" class="card`);
     return h + '</div>';
   }
+  function lowTag(i) {
+    const lb = lowBonus(B, i); if (!lb.n) return '';
+    const why = [lb.swarm ? `Swarm +${lb.swarm}` : '', lb.streak ? `Streak +${lb.streak}` : ''].filter(Boolean).join(', ');
+    return `<span class="low-tag" title="${why}">+${lb.n}</span>`;
+  }
   function renderBattle() {
     hpBar('foeHp', B.eHp, B.eMax);
     hpBar('youHp', run.hp, run.maxHp);
@@ -2403,7 +2425,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const pn = peek(B, 'p'), hand = handMode();
     $('youPeek').innerHTML = pn && !hand ? `${cardHTML(pn, 'mini')}<span>Next</span>` : '';
     $('handRow').hidden = !hand; $('flipBtn').hidden = hand;
-    if (hand) $('handRow').innerHTML = B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}</button>`).join('');
+    if (hand) $('handRow').innerHTML = B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}${lowTag(i)}</button>`).join('');
     $('foeQuirk').textContent = quirkLine();
     const sight = foeSight(run, B), en = sight ? peekN(B, 'e', sight) : [];
     $('foePeek').innerHTML = en.length ? `<div class="peek-stack">${en.map(c => cardHTML(c, 'mini')).join('')}</div><span>${en.length > 1 ? 'Next two' : 'Next'}</span>`
@@ -2427,9 +2449,21 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
       ...r.parts.map(x => `<span class="${x.n > 0 ? 'b-up' : 'b-down'}">${sgn(x.n)} ${x.l}</span>`)];
     p.innerHTML = `<div class="tot">−${r.dmg}</div>${eq ? `<div class="eq">${eq}</div>` : ''}${eq || r.baseWar ? `<div class="chips">${chips.join('')}</div>` : ''}`;
     const [x, y] = at ? centerOf(at) : [innerWidth / 2, innerHeight / 2];
-    p.style.left = `${x}px`; p.style.top = `${Math.max(90, y)}px`;
-    document.body.append(p); setTimeout(() => p.remove(), 2000);
+    p.style.left = x ? `${x}px` : '50%'; p.style.top = y ? `${Math.max(90, y)}px` : '45%';
+    if (!(eq || r.baseWar)) { document.body.append(p); setTimeout(() => p.remove(), 2000); return null; }
+    // a breakdown with bonuses stays up until you tap, click, press a key or a controller button
+    p.classList.add('stay'); p.insertAdjacentHTML('beforeend', '<button class="primary dmg-next" type="button">Next</button>');
+    const hold = document.createElement('div'); hold.className = 'dmg-hold'; hold.append(p); document.body.append(hold);
+    return new Promise(res => {
+      const t0 = Date.now();
+      const done = () => { if (Date.now() - t0 < 350) return; dmgHold = null; removeEventListener('keydown', key, true); hold.classList.add('out'); setTimeout(() => hold.remove(), 200); Snd.tap(); res(); };
+      const key = e => { e.preventDefault(); e.stopImmediatePropagation(); if (!e.repeat) done(); };
+      hold.addEventListener('click', e => { e.stopPropagation(); done(); });
+      addEventListener('keydown', key, true);
+      dmgHold = done;
+    });
   }
+  let dmgHold = null;
   function dmgMsg(r) { const eq = dmgEq(r); return eq ? ` (${eq})` : ''; }
   function popup(row, text, cls) {
     const p = document.createElement('div');
@@ -2506,7 +2540,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const pc = r.pc, ec = r.ec;
     const tie = effP(run, pc) === effE(B, ec);
     const warTxt = n => n ? (n > 1 ? `${n} wars ` : 'War ') : '';
-    let m;
+    let m, held = null;
     if (r.cmp === 1) {
       const mine = yL.lastElementChild;
       mine.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-34px) scale(1.12)', offset: .45 }, { transform: 'translateY(-6px) scale(1)' }], { duration: 380, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'forwards' });
@@ -2517,14 +2551,14 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
       Snd.hit(big); buzz(big ? 60 : 25); FX.hitFlash(false, big);
       if (big) once($('sBattle'), 'shake', 420);
       const [x, y] = centerOf(oL.lastElementChild); burst(x, y, { n: big ? 30 : 16, spread: big ? 150 : 90 });
-      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck && !(r.why && r.wars) ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ' (with luck)' : r.why && r.wars ? ' (+2)' : ''} beats ${L(ec)}.`;
+      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck && !(r.why && r.wars) ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ` (+${r.luck})` : r.why && r.wars ? ' (+2)' : ''} beats ${L(ec)}.`;
       m = `${r.wars ? warTxt(r.wars) + 'won. ' : ''}${lead} <span class="dmg">${r.dmg} damage</span>${dmgMsg(r)}.`;
       if (r.heal) m += ` You heal ${r.heal}.`;
       if (r.gold) { m += ` +${r.gold} credits.`; setTimeout(bumpGold, 300); }
       if (r.thorn) { m += ` Thorns hit you for ${r.thorn}.`; setTimeout(() => popup('youRow', `−${r.thorn}`, 'hurt'), 450); }
       r.caps.forEach(c => { m += c.back ? ` You win back your ${L(c)}!` : ` You capture their ${L(c)}!`; });
       popup('foeRow', `−${r.dmg}`);
-      dmgPop(oL.lastElementChild, r);
+      held = dmgPop(oL.lastElementChild, r);
       if (r.heal) { setTimeout(() => { popup('youRow', `+${r.heal}`, 'heal'); Snd.heal(); once($('youHp'), 'healflash', 600); }, 350); }
     } else if (r.cmp === -1) {
       const theirs = oL.lastElementChild;
@@ -2542,11 +2576,13 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
       if (r.eHeal) m += ` It heals ${r.eHeal}.`;
       if (r.lost) m += ` They take your ${L(r.lost)}! Win to get it back.`;
       popup('youRow', r.blocked ? 'Blocked' : `−${r.dmg}`, r.blocked ? 'heal' : 'hurt');
-      if (!r.blocked && !r.medic && !r.squire) dmgPop(yL.lastElementChild, r, true);
+      if (!r.blocked && !r.medic && !r.squire) held = dmgPop(yL.lastElementChild, r, true);
       if (r.back) setTimeout(() => { popup('foeRow', `−${r.back}`); Snd.hit(false); once($('foeMed'), 'hit', 460); }, 380);
     } else {
       m = 'Stalemate. Nobody has cards left for the war.';
     }
+    if (r.swarm) m += ` 🐜 Swarm +${r.swarm}.`;
+    if (r.streak) m += ` 🔁 Streak +${r.streak}.`;
     if (r.pc && r.pc.lk) m += ' Lucky Chip: +4 ranks!';
     if (r.red) m += ' Red Chip: it strikes twice!';
     if (r.sealGold) { m += ` +${r.sealGold} credits (Gold Chip).`; setTimeout(bumpGold, 300); }
@@ -2570,6 +2606,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     if (r.bloom) { m += ` The Malware Queen breaks out! You take ${r.bloom}.`; setTimeout(() => { banner('Outbreak', true); popup('youRow', `−${r.bloom}`, 'hurt'); Snd.hurt(true); buzz([60, 40, 60]); once($('sBattle'), 'shake', 420); }, 500); }
     if (r.decree && B.decree && !B.over) setTimeout(() => { once($('foeQuirk'), 'flashq', 1200); Snd.bell(); }, 900);
     setMsg(m);
+    if (held) await held;
     if (r.caps.length) { await sleep(450); banner(r.caps.every(c => c.back) ? 'Won back' : 'Captured'); Snd.rare(); buzz([30, 40, 60]); }
     else if (r.lost) { await sleep(450); banner('Taken', true); Snd.hurt(false); buzz(120); }
     busy = false; FX.warAlert(false);
@@ -2762,7 +2799,8 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const box = $('evChoices'); box.innerHTML = ''; box.hidden = false;
     D.choices(run, st).forEach((c, i) => {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'choice'; b.style.setProperty('--d', `${150 + i * 90}ms`);
-      b.innerHTML = `<b>${c.l}</b><span>${c.d}</span>`;
+      const skip = /^(Leave|Walk|Refuse|Let them be|Let it)/.test(c.l); b.classList.toggle('skip', skip);
+      b.innerHTML = `<b>${c.l}</b><span>${skip ? '<i class="skiptag">Skip: nothing happens.</i> ' : ''}${c.d}</span>`;
       const pool = c.filter ? run.deck.filter(c.filter) : run.deck;
       if ((c.can && !c.can(run)) || (c.pick && !pool.length)) b.disabled = true;
       b.addEventListener('click', () => pickChoice(c));
@@ -2882,9 +2920,9 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const G = { recruit: ['Recruits', 'Choose one to join your deck, or skip.'], mercs: ['Merc Hub', 'Hire one specialist unit, or skip.'], suit: [`${P.s ? SYMS[P.s] : ''} Draft`, `Choose one of these ${P.s ? SUITNAME[P.s] : ''}, or skip.`],
       blind: ['Blind Draw', 'Only the suits show. Pick one and see what you get.'], trial: ['A rare card', 'Your reward for passing the test.'] };
     const gain = P.k === 'gain', rev = P.k === 'reveal', perk = P.k === 'perk';
-    $('rewardTitle').textContent = perk ? `Level ${P.lvl}!` : gain ? G[P.t][0] : rev ? 'You drew...' : `The ${short(P.foe)} falls.`;
-    $('rewardMed').innerHTML = perk ? artIco('misc', 'Level Up', '⬆️') : gain || rev ? (P.t === 'suit' ? SYMS[P.s] + VS : P.t === 'trial' ? artIco('misc', 'Rare Card', '🗿') : artIco('misc', 'New Cards', '🃏')) : foeGlyph({ name: P.foe });
-    $('rewardSub').textContent = perk ? 'Choose a perk. It lasts for the rest of the run.' : gain ? G[P.t][1] : rev ? `The ${full(P.c)}${P.c.v >= 11 ? '. Lucky!' : P.c.v <= 5 ? '. Oh dear.' : '.'} It joins your deck.`
+    $('rewardTitle').textContent = perk ? `Level ${P.lvl}!` : gain ? G[P.t][0] : rev ? (P.chip ? 'Chip installed!' : 'You drew...') : `The ${short(P.foe)} falls.`;
+    $('rewardMed').innerHTML = perk ? artIco('misc', 'Level Up', '⬆️') : rev && P.chip ? SEALS[P.chip].i : gain || rev ? (P.t === 'suit' ? SYMS[P.s] + VS : P.t === 'trial' ? artIco('misc', 'Rare Card', '🗿') : artIco('misc', 'New Cards', '🃏')) : foeGlyph({ name: P.foe });
+    $('rewardSub').textContent = perk ? 'Choose a perk. It lasts for the rest of the run.' : gain ? G[P.t][1] : rev ? (P.chip ? `Your ${full(P.c)} got the ${SEALS[P.chip].n}: ${SEALS[P.chip].d}` : `The ${full(P.c)}${P.c.v >= 11 ? '. Lucky!' : P.c.v <= 5 ? '. Oh dear.' : '.'} It joins your deck.`)
       : `+${P.g} credits.${P.back && P.back.length ? ` You win back your ${P.back.join(', ')}.` : ''} ${P.k === 'prize' ? 'Your prize:' : 'Claim an upgrade.'}`;
     $('offers').innerHTML = '';
     const list = perk ? P.choices.map(p => ({ k: 'perk', p })) : P.k === 'boss' || P.k === 'relic' ? P.choices.map(r => ({ k: 'relic', r })) : gain ? P.cards.map(c => ({ k: 'card', c, blind: P.t === 'blind' })) : rev ? [{ k: 'card', c: P.c }] : [P.p];
@@ -2925,7 +2963,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     }
     if (P.k === 'perk') {
       const pk = P.choices[i]; gainPerk(run, pk); run.pending = null; save();
-      if (pk === 'sealer') return openCardPick({ title: '🔏 Chipsmith', desc: 'Pick a card. It gets a random chip.', onPick: c => { c.sl = pick(SEAL_IDS); Snd.rare(); save(); afterReward(); } });
+      if (pk === 'sealer') return openCardPick({ title: '🔏 Chipsmith', desc: 'Pick a card. It gets a random chip.', onPick: c => { c.sl = pick(SEAL_IDS); Snd.rare(); run.pending = { k: 'reveal', c, chip: c.sl }; save(); showReward(); } });
       return afterReward();
     }
     if (P.k === 'gain') {

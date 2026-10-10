@@ -959,6 +959,14 @@
   .dmgpop .chips .b-up { box-shadow: inset 0 0 0 1.5px rgba(111,240,208,.6); }
   .dmgpop .chips .b-down { box-shadow: inset 0 0 0 1.5px rgba(169,163,184,.5); }
   .msg .b-up { font-weight: 800; }
+  .dmg-hold { position: fixed; inset: 0; z-index: 29; cursor: pointer; }
+  .dmg-hold.out { animation: fade .2s reverse forwards; }
+  .dmgpop.stay { animation: dmgpopIn .45s cubic-bezier(.2,.8,.2,1) forwards; pointer-events: auto; }
+  .dmg-next { width: auto; min-height: 44px; padding: 0 30px; margin-top: 8px; font-size: 1.2rem !important; }
+  .hand-card { position: relative; }
+  .low-tag { position: absolute; top: -10px; right: -8px; z-index: 3; min-width: 30px; padding: 3px 7px 1px; border-radius: 999px; font-family: var(--head); font-size: 1.1rem; line-height: 1;
+    font-weight: 600; color: #06231b; background: #6ff0d0; box-shadow: 0 0 0 2px #0b0e10, 0 0 12px rgba(111,240,208,.7); pointer-events: none; }
+  @keyframes dmgpopIn { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 55% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
   @keyframes dmgpop { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 22% { transform: translate(-50%, -50%) scale(1); }
     80% { opacity: 1; transform: translate(-50%, -54%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -70%) scale(.95); } }
   .procshake { animation: procshake .65s; position: relative; z-index: 2; }
@@ -1215,6 +1223,8 @@
   /* the Deck/sound tools stay in the screen corner even though the enemy panel is now a positioned window
      (the scaled stage is the containing block for fixed elements inside it) */
   .stage .foe-head .tools { position: fixed !important; top: 40px; right: 56px; z-index: 3; }
+  .ev-choice.skip, .choice.skip { opacity: .72; border-style: dashed; }
+  .skiptag { font-style: normal; font-weight: 800; color: var(--brass-hi); }
 </style>
 </head>
 <body>
@@ -1226,7 +1236,7 @@
   <div class="fan" id="fan" aria-hidden="true"></div>
   <h1>War</h1>
   <p class="sub">The Long March</p>
-  <p class="rules">Three layers of the network to the Motherboard, one life. Each round you play a card from your hand of three against the enemy's next card, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Choose your route: recruits, drafts and tests for new cards, then chargers, labs, black boxes and strange hackers along the way, then a fight. Build your deck as you go.</p>
+  <p class="rules">Three layers of the network to the Motherboard, one life. Each round you play a card from your hand of three against the enemy's next card, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Low cards (6 or under) team up: each other low card in your hand gives +2 (Swarm), and low cards played in a row get +1, +2, +3 (Streak). Choose your route: recruits, drafts and tests for new cards, then chargers, labs, black boxes and strange hackers along the way, then a fight. Build your deck as you go.</p>
   <nav class="menu" aria-label="Main menu">
     <button class="menu-btn main" id="continueBtn" type="button" hidden><span>Continue</span><small id="continueSub"></small></button>
     <button class="menu-btn" id="newRunBtn" type="button"><span>New Run</span><small>Start fresh in any of the 3 save slots</small></button>
@@ -1526,6 +1536,12 @@ const DECREES = {
   suit:{n:'Priority suit', d:'Cards of the priority suit count 3 higher this round, for both sides.'}
 };
 const rollDecree = () => { const k=pick(Object.keys(DECREES)); return k==='suit' ? {k, s:pick(SUITS)} : {k}; };
+/* low cards (6 or lower) team up. Swarm: +2 ranks for each other low card in your hand. Streak: low cards played in a row get +1, +2, +3... */
+const LOW = 6;
+const isLow = c => !!c && c.v<=LOW && !c.sk && c.sl!=='stone';
+function lowBonus(b,hi){ const h=b.hand||[], i=Math.min(hi||0,h.length-1), c=h[i];
+  if(!isLow(c)) return {swarm:0, streak:0, n:0};
+  const swarm=2*h.filter((x,j)=>j!==i&&isLow(x)).length, streak=b.streak||0; return {swarm, streak, n:swarm+streak}; }
 function refillHand(b){ b.hand=b.hand||[]; while(b.hand.length<3){ const c=take(b,'p'); if(!c) break; b.hand.push(c); } }
 const ROWS = 10, COLS = 3;
 const rint = (a,b) => a + Math.floor(Math.random()*(b-a+1));
@@ -1533,8 +1549,8 @@ const pick = a => a[Math.floor(Math.random()*a.length)];
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const rankLabel = v => v<=10 ? String(v) : {11:'J',12:'Q',13:'K',14:'A'}[v];
 const nid = () => Math.random().toString(36).slice(2,9);
-// balanced 2026-10-05 by simulation (tools/balance_sim.js) for hand-of-3 fights: careful play wins ~49%, casual ~39%, random card picks ~2% (skill now matters far more than the shuffle)
-const TUNE = { hp:22, hpStep:6.5, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
+// balanced 2026-10-10 by simulation (tools/balance_sim.js) with Swarm/Streak low-card bonuses: careful play wins ~49%, casual ~38%, random card picks ~3%
+const TUNE = { hp:27, hpStep:9, heal:.1, actHeal:.6, baseGold:14, eliteHp:1.25 };
 
 function foeStats(act,row,name,elite){
   const t=act*3+Math.floor(row/3)+(elite?.7:0);
@@ -1671,9 +1687,10 @@ function warTrigger(run,b,pc,ec,luck){
 function playRound(run,b,hi){
   b.round++; run.stats.rounds++;
   const D=b.decree&&b.decree.k;
-  const luck=b.luck; b.luck=0;
+  const low=b.hand&&b.hand.length ? lowBonus(b,hi) : {swarm:0,streak:0,n:0}, tonicLuck=b.luck, luck=b.luck+low.n; b.luck=0;
   const roll=c=>{ if(c) c.lk = c.sl==='lucky' && Math.random()<.25; return c; };  // a Lucky seal rolls each time it's flipped
   let pc=roll(b.hand && b.hand.length ? b.hand.splice(Math.min(hi||0, b.hand.length-1),1)[0] : take(b,'p')), ec=take(b,'e');
+  b.streak = isLow(pc) ? (b.streak||0)+1 : 0;
   const flipped=[pc];
   const used={p:[pc],e:[ec]}; const steps=[{t:'flip',pc,ec,luck}];
   const why=warTrigger(run,b,pc,ec,luck); steps[0].why=why;
@@ -1690,7 +1707,7 @@ function playRound(run,b,hi){
     steps.push({t:'war',pd,ed,pc,ec});
     cmp=compare(run,b,pc,ec,why?2:0);  // wars you start give your deciding card +2
   }
-  const r={why, cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, thorn:0, gold:0, caps:[], lost:null, blocked:null, luck:curLuck, pc, ec};
+  const r={why, cmp:stale?0:cmp, wars, dmg:0, heal:0, eHeal:0, back:0, thorn:0, gold:0, caps:[], lost:null, blocked:null, luck:curLuck, swarm:wars?0:low.swarm, streak:wars?0:low.streak, pc, ec};
   r.sealGold=flipped.filter(c=>c&&c.sl==='gold').length*3; run.gold+=r.sealGold;
   r.skillGold=flipped.filter(c=>c&&c.sk==='merchant').length*4; run.gold+=r.skillGold;
   r.rage=flipped.filter(c=>c&&c.sk==='berserker').length*2; run.hp-=r.rage;
@@ -1702,7 +1719,7 @@ function playRound(run,b,hi){
     r.base=rawGap+3*wars; r.parts=[]; r.baseWar=wars;
     const tag=(T,k)=>T[k]?`${T[k].i} ${T[k].n}`:k;
     const boostNames=()=>{ const n=[]; if(pc.sl==='stone') n.push(tag(SEALS,'stone')); else { if(has(run,'crown')&&pc.v>=11&&pc.v<=13) n.push(tag(RELICS,'crown')); if(has(run,'prism')&&isSuit(pc,'D')) n.push(tag(RELICS,'prism')); if(pc.lk) n.push(tag(SEALS,'lucky')); }
-      if(curLuck) n.push('🍀 Luck'); if(b.f.q==='royal'&&ec.v>=11&&ec.v<=13) n.push('👑 Admin foe'); return n.join(', ')||'Rank boosts'; };
+      if(curLuck&&tonicLuck) n.push('🍀 Luck'); if(curLuck&&low.swarm) n.push('🐜 Swarm'); if(curLuck&&low.streak) n.push('🔁 Streak'); if(b.f.q==='royal'&&ec.v>=11&&ec.v<=13) n.push('👑 Admin foe'); return n.join(', ')||'Rank boosts'; };
     let d;
     const part=(l,nd)=>{ if(nd!==d) r.parts.push({l, n:nd-d}); d=nd; };
     if(cmp===1){
@@ -1948,7 +1965,7 @@ const NODES = {
       : [{l:'Flash a mod', d:'You have no modded cards. Pay 15 credits for a random mod on a card you pick.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`The pads flash a ${CHARMS[c.ch].n} mod into your ${lbl(c)}.`, good:true}; }},
           {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
 };
-if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,skillCard,STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
+if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,foeSight,peekN,SKILLS,SKILL_IDS,skillCard,STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
 
 </script>
 <script>
@@ -3182,9 +3199,21 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
       ...r.parts.map(x => `<span class="${x.n > 0 ? 'b-up' : 'b-down'}">${sgn(x.n)} ${x.l}</span>`)];
     p.innerHTML = `<div class="tot">−${r.dmg}</div>${eq ? `<div class="eq">${eq}</div>` : ''}${eq || r.baseWar ? `<div class="chips">${chips.join('')}</div>` : ''}`;
     const [x, y] = at ? centerOf(at) : [innerWidth / 2, innerHeight / 2];
-    p.style.left = `${x}px`; p.style.top = `${Math.max(90, y)}px`;
-    document.body.append(p); setTimeout(() => p.remove(), 2000);
+    p.style.left = x ? `${x}px` : '50%'; p.style.top = y ? `${Math.max(90, y)}px` : '45%';
+    if (!(eq || r.baseWar)) { document.body.append(p); setTimeout(() => p.remove(), 2000); return null; }
+    // a breakdown with bonuses stays up until you tap, click, press a key or a controller button
+    p.classList.add('stay'); p.insertAdjacentHTML('beforeend', '<button class="primary dmg-next" type="button">Next</button>');
+    const hold = document.createElement('div'); hold.className = 'dmg-hold'; hold.append(p); document.body.append(hold);
+    return new Promise(res => {
+      const t0 = Date.now();
+      const done = () => { if (Date.now() - t0 < 350) return; dmgHold = null; removeEventListener('keydown', key, true); hold.classList.add('out'); setTimeout(() => hold.remove(), 200); Snd.tap(); res(); };
+      const key = e => { e.preventDefault(); e.stopImmediatePropagation(); if (!e.repeat) done(); };
+      hold.addEventListener('click', e => { e.stopPropagation(); done(); });
+      addEventListener('keydown', key, true);
+      dmgHold = done;
+    });
   }
+  let dmgHold = null;
   function dmgMsg(r) { const eq = dmgEq(r); return eq ? ` (${eq})` : ''; }
   function setMsg(t) { $('bMsg').innerHTML = `<span>${t}</span>`; }  // one wrapper so flex layout keeps the spaces between parts
   function pileHTML(n) {
@@ -3192,6 +3221,11 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     let h = '<div class="pile" style="margin:0 ' + layers * 1.5 + 'px ' + layers * 1.5 + 'px 0">';
     for (let i = layers - 1; i >= 0; i--) h += cardEl(null, { size: 'mini', down: true }).outerHTML.replace('class="card', `style="transform:translate(${i * 1.5}px,${i * 1.5}px) rotateY(180deg)" class="card`);
     return h + '</div>';
+  }
+  function lowTag(i) {
+    const lb = lowBonus(B, i); if (!lb.n) return '';
+    const why = [lb.swarm ? `Swarm +${lb.swarm}` : '', lb.streak ? `Streak +${lb.streak}` : ''].filter(Boolean).join(', ');
+    return `<span class="low-tag" title="${why}">+${lb.n}</span>`;
   }
   function renderBattle() {
     hpBar('foeHp', B.eHp, B.eMax);
@@ -3205,7 +3239,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const pn = peek(B, 'p'), hand = handMode();
     $('youPeek').innerHTML = pn && !hand ? `${cardHTML(pn, 'mini')}<span>Next</span>` : '';
     $('handRow').hidden = !hand; $('flipBtn').hidden = hand;
-    if (hand) $('handRow').innerHTML = `<span class="lbl">Your hand · pick a card to play</span><div class="hand-cards">${B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}<kbd>${i + 1}</kbd></button>`).join('')}</div>`;
+    if (hand) $('handRow').innerHTML = `<span class="lbl">Your hand · pick a card to play</span><div class="hand-cards">${B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}${lowTag(i)}<kbd>${i + 1}</kbd></button>`).join('')}</div>`;
     $('foeQuirk').textContent = quirkLine();
     const sight = foeSight(run, B), en = sight ? peekN(B, 'e', sight) : [];
     $('foePeek').innerHTML = en.length ? `<div class="peek-stack">${en.map(c => cardHTML(c, 'mini')).join('')}</div><span>${en.length > 1 ? 'Next two' : 'Next'}</span>`
@@ -3320,7 +3354,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const pc = r.pc, ec = r.ec;
     const tie = effP(run, pc) === effE(B, ec);
     const warTxt = n => n ? (n > 1 ? `${n} wars ` : 'War ') : '';
-    let m;
+    let m, held = null;
     if (r.cmp === 1) {
       const mine = yL.lastElementChild;
       mine.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-34px) scale(1.12)', offset: .45 }, { transform: 'translateY(-6px) scale(1)' }], { duration: 380, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'forwards' });
@@ -3331,13 +3365,13 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
       Snd.hit(big); buzz(big ? 60 : 25); FX.hitFlash(false, big);
       if (big) once($('sBattle'), 'shake', 420);
       const [x, y] = centerOf(oL.lastElementChild); burst(x, y, { n: big ? 30 : 16, spread: big ? 150 : 90 });
-      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck && !(r.why && r.wars) ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ' (with luck)' : r.why && r.wars ? ' (+2)' : ''} beats ${L(ec)}.`;
+      const lead = pc.v <= 3 && ec.v === 14 && has(run, 'sling') ? `Your ${L(pc)} fells their Ace!` : tie && !r.luck && !(r.why && r.wars) ? 'Tie goes to you.' : `Your ${L(pc)}${r.luck ? ` (+${r.luck})` : r.why && r.wars ? ' (+2)' : ''} beats ${L(ec)}.`;
       m = `${r.wars ? warTxt(r.wars) + 'won. ' : ''}${lead} <span class="dmg">${r.dmg} damage</span>${dmgMsg(r)}.`;
       if (r.heal) m += ` You heal ${r.heal}.`;
       if (r.gold) m += ` <span class="cap">+${r.gold} credits (Gold-Plated)</span>`;
       if (r.thorn) { m += ` Thorns hit you for ${r.thorn}.`; setTimeout(() => popup('youRow', `−${r.thorn}`, 'hurt'), 450); }
       popup('foeRow', `−${r.dmg}`);
-      dmgPop(oL, r);  // the lane, not the card: on PC the card may still be sliding in from the pile
+      held = dmgPop(oL, r);  // the lane, not the card: on PC the card may still be sliding in from the pile
       if (r.heal) { setTimeout(() => { popup('youRow', `+${r.heal}`, 'heal'); Snd.heal(); once($('youHp'), 'healflash', 600); }, 350); }
     } else if (r.cmp === -1) {
       const theirs = oL.lastElementChild;
@@ -3354,13 +3388,15 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
       if (r.back) m += ` Your club still hits for ${r.back}.`;
       if (r.eHeal) m += ` It heals ${r.eHeal}.`;
       popup('youRow', r.blocked ? 'Blocked' : `−${r.dmg}`, r.blocked ? 'heal' : 'hurt');
-      if (!r.blocked && !r.medic && !r.squire) dmgPop(yL, r, true);
+      if (!r.blocked && !r.medic && !r.squire) held = dmgPop(yL, r, true);
       if (r.back) setTimeout(() => { popup('foeRow', `−${r.back}`); Snd.hit(false); once($('foeMed'), 'hit', 460); }, 380);
     } else {
       m = 'Stalemate. Nobody has cards left for the war.';
     }
     r.caps.forEach(c => { m += c.back ? ` <span class="cap">You win back your ${L(c)}!</span>` : ` <span class="cap">You capture their ${L(c)}!</span>`; });
     if (r.lost) m += ` <span class="hurt">They take your ${L(r.lost)}! Win the battle to get it back.</span>`;
+    if (r.swarm) m += ` <span class="cap">🐜 Swarm +${r.swarm}</span>`;
+    if (r.streak) m += ` <span class="cap">🔁 Streak +${r.streak}</span>`;
     if (r.pc && r.pc.lk) m += ' <span class="cap">Lucky Chip: +4 ranks!</span>';
     if (r.red) m += ' <span class="cap">Red Chip: it strikes twice!</span>';
     if (r.sealGold) m += ` <span class="cap">+${r.sealGold} credits (Gold Chip)</span>`;
@@ -3384,6 +3420,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     if (r.bloom) { m += ` <span class="hurt">The Malware Queen breaks out! You take ${r.bloom}.</span>`; setTimeout(() => { banner('Outbreak', true); popup('youRow', `−${r.bloom}`, 'hurt'); Snd.hurt(true); once($('sBattle'), 'shake', 420); }, 500); }
     if (r.decree && B.decree && !B.over) setTimeout(() => { once($('foeQuirk'), 'flashq', 1200); Snd.bell(); }, 900);
     setMsg(m);
+    if (held) await held;
     if (r.wars) await warSpoils(r, yL, oL);
     busy = false; FX.warAlert(false);
     renderBattle();
@@ -3469,9 +3506,9 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const G = { recruit: ['Recruits', 'Choose one to join your deck, or skip.'], mercs: ['Merc Hub', 'Hire one specialist unit, or skip.'], suit: [`${P.s ? SYMS[P.s] + VS : ''} Draft`, `Choose one of these ${P.s ? SUITNAME[P.s] : ''}, or skip.`],
       blind: ['Blind Draw', 'Only the suits show. Pick one and see what you get.'], trial: ['A rare card', 'Your reward for passing the test.'] };
     const gain = P.k === 'gain', rev = P.k === 'reveal', perk = P.k === 'perk';
-    $('rewardTitle').textContent = perk ? `Level ${P.lvl}!` : gain ? G[P.t][0] : rev ? 'You drew...' : `The ${short(P.foe)} falls.`;
-    $('rewardMed').innerHTML = perk ? artIco('misc', 'Level Up', '⬆️') : gain || rev ? (P.t === 'suit' ? SYMS[P.s] + VS : P.t === 'trial' ? artIco('misc', 'Rare Card', '🗿') : artIco('misc', 'New Cards', '🃏')) : foeGlyph({ name: P.foe });
-    $('rewardSub').textContent = perk ? 'Choose a perk. It lasts for the rest of the run.' : gain ? G[P.t][1] : rev ? `The ${full(P.c)}${P.c.v >= 11 ? '. Lucky!' : P.c.v <= 5 ? '. Oh dear.' : '.'} It joins your deck.`
+    $('rewardTitle').textContent = perk ? `Level ${P.lvl}!` : gain ? G[P.t][0] : rev ? (P.chip ? 'Chip installed!' : 'You drew...') : `The ${short(P.foe)} falls.`;
+    $('rewardMed').innerHTML = perk ? artIco('misc', 'Level Up', '⬆️') : rev && P.chip ? SEALS[P.chip].i : gain || rev ? (P.t === 'suit' ? SYMS[P.s] + VS : P.t === 'trial' ? artIco('misc', 'Rare Card', '🗿') : artIco('misc', 'New Cards', '🃏')) : foeGlyph({ name: P.foe });
+    $('rewardSub').textContent = perk ? 'Choose a perk. It lasts for the rest of the run.' : gain ? G[P.t][1] : rev ? (P.chip ? `Your ${full(P.c)} got the ${SEALS[P.chip].n}: ${SEALS[P.chip].d}` : `The ${full(P.c)}${P.c.v >= 11 ? '. Lucky!' : P.c.v <= 5 ? '. Oh dear.' : '.'} It joins your deck.`)
       : `+${P.g} credits (you have ${run.gold}).${P.back && P.back.length ? ` You win back your ${P.back.join(', ')}.` : ''} ${P.k === 'prize' ? 'Your prize:' : 'Claim an upgrade.'}`;
     $('offers').innerHTML = '';
     const list = perk ? P.choices.map(p => ({ k: 'perk', p })) : P.k === 'boss' || P.k === 'relic' ? P.choices.map(r => ({ k: 'relic', r })) : gain ? P.cards.map(c => ({ k: 'card', c, blind: P.t === 'blind' })) : rev ? [{ k: 'card', c: P.c }] : [P.p];
@@ -3514,7 +3551,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     }
     if (P.k === 'perk') {
       const p = P.choices[i]; gainPerk(run, p);
-      if (p === 'sealer') { const c = await pickCard({ title: '🔏 Chipsmith', sub: 'Pick a card. It gets a random chip.' }); if (c) { c.sl = pick(SEAL_IDS); Snd.rare(); } }
+      if (p === 'sealer') { const c = await pickCard({ title: '🔏 Chipsmith', sub: 'Pick a card. It gets a random chip.' }); if (c) { c.sl = pick(SEAL_IDS); Snd.rare(); run.pending = { k: 'reveal', c, chip: c.sl }; save(); return showReward(); } }
       run.pending = null; save(); return afterReward();
     }
     if (P.k === 'gain') {
@@ -3584,7 +3621,8 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
     const box = $('evChoices'); box.innerHTML = ''; box.hidden = false;
     D.choices(run, st).forEach((c, i) => {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'ev-choice'; b.style.setProperty('--d', `${150 + i * 90}ms`);
-      b.innerHTML = `<b>${c.l}</b><span>${c.d}</span><kbd>${i + 1}</kbd>`;
+      const skip = /^(Leave|Walk|Refuse|Let them be|Let it)/.test(c.l); b.classList.toggle('skip', skip);
+      b.innerHTML = `<b>${c.l}</b><span>${skip ? '<i class="skiptag">Skip: nothing happens.</i> ' : ''}${c.d}</span><kbd>${i + 1}</kbd>`;
       const pool = c.filter ? run.deck.filter(c.filter) : run.deck;
       if ((c.can && !c.can(run)) || (c.pick && !pool.length)) b.disabled = true;
       b.addEventListener('click', () => pickChoice(c));
@@ -3925,7 +3963,7 @@ if(typeof module!=='undefined') module.exports={foeSight,peekN,SKILLS,SKILL_IDS,
       if (!s) return;
       if (!seen) { seen = true; toast('🎮 Controller connected'); syncPadNote(); }
       const now = performance.now();
-      for (const k of Object.keys(s)) if (press(k, s[k], now)) { if (FX.busy()) { FX.skip(); continue; } setActive(true); act(k); }
+      for (const k of Object.keys(s)) if (press(k, s[k], now)) { if (dmgHold) { dmgHold(); continue; } if (FX.busy()) { FX.skip(); continue; } setActive(true); act(k); }
     }
     setInterval(poll, 16);  // a timer, not requestAnimationFrame, so it keeps running in any window state
 
