@@ -228,6 +228,15 @@
   .pb-list span { white-space: nowrap; font-size: .82rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: #0b0f11; color: var(--bc); box-shadow: inset 0 0 0 1.5px var(--bc), 0 3px 8px rgba(0,0,0,.5); }
   .lane .card:not(:only-child) .pb-list { display: none; }
   @media (max-width: 560px) { .pb-list { left: 50%; top: auto; bottom: 4%; transform: translateX(-50%); justify-items: center; } .pb-list span { font-size: .72rem; padding: 2px 8px; } }
+  .gloss { display: grid; gap: 4px; margin-top: 8px; text-align: left; }
+  .gloss > span { display: block; padding: 4px 0 4px 9px; border-left: 3px solid var(--bc); font-size: .86rem; line-height: 1.35; color: var(--text); font-style: normal; font-weight: 600; }
+  .gloss b { color: var(--bc); font-weight: 800; }
+  .gloss em { font-style: normal; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .ev-result .gloss, .event-result .gloss { margin-top: 12px; }
+  /* every card shows its base value (J 11, Q 12, K 13, A 14) just under its top-left corner */
+  .val-badge { position: absolute; left: 4%; top: 31%; z-index: 2; min-width: 1.6em; padding: .12em .3em .05em; border-radius: 999px; text-align: center;
+    font-family: var(--head); font-size: max(9px, calc(var(--cw) * .14)); line-height: 1; font-weight: 600; color: #8de9ff; background: rgba(11,15,17,.85);
+    box-shadow: 0 0 0 1px rgba(47,211,245,.55); pointer-events: none; }
   @keyframes dmgpopIn { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 55% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
   @keyframes dmgpop { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 22% { transform: translate(-50%, -50%) scale(1); }
     80% { opacity: 1; transform: translate(-50%, -54%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -70%) scale(.95); } }
@@ -1483,17 +1492,17 @@ const EVENTS = {
     {l:'Bet a card', d:'Stake a card you pick. Win a card 2 ranks higher, or lose it.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ if(Math.random()<.5){ const n=addCard(r,{v:Math.min(14,c.v+2), s:c.s}); return `You win! He hands over the ${rankLabel(n.v)}. You keep yours too.`; } removeCard(r,c.id); return 'You lose. He tucks your card into his sleeve.'; }},
     {l:'Walk away', d:'Nothing ventured.', go:()=>'You log off and keep moving.'}]},
   shrine:{t:'The Old Server', i:'🖥️', text:'A dusty server hums in a dead room. Someone left offerings of blood and credits at its feet.', choices:[
-    {l:'Offer blood', d:'Lose 8 HP. Gain a random upgrade.', can:r=>r.hp>8, go:r=>{ r.hp-=8; const x=relicChoices(r,1)[0]; if(!x){ r.gold+=40; return 'The server is silent. You find 40 credits instead.'; } gainRelic(r,x); return `The server lights up. You receive the ${RELICS[x].n}.`; }},
+    {l:'Offer blood', d:'Lose 8 HP. Gain a random upgrade.', can:r=>r.hp>8, go:r=>{ r.hp-=8; const x=relicChoices(r,1)[0]; if(!x){ r.gold+=40; return 'The server is silent. You find 40 credits instead.'; } gainRelic(r,x); return `The server lights up. New upgrade, the ${RELICS[x].n}: ${RELICS[x].d}`; }},
     {l:'Offer credits', d:'Pay 25 credits. Heal to full.', can:r=>r.gold>=25, go:r=>{ r.gold-=25; r.hp=r.maxHp; return 'A warm reboot runs through you. You are fully healed.'; }},
     {l:'Leave', d:'Let it sleep.', go:()=>'You back away and move on.'}]},
   sharp:{t:'The Card Sharp', i:'🃏', text:'"Trade you," says a woman with too many implants. "My one for your two."', choices:[
     {l:'Trade two weak cards', d:'Lose your two weakest cards. Gain a random face card or Ace.', can:r=>r.deck.length>9, go:r=>{ const w=weakest(r,2); w.forEach(c=>removeCard(r,c.id)); const n=addCard(r,{v:rint(11,14), s:pick(SUITS)}); return `She takes your ${w.map(c=>rankLabel(c.v)).join(' and ')} and hands you a ${rankLabel(n.v)}.`; }},
-    {l:'Pay for a patch', d:'Pay 20 credits. Put a Turbo mod on a card.', pick:'any', can:r=>r.gold>=20, go:(r,c)=>{ r.gold-=20; charmCard(r,c.id,'keen'); return 'She rewires the card in seconds. It is now Turbo.'; }},
+    {l:'Buy a Turbo mod', d:'Pay 20 credits. A card you pick gets the Turbo mod: +3 damage whenever it wins.', pick:'any', can:r=>r.gold>=20, go:(r,c)=>{ r.gold-=20; charmCard(r,c.id,'keen'); return `She rewires it in seconds. Your ${lbl(c)} now has the Turbo mod: +3 damage whenever it wins.`; }},
     {l:'Leave', d:'Keep your cards close.', go:()=>'She shrugs and shuffles.'}]},
   camp:{t:'Abandoned Outpost', i:'🏚️', text:'Dead monitors, torn cables, and gear left in a hurry.', choices:[
     {l:'Rest a while', d:'Heal 15 HP.', go:r=>{ r.hp=Math.min(r.maxHp,r.hp+15); return 'You recharge in a quiet corner. +15 HP.'; }},
     {l:'Search the gear', d:'Find 35 credits. Might be trapped.', go:r=>{ r.gold+=35; if(Math.random()<.5){ r.hp-=8; return 'A security trap zaps your hand! −8 HP, but you get 35 credits.'; } return 'Nobody is coming back for this. +35 credits.'; }},
-    {l:'Take the repair kit', d:'Gain a Repair Script.', go:r=>gainTonic(r,'heal')?'You load a Repair Script.':'Your script slots are full, so you leave it.'}]},
+    {l:'Take the repair kit', d:'Gain a Repair Script: a one-use item you can run in battle to heal 12 HP.', go:r=>gainTonic(r,'heal')?'You load a Repair Script. Run it in any battle to heal 12 HP.':'Your script slots are full, so you leave it.'}]},
   forge:{t:'Back-Alley Lab', i:'⚒️', text:'A tech with a soldering iron nods at your deck. "I can upgrade those."', choices:[
     {l:'Overvolt', d:'Lose 6 HP. Your 3 weakest cards gain 3 ranks.', can:r=>r.hp>6, go:r=>{ r.hp-=6; weakest(r,3).forEach(c=>c.v=Math.min(14,c.v+3)); return 'Sparks fly and burn your arms. Your weakest cards are stronger.'; }},
     {l:'Scrap a card', d:'Remove a card you pick. Gain 15 credits.', pick:'any', can:r=>r.deck.length>8, go:(r,c)=>{ removeCard(r,c.id); r.gold+=15; return `The ${rankLabel(c.v)} is stripped for parts. +15 credits.`; }},
@@ -1503,7 +1512,7 @@ const EVENTS = {
     {l:'Refuse', d:'Nothing is free.', go:()=>'He melts back into the crowd.'}]},
   seer:{t:'The Oracle AI', i:'🔮', text:'A hologram flickers over a cracked console. "I have run your future," it says. "For a price."', choices:[
     {l:'Pay 30 credits', d:'+1 New Hand in every battle for the rest of the run.', can:r=>r.gold>=30, go:r=>{ r.gold-=30; r.bonusBurns=(r.bonusBurns||0)+1; return 'It tells you which cards to fear. +1 New Hand every battle.'; }},
-    {l:'Pay 10 credits', d:'Gain a Luck Script.', can:r=>r.gold>=10, go:r=>{ r.gold-=10; return gainTonic(r,'luck')?'It uploads a Luck Script.':'Your script slots are full. It keeps the credits anyway.'; }},
+    {l:'Pay 10 credits', d:'Gain a Luck Script: a one-use item for battle that makes your next card count 5 ranks higher.', can:r=>r.gold>=10, go:r=>{ r.gold-=10; return gainTonic(r,'luck')?'It uploads a Luck Script. Run it in battle and your next card counts 5 ranks higher.':'Your script slots are full. It keeps the credits anyway.'; }},
     {l:'Leave', d:'The future can wait.', go:()=>'"You\'ll be back," it calls.'}]},
   deserters:{t:'Rogue Bots', i:'🏳️', text:'Three battered bots sit by the data stream. "Take us with you. Or take our credits. We won\'t fight."', choices:[
     {l:'Recruit them', d:'Add three random 8 to 10 cards.', go:r=>{ for(let i=0;i<3;i++) addCard(r,{v:rint(8,10),s:pick(SUITS)}); return 'Three new cards join your deck.'; }},
@@ -1514,7 +1523,7 @@ const EVENT_IDS = Object.keys(EVENTS);
 const REST = {t:'Charging Station', i:'🔋', text:'A safe place to recharge. The coils hum.', choices:[
   {l:'Rest', d:'Heal 30% of your max HP.', go:r=>{ const h=Math.min(r.maxHp-r.hp, Math.ceil(r.maxHp*.3)); r.hp+=h; return `You sleep soundly. +${h} HP.`; }},
   {l:'Sharpen', d:'A card you pick gains 3 ranks.', pick:'any', go:(r,c)=>{ const o=c.v; sharpen(r,c.id,3); return `Your ${rankLabel(o)} is now a ${rankLabel(Math.min(14,o+3))}.`; }},
-  {l:'Compile', d:'Gain a random script.', go:r=>{ const t=pick(Object.keys(TONICS)); return gainTonic(r,t)?`You compile a ${TONICS[t].n}.`:'Your script slots are full.'; }}]};
+  {l:'Compile', d:'Gain a random script: a one-use item you run during a battle.', go:r=>{ const t=pick(Object.keys(TONICS)); return gainTonic(r,t)?`You compile a ${TONICS[t].n}: ${TONICS[t].d}`:'Your script slots are full.'; }}]};
 /* card-gain and utility spots */
 function gainRange(run,up=0){ const t=run.act*3+Math.floor(Math.max(0,run.row)/3); return [Math.min(12,5+Math.floor(t*.8)+up), Math.min(14,9+t+up)]; }
 function randCard(run,up=0,s){ if(Math.random()<.06) return skillCard(null,s); const [lo,hi]=gainRange(run,up); const c={v:rint(lo,hi), s:s||pick(SUITS)}; if(Math.random()<.15) c.ch=pick(Object.keys(CHARMS)); if(Math.random()<.1) c.sl=pick(SEAL_IDS); return c; }
@@ -1550,9 +1559,9 @@ const NODES = {
       {l:`Boost it again`, d:`+2 more ranks, but a ${st.times===1?30:55}% chance the card burns out.`, can:r=>{ const c=r.deck.find(x=>x.id===st.sharp); return c&&c.v<14; }, go:(r,_,st)=>{ const c=r.deck.find(x=>x.id===st.sharp); if(Math.random()<(st.times===1?.3:.55)){ removeCard(r,c.id); return {text:`The flames leap up. Your ${lbl(c)} is ash.`, bad:true}; } c.v=Math.min(14,c.v+2); st.times++; return {text:`It holds! Now a ${lbl(c)}.`, again:true}; }},
       {l:'Unplug', d:'Quit while you\'re ahead.', go:()=>({text:'You unplug and move on.'})}
     ]},
-  pack:{t:'Supply Cache', i:'📦', map:'Cache', info:'Fill your empty script slots.',
+  pack:{t:'Supply Cache', i:'📦', map:'Cache', info:'Fill your empty script slots. Scripts are one-use items you run during a battle.',
     text:'A sealed supply cache sits in the corner, still full.',
-    choices:()=>[{l:'Take what fits', d:'Fill up to 2 empty script slots with random scripts.', go:r=>{ const got=[]; for(let i=0;i<2;i++){ const t=pick(Object.keys(TONICS)); if(gainTonic(r,t)) got.push(TONICS[t].n); } return {text: got.length?`You find: ${got.join(' and ')}.`:'Your script slots are already full, so you leave it.'}; }}]},
+    choices:()=>[{l:'Take what fits', d:'Fill up to 2 empty script slots with random scripts: one-use items you run during a battle.', go:r=>{ const got=[]; for(let i=0;i<2;i++){ const t=pick(Object.keys(TONICS)); if(gainTonic(r,t)) got.push(`${TONICS[t].n} (${TONICS[t].d.replace(/\.$/,'')})`); } return {text: got.length?`You find: ${got.join(' and ')}.`:'Your script slots are already full, so you leave it.'}; }}]},
   altar:{t:'The Black Box', i:'⬛', map:'Black Box', info:'Delete a card for a lasting boon.',
     text:'A black box hums with a red light. Something inside wants a card.',
     choices:()=>[
@@ -1564,7 +1573,7 @@ const NODES = {
     text:'An old coder types without looking up. "Firmware," she says. "It will mod a whole suit. Only one at a time."',
     choices:(run,st)=>{ if(!st.opts){ const s=shuffle(SUITS.slice()), c=shuffle(Object.keys(CHARMS)); st.opts=[0,1,2].map(i=>({s:s[i], ch:c[i%c.length]})); }
       return st.opts.map(o=>({l:`${SYMS[o.s]} ${CHARMS[o.ch].n} firmware`, d:`All your ${SUITNAME[o.s]} gain ${CHARMS[o.ch].n}: ${CHARMS[o.ch].d.replace(/this card wins/g, 'they win').replace(/This card wins/g, 'They win').replace(/This card starts/g, 'They start').replace(/below it/g, 'below them').replace(/this card/g, 'they').replace(/This card/g, 'They')}${run.totem?' Replaces your current firmware.':''}`,
-        go:r=>{ r.totem={s:o.s, ch:o.ch}; return {text:`She flashes the ${SUITNAME[o.s]} firmware. Your ${SUITNAME[o.s]} are now ${CHARMS[o.ch].n}.`, good:true}; }})).concat([{l:'Leave', d:'No firmware today.', go:()=>({text:'She goes back to her typing.'})}]); }},
+        go:r=>{ r.totem={s:o.s, ch:o.ch}; return {text:`All your ${SUITNAME[o.s]} are now ${CHARMS[o.ch].n}: ${CHARMS[o.ch].d}`, good:true}; }})).concat([{l:'Leave', d:'No firmware today.', go:()=>({text:'She goes back to her typing.'})}]); }},
   fungi:{t:'The Fusion Lab', i:'⚛️', map:'Fusion Lab', info:'Fuse two cards of the same rank into one much stronger card.',
     text:'Two scientists in visors lean over a humming reactor. "Two the same," they say together. "Make them one."',
     choices:run=>{ const P=dupPairs(run);
@@ -1575,19 +1584,19 @@ const NODES = {
     text:'A glitchy clone bay hums at your deck. It wants to copy something.',
     choices:()=>[{l:'Print a copy', d:'Gain a copy of a card you pick. It might come out better, worse, or modded.', pick:'any', go:(r,c)=>{ const m=pick(['up2','up1','down1','charm','same']); const n={v:c.v,s:c.s,ch:c.ch};
       if(m==='up2') n.v=Math.min(14,n.v+2); if(m==='up1') n.v=Math.min(14,n.v+1); if(m==='down1') n.v=Math.max(2,n.v-1); if(m==='charm') n.ch=pick(Object.keys(CHARMS));
-      const k=addCard(r,n); return {text:`It prints a ${lbl(k)}${k.ch?` with a ${CHARMS[k.ch].n} mod`:''}.${m==='down1'?' A bit glitchy.':m==='same'?' A perfect copy.':' Better than the original!'}`}; }},
+      const k=addCard(r,n); return {text:`It prints a ${lbl(k)}${k.ch?` with the ${CHARMS[k.ch].n} mod (${CHARMS[k.ch].d.replace(/\.$/,'')})`:''}.${m==='down1'?' A bit glitchy.':m==='same'?' A perfect copy.':' Better than the original!'}`}; }},
       {l:'Leave', d:'Keep it away from your cards.', go:()=>({text:'It beeps sadly.'})}]},
-  sealer:{t:'The Chip Shop', i:'🔏', map:'Chip Shop', info:'Install a chip in one of your cards.',
-    text:'A hunched tech sorts coloured chips under a magnifier. "Choose your chip," he rasps.',
+  sealer:{t:'The Chip Shop', i:'🔏', map:'Chip Shop', info:'Put a chip on one of your cards: a lasting special power for that card. A card holds one chip.',
+    text:'A hunched tech sorts coloured chips under a magnifier. "Choose your chip," he rasps. A chip gives one card a lasting special power.',
     choices:(run,st)=>{ if(!st.opts) st.opts=shuffle(SEAL_IDS.slice()).slice(0,3);
-      return st.opts.map(sl=>({l:`${SEALS[sl].i} ${SEALS[sl].n}`, d:`${SEALS[sl].d} Goes on a card you pick.`, pick:'any', go:(r,c)=>{ c.sl=sl; return {text:`He installs the ${SEALS[sl].n} in your ${lbl(c)}.`, good:true}; }}))
+      return st.opts.map(sl=>({l:`${SEALS[sl].i} ${SEALS[sl].n}`, d:`${SEALS[sl].d} Goes on a card you pick.`, pick:'any', go:(r,c)=>{ c.sl=sl; return {text:`Your ${lbl(c)} now has the ${SEALS[sl].n}: ${SEALS[sl].d}`, good:true}; }}))
         .concat([{l:'Leave', d:'No chip today.', go:()=>({text:'He switches off the lamp.'})}]); }},
-  stones:{t:'Transfer Pads', i:'📲', map:'Transfer', info:'Move a mod from one card to another.',
-    text:'Two transfer pads hum side by side. Place a card on each.',
-    choices:(run,st)=> st.moving ? [{l:'Choose the new card', d:`Give the ${CHARMS[st.moving].n} mod to a card you pick.`, pick:'any', go:(r,c,st)=>{ c.ch=st.moving; st.moving=null; return {text:`Your ${lbl(c)} is now ${CHARMS[c.ch].n}.`, good:true}; }}]
-      : run.deck.some(c=>c.ch) ? [{l:'Move a mod', d:'Scrap a modded card. Its mod goes to another card you pick.', pick:'charmed', filter:c=>!!c.ch, go:(r,c,st)=>{ st.moving=c.ch; removeCard(r,c.id); return {text:`The ${lbl(c)} is wiped. The ${CHARMS[st.moving].n} mod is in the buffer.`, again:true}; }},
+  stones:{t:'Transfer Pads', i:'📲', map:'Transfer', info:'Move a mod (a lasting bonus on one card) from one card to another, or buy a random one.',
+    text:'Two transfer pads hum side by side. They can move a mod from one card to another. A mod is a lasting bonus stuck to one card.',
+    choices:(run,st)=> st.moving ? [{l:'Choose the new card', d:`Give the ${CHARMS[st.moving].n} mod to a card you pick. ${CHARMS[st.moving].n}: ${CHARMS[st.moving].d}`, pick:'any', go:(r,c,st)=>{ c.ch=st.moving; st.moving=null; return {text:`Your ${lbl(c)} now has the ${CHARMS[c.ch].n} mod: ${CHARMS[c.ch].d}`, good:true}; }}]
+      : run.deck.some(c=>c.ch) ? [{l:'Move a mod', d:'Delete one of your modded cards. Its mod moves to another card you pick.', pick:'charmed', filter:c=>!!c.ch, go:(r,c,st)=>{ st.moving=c.ch; removeCard(r,c.id); return {text:`The ${lbl(c)} is deleted. Now pick the card that gets its ${CHARMS[st.moving].n} mod (${CHARMS[st.moving].d.replace(/\.$/,'')}).`, again:true}; }},
           {l:'Leave', d:'Keep your mods where they are.', go:()=>({text:'The humming fades.'})}]
-      : [{l:'Flash a mod', d:'You have no modded cards. Pay 15 credits for a random mod on a card you pick.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`The pads flash a ${CHARMS[c.ch].n} mod into your ${lbl(c)}.`, good:true}; }},
+      : [{l:'Buy a random mod', d:'Pay 15 credits. A card you pick gets a random mod: a lasting bonus on that card, like +3 damage or +2 credits whenever it wins.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`Your ${lbl(c)} got the ${CHARMS[c.ch].n} mod: ${CHARMS[c.ch].d}`, good:true}; }},
           {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
 };
 if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,foeSight,peekN,SKILLS,SKILL_IDS,skillCard,STYLES,DECREES,BLOOM,rollDecree,refillHand,startStyle,SEALS,PERKS,SEAL_IDS,hasPerk,gainXP,xpNeed,perkChoices,gainPerk,gainCards,NODES,TRIALS,runTrial,rareCards,randCard,dupPairs,SUITS,charmOf,newRun,newBattle,playRound,burn,peek,useTonic,winBattle,cardChoices,applyPrize,addCard,charmCard,sharpen,removeCard,relicChoices,gainRelic,nextAct,makeStore,buyItem,reachable,effP,has,weakest,gainTonic,EVENTS,REST,ACTS,RELICS,TONICS,CHARMS,TUNE,ROWS};
@@ -2026,7 +2035,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
     el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}${art ? ' art' : ''}${c && c.sk ? ' skill' : ''}`;
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', down || !c ? 'Face-down card' : full(c));
-    el.innerHTML = `<div class="fc front">${art ? artImg(artFile(c)) + `<span class="art-fallback" hidden>${faceHTML(c, size)}</span>` : c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}${c && c.sl && SEALS[c.sl] ? `<span class="seal-badge">${SEALS[c.sl].i}</span>` : ''}</div><div class="fc backf"></div>`;
+    el.innerHTML = `<div class="fc front">${art ? artImg(artFile(c)) + `<span class="art-fallback" hidden>${faceHTML(c, size)}</span>` : c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}${c && c.sl && SEALS[c.sl] ? `<span class="seal-badge">${SEALS[c.sl].i}</span>` : ''}${c ? `<span class="val-badge">${c.v}</span>` : ''}</div><div class="fc backf"></div>`;
     return el;
   }
   const cardHTML = (c, size, down) => cardEl(c, { size, down }).outerHTML;
@@ -2532,7 +2541,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
     const p = document.createElement('div');
     p.className = `dmgpop${hurt ? ' hurt' : ''}`;
     const eq = dmgEq(r);
-    const chips = [`<span class="b-base">${r.base - 3 * r.baseWar} card${r.base - 3 * r.baseWar === 1 ? '' : 's'}</span>`, ...(r.baseWar ? [`<span class="b-base">+${3 * r.baseWar} war</span>`] : []),
+    const chips = [`<span class="b-base">${r.base - 3 * r.baseWar} card gap</span>`, ...(r.baseWar ? [`<span class="b-base">+${3 * r.baseWar} for ${r.baseWar > 1 ? `${r.baseWar} wars` : 'the war'}</span>`] : []),
       ...r.parts.map(x => `<span class="${x.n > 0 ? 'b-up' : 'b-down'}">${sgn(x.n)} ${x.l}</span>`)];
     p.innerHTML = `<div class="tot">−${r.dmg}</div>${eq ? `<div class="eq">${eq}</div>` : ''}${eq || r.baseWar ? `<div class="chips">${chips.join('')}</div>` : ''}`;
     const [x, y] = at ? centerOf(at) : [innerWidth / 2, innerHeight / 2];
@@ -2552,7 +2561,13 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
     });
   }
   let dmgHold = null;
-  function dmgMsg(r) { const eq = dmgEq(r); return eq ? ` (${eq})` : ''; }
+  // the damage maths in words; wars spell out the card gap and the +3 per war
+  function dmgMsg(r) {
+    const eq = dmgEq(r), w = r.baseWar || 0;
+    if (!w) return eq ? ` (${eq})` : '';
+    const gap = r.base - 3 * w, bonus = r.parts.reduce((a, x) => a + x.n, 0);
+    return `: ${gap} for the gap between the last two cards + ${3 * w} for ${w === 1 ? 'the war' : `${w} wars (+3 each)`}${bonus ? `, ${sgn(bonus)} from bonuses` : ''}`;
+  }
   function popup(row, text, cls) {
     const p = document.createElement('div');
     p.className = `pop ${cls || ''}`; p.textContent = text;
@@ -2613,8 +2628,9 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
         await sleep(560);
       } else {
         const wi = si === 1 && whyInfo(steps[0].why);
+        const warHow = `${wi ? '' : si > 1 ? 'Tie again! ' : 'Tie! '}${si > 1 ? 'Another war: each side lays 3 more cards face down and flips one more. Every war adds +3 damage for the winner.' : 'WAR: each side lays 3 cards face down, then flips one more. The higher flip wins the war: it deals the gap +3 extra damage, and takes the loser\'s best card from the pile.'}`;
+        setMsg(wi ? `${wi.text} Your card gets +2. ${warHow}` : warHow);
         if (wi) {
-          setMsg(`${wi.text} Your card gets +2.`);
           const chip = [...$('battleRelics').querySelectorAll('.relic-chip')].find(c => c.getAttribute('aria-label') === (wi.kind === 'perk' ? PERKS : RELICS)[wi.id]?.n);
           await relicCall(chip, wi.i);
           if (chip) once(chip, 'proc', 1800);
@@ -2655,7 +2671,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
       if (r.heal) m += ` You heal ${r.heal}.`;
       if (r.gold) { m += ` +${r.gold} credits.`; setTimeout(bumpGold, 300); }
       if (r.thorn) { m += ` Thorns hit you for ${r.thorn}.`; setTimeout(() => popup('youRow', `−${r.thorn}`, 'hurt'), 450); }
-      r.caps.forEach(c => { m += c.back ? ` You win back your ${L(c)}!` : ` You capture their ${L(c)}!`; });
+      r.caps.forEach(c => { m += c.back ? ` You win back your ${L(c)}!` : ` You capture their ${L(c)}, the best card in their war pile. It joins your deck for the rest of the run!`; });
       popup('foeRow', `−${r.dmg}`);
       held = dmgPop(oL, r);  // the lane, not the card: the card may still be sliding in
       if (r.heal) { setTimeout(() => { popup('youRow', `+${r.heal}`, 'heal'); Snd.heal(); once($('youHp'), 'healflash', 600); }, 350); }
@@ -2673,7 +2689,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
       m = `${r.wars ? warTxt(r.wars) + 'lost. ' : ''}${lead} ${r.blocked ? `Your ${r.blocked === 'aegis' ? 'Energy Shield' : 'Shield Script'} blocks the hit!` : `<span class="hurt">You take ${r.dmg}</span>${dmgMsg(r)}.`}`;
       if (r.back) m += ` Your club still hits for ${r.back}.`;
       if (r.eHeal) m += ` It heals ${r.eHeal}.`;
-      if (r.lost) m += ` They take your ${L(r.lost)}! Win to get it back.`;
+      if (r.lost) m += ` The loser of a war gives up their best card in the pile: they take your ${L(r.lost)}! Win the battle to get it back.`;
       popup('youRow', r.blocked ? 'Blocked' : `−${r.dmg}`, r.blocked ? 'heal' : 'hurt');
       if (!r.blocked && !r.medic && !r.squire) held = dmgPop(yL, r, true);
       if (r.back) setTimeout(() => { popup('foeRow', `−${r.back}`); Snd.hit(false); once($('foeMed'), 'hit', 460); }, 380);
@@ -2868,7 +2884,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
       go.textContent = sel.peek ? 'Not on your route yet' : D[2]; return;
     }
     const f = n.foe;
-    info.innerHTML = `<span class="med">${foeGlyph(f)}</span><div><b>${f.name}${n.t === 'boss' ? ' (boss)' : n.t === 'elite' ? ' (elite)' : ''}</b><small>${f.hp} HP, cards ${rankLabel(f.lo)} to ${rankLabel(f.hi)}. ${f.q ? QUIRKS[f.q] : 'No tricks.'}${STYLES[f.style] ? ` ${STYLES[f.style].i} ${STYLES[f.style].n}: ${STYLES[f.style].d}` : ''}</small><small class="pz">Prize: ${PRIZE_ICON[n.prize.k]} ${prizeText(n.prize)}${n.t === 'battle' ? ', plus credits' : ''}</small></div>`;
+    info.innerHTML = `<span class="med">${foeGlyph(f)}</span><div><b>${f.name}${n.t === 'boss' ? ' (boss)' : n.t === 'elite' ? ' (elite)' : ''}</b><small>${f.hp} HP, cards ${rankLabel(f.lo)} to ${rankLabel(f.hi)}. ${f.q ? QUIRKS[f.q] : 'No tricks.'}${STYLES[f.style] ? ` ${STYLES[f.style].i} ${STYLES[f.style].n}: ${STYLES[f.style].d}` : ''}</small><small class="pz">Prize: ${PRIZE_ICON[n.prize.k]} ${prizeText(n.prize)}${n.t === 'battle' ? ', plus credits' : ''}${n.prize.k === 'seal' ? `. ${SEALS[n.prize.sl].n}: ${SEALS[n.prize.sl].d}` : n.prize.k === 'charm' ? `. ${CHARMS[n.prize.ch].n} mod: ${CHARMS[n.prize.ch].d}` : n.prize.k === 'tonic' ? `. ${TONICS[n.prize.t].n}: ${TONICS[n.prize.t].d}` : ''}</small></div>`;
     go.textContent = sel.peek ? 'Not on your route yet' : n.t === 'boss' ? `Face ${f.name.replace(/^The /, 'the ')}` : `Fight the ${short(f.name)}`;
   }
   function goSpot() {
@@ -2945,9 +2961,13 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
         'Up top is the <b>Training Bot</b> and its health bar. Down below is your health and your <b>hand of 3 cards</b>. The card at the right of the table is the <b>enemy\'s next card</b>, so you always know what you are playing against.'],
       only: [9, 'S'], doText: 'Their next card is a <b>5</b>. Play your <b>9♠</b>: 9 − 5 = <b>4 damage</b>.' },
     { pages: ['Hit for 4! Tip: you don\'t need your biggest card every time. Keep your <b>Queen</b> for something big.',
-        'Their next card is a <b>7</b>, the same as your 7♦. A <b>tie starts a WAR</b>: both sides lay 3 cards face down and flip one more. The higher flip wins, deals <b>+3 extra damage</b>, and <b>captures</b> the enemy\'s best card for your deck.'],
+        'Their next card is a <b>7</b>, the same as your 7♦. A <b>tie starts a WAR</b>.',
+        '<b>How a war works:</b> both sides lay <b>3 cards face down</b> (the war pile), then flip <b>one more card</b>. The higher of those two flipped cards wins the whole war. If they tie again, it is another war on top.',
+        '<b>War damage:</b> the winner hits for the <b>gap between the last two flipped cards</b>, plus <b>3 for every war</b>. One war won with an Ace against a 10 is 4 + 3 = <b>7 damage</b>. Two wars would be gap + 6.',
+        '<b>The prize:</b> the winner takes the loser\'s <b>best card from the war pile</b> and keeps it for the rest of the run. Lose a war and they take <b>your</b> best card, until you win the fight and get it back.'],
       only: [7, 'D'], doText: 'Play your <b>7♦</b> to start a war.' },
-    { pages: ['You won the war! Your Ace beat their 10 for 4 + 3 = <b>7 damage</b>, and you <b>captured their 10</b>. It is in your deck for the rest of the run. (Lose a war and they take <b>your</b> best card until you win the fight.)',
+    { pages: ['You won the war! Your <b>Ace</b> beat their <b>10</b>: <b>4</b> for the gap (14 − 10) <b>+ 3</b> for the war = <b>7 damage</b>.',
+        '<b>The card you won:</b> their 10♦ was the best card in their war pile, so it is <b>yours now</b>. It joins <b>your deck</b> for the rest of the run, so you can draw it and play it in later fights. (Lose a war and they take <b>your</b> best card the same way, until you win the fight.)',
         'Their next card is a <b>Jack</b>. Your <b>Queen</b> beats it by 1. Small wins still count.'],
       only: [12, 'C'], doText: 'Play your <b>Queen ♣</b> against their Jack.' },
     { pages: ['Now your hand is all low cards: <b>2, 3 and 4</b>. Low cards are not junk. They team up.',
