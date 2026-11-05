@@ -4,7 +4,8 @@
    then run  SIM(1000)            -> careful player (smart route, burns, tonics, good picks)
              SIM(1000, 'casual')  -> same choices, but a random route through the map
              SIM(1000, 'random')  -> picks everything at random
-   Targets (2026-10-10, TUNE hp 27 / hpStep 9, with Swarm/Streak): careful ~49% wins, casual ~38%, random ~3%.
+   Targets (2026-11-04, after the editor's playtest: Malware Queen 36 HP, Motherboard 50 HP with 9-A cards, store before every boss):
+   careful ~32% wins, casual ~29%, random ~1.5%. (Human players beat the old ~49% tuning easily, so the bot is meant to lose more.)
    Every fight is played from a hand of 3 (2026-10-05): the careful bot plays the cheapest card that beats the enemy's next card,
    or dumps its weakest; in the Port Warden's hidden-hand fight it guesses from his card range. Random mode picks at random. */
 window.SIM = function (N = 500, mode = 'smart') {

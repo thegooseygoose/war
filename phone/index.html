@@ -193,6 +193,9 @@
   .low-hint { flex-basis: 100%; max-width: 520px; margin: 14px auto 0; padding: 6px 12px; border-radius: 6px; text-align: center; font-size: .92rem; line-height: 1.35; color: var(--text);
     background: rgba(111,240,208,.08); box-shadow: inset 0 0 0 1.5px rgba(111,240,208,.45); }
   .low-hint b { color: #6ff0d0; }
+  .heat-hint { flex-basis: 100%; max-width: 520px; margin: 8px auto 0; padding: 5px 12px; border-radius: 6px; text-align: center; font-size: .92rem; line-height: 1.35; color: var(--text); background: rgba(255,140,60,.1); box-shadow: inset 0 0 0 1px rgba(255,140,60,.45); }
+  .heat-hint b { color: #ffad6b; }
+  .heat-hint.now { background: rgba(255,80,40,.22); box-shadow: inset 0 0 0 2px #ff7a3c, 0 0 18px rgba(255,90,40,.45); font-weight: 700; }
   .hand-row { flex-wrap: wrap; }
   /* tutorial coach */
   .coach { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 36; width: min(600px, calc(100vw - 24px)); padding: 14px 18px 16px; border-radius: 8px;
@@ -237,6 +240,8 @@
   .val-badge { position: absolute; left: 4%; top: 31%; z-index: 2; min-width: 1.6em; padding: .12em .3em .05em; border-radius: 999px; text-align: center;
     font-family: var(--head); font-size: max(9px, calc(var(--cw) * .14)); line-height: 1; font-weight: 600; color: #8de9ff; background: rgba(11,15,17,.85);
     box-shadow: 0 0 0 1px rgba(47,211,245,.55); pointer-events: none; }
+  /* room above the hand for the value circles */
+  .hand-row { padding-top: 24px !important; }
   @keyframes dmgpopIn { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 55% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
   @keyframes dmgpop { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.3); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 22% { transform: translate(-50%, -50%) scale(1); }
     80% { opacity: 1; transform: translate(-50%, -54%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -70%) scale(.95); } }
@@ -298,8 +303,9 @@
   .mini { --cw: calc(var(--cwb) * .62); }
   .tiny { --cw: 44px; }
   .mini .corner.br, .tiny .corner.br { display: none; }
-  .lane .card + .card { margin-left: calc(var(--cw) * -.6); }
-  .lane .card.down + .card.down { margin-left: calc(var(--cw) * -.84); }
+  .lane .card + .card { margin-left: calc(var(--cw) * -.6 - var(--squeeze, 0px)); }
+  .lane .card.down + .card.down { margin-left: calc(var(--cw) * -.84 - var(--squeeze, 0px)); }
+  .lane { min-width: 0; } .row > * { min-width: 0; }  /* a long war squeezes the pile instead of widening the table */
   .lane.won .card:not(.down):last-child .front { box-shadow: inset 0 0 0 calc(var(--cw) * .035) #fafbfc, inset 0 0 0 calc(var(--cw) * .045) rgba(44,150,176,.45), 0 0 0 3px var(--brass), 0 0 26px rgba(100,224,255,.7); }
   .lane.lost .fc { filter: brightness(.62) saturate(.7); transition: filter .3s; }
   .card.gone { visibility: hidden; }
@@ -847,7 +853,8 @@
   /* the enemy's next card(s): one normally, two with the Scanner or a Ghost Chip, a "?" when hidden */
   .peek-stack { display: flex; align-items: flex-start; }
   .peek-stack .card:first-child { z-index: 1; }
-  .peek-stack .card + .card { margin-left: calc(var(--cw) * -.55); transform: translateY(14%) scale(.88); filter: brightness(.65); }
+  .peek-stack { flex-direction: row-reverse; }  /* the 2nd card tucks in on the LEFT so its rank corner + value badge show */
+  .peek-stack .card + .card { margin-right: calc(var(--cw) * -.5); transform: translateY(14%) scale(.88); filter: brightness(.85); }
   .hidden-card { display: grid; place-items: center; font-family: var(--head); font-size: calc(var(--cwb) * .38); color: #ff4f5e; border: 2px dashed rgba(255,79,94,.65); border-radius: 6px; background: rgba(255,79,94,.06); }
 
   /* store sign: hazard stripes instead of a circus awning */
@@ -886,6 +893,14 @@
   /* data flows along the roads you can take and have taken */
   .map-svg line.flow { stroke: #e8fbff; stroke-width: 2.4; stroke-dasharray: 2 16; stroke-linecap: round; opacity: .95; animation: dataFlow 1s linear infinite; filter: drop-shadow(0 0 3px #2fd3f5); }
   @media (prefers-reduced-motion: reduce) { .map-svg line.flow { display: none; } }
+
+  /* Gold-Plated mod: the card itself looks gold-plated */
+  .card.gilded .front { background: linear-gradient(135deg, #fff3c4 0%, #f2cf63 22%, #fff7d6 42%, #d9a92e 62%, #fbe38f 80%, #c8921f 100%) !important;
+    box-shadow: inset 0 0 0 calc(var(--cw) * .035) #b8860b, inset 0 0 0 calc(var(--cw) * .05) #ffe58a, 0 0 calc(var(--cw) * .08) rgba(255,200,60,.55) !important; }
+  .card.gilded.art .front img.art { filter: sepia(.55) saturate(1.6) hue-rotate(-8deg) brightness(1.04) drop-shadow(0 0 calc(var(--cw) * .04) rgba(255,200,60,.8)); }
+  .card.gilded .front::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 45%, transparent 60%); background-size: 250% 100%; animation: goldShine 3.2s ease-in-out infinite; }
+  @keyframes goldShine { 0% { background-position: 130% 0; } 60%, 100% { background-position: -30% 0; } }
 </style>
 </head>
 <body>
@@ -895,7 +910,7 @@
   <div class="fan" id="fan" aria-hidden="true"></div>
   <h1>War</h1>
   <p class="sub">The Long March</p>
-  <p class="rules">Three layers of the network to the Motherboard, one life. Each round you play a card from your hand of three against the enemy's next card, and the higher card hits for the difference in rank. Ties start a war: three down, one up, and the winner captures the loser's best card. Low cards (6 or under) team up: each other low card in your hand gives +2 (Swarm), and low cards played in a row get +1, +2, then +3 at most (Streak). Choose your route: recruits, drafts and tests for new cards, then chargers, labs, black boxes and strange hackers along the way, then a fight. Build your deck as you go.</p>
+  <p class="rules">Fight through three layers of the network to the Motherboard, with one life. Each round, play a card from your hand against the enemy's next card: the higher card hits for the difference. Ties start wars. New here? Play the <b>Tutorial</b> first.</p>
   <nav class="menu" aria-label="Main menu">
     <button class="menu-btn main" id="continueBtn" type="button" hidden><span>Continue</span><small id="continueSub"></small></button>
     <button class="menu-btn" id="tutBtn" type="button"><span>Tutorial</span><small>Learn the rules in a guided practice fight</small></button>
@@ -1152,8 +1167,8 @@ const FOES = {
 };
 const ACTS = [
   { name:'The Firewall', foes:['Ping Probe','Packet Sniffer','Antivirus','Brute Forcer','Phisher'], elites:['Botnet Captain','Kernel Lock'], boss:{name:'The Port Warden', hp:26, lo:3, hi:9, q:'wall', style:'hand', intro:'"ACCESS DENIED. This port is closed."'} },
-  { name:'The Wild Net', foes:['Trojan','Ransomware','Power Surge','Memory Leak','Brute Forcer'], elites:['Zero-Day','Rootkit'], boss:{name:'The Malware Queen', hp:32, lo:4, hi:11, q:'thorns', style:'bloom', intro:'"Such clean code. Let me infect it."'} },
-  { name:'The Core', foes:['Sysadmin','War Daemon','Cipher Guard','Fork Bomb','Trojan'], elites:['Root Admin','Kill Switch'], boss:{name:'The Motherboard', hp:38, lo:5, hi:13, q:'royal', final:true, style:'decree', intro:'"KNEEL, USER. I may let you keep your data."'} }
+  { name:'The Wild Net', foes:['Trojan','Ransomware','Power Surge','Memory Leak','Brute Forcer'], elites:['Zero-Day','Rootkit'], boss:{name:'The Malware Queen', hp:36, lo:4, hi:11, q:'thorns', style:'bloom', intro:'"Such clean code. Let me infect it."'} },
+  { name:'The Core', foes:['Sysadmin','War Daemon','Cipher Guard','Fork Bomb','Trojan'], elites:['Root Admin','Kill Switch'], boss:{name:'The Motherboard', hp:50, lo:9, hi:14, q:'royal', final:true, style:'decree', intro:'"KNEEL, USER. I may let you keep your data."'} }
 ];
 /* each act boss fights in its own style */
 const BLOOM = 6;
@@ -1199,7 +1214,7 @@ function rollPrize(){ const r=Math.random(); return r<.45?{k:'gold', n:rint(8,14
 const GAIN = ['recruit','suit','blind','trial','mercs'];
 const UTIL = ['rest','pack','altar','carver','fungi','goo','stones','sealer','store','event','chest'];
 function rowKinds(act,r){
-  if(r===ROWS-1) return {pool:['rest','store','pack'], n:3};
+  if(r===ROWS-1) return {pool:['store'], n:1};  // everyone passes a store right before the boss (it also offers a free recharge)
   const c=r%3;
   if(c===0) return {pool: r===0 ? ['recruit','suit','blind'] : GAIN, n: rint(2,3)};
   if(c===1) return {pool: UTIL, n: rint(2,3)};
@@ -1474,6 +1489,7 @@ function makeStore(run){
   items.push({k:'seal', sl:pick(SEAL_IDS), price:26+a*3});
   items.push({k:'card', c:skillCard(), price:24+a*4});
   items.push({k:'remove', price:30+run.removals*15});
+  if(run.row===ROWS-1) items.splice(2,1,{k:'heal', price:0});  // the last stop before the boss: a free recharge (like a Charger) in place of the 3rd card
   return items;
 }
 function buyItem(run,it,cardId){
@@ -1484,6 +1500,7 @@ function buyItem(run,it,cardId){
   else if(it.k==='charm') charmCard(run,cardId,it.ch);
   else if(it.k==='seal'){ const c=run.deck.find(x=>x.id===cardId); if(c) c.sl=it.sl; }
   else if(it.k==='remove'){ removeCard(run,cardId); run.removals++; }
+  else if(it.k==='heal'){ run.hp=Math.min(run.maxHp, run.hp+Math.ceil(run.maxHp*.3)); }
 }
 /* events: each choice may need a card picked (pick:'any') */
 const EVENTS = {
@@ -1548,7 +1565,7 @@ const NODES = {
   recruit:{t:'Recruits', i:'🃏', map:'Recruits', info:'Choose 1 of 3 new cards.'},
   mercs:{t:'Merc Hub', i:'🏴', map:'Merc Hub', info:'Hire 1 of 3 skill cards: specialist units with their own rules.'},
   suit:{t:'Suit Draft', i:'♠', map:'Draft', info:n=>`Choose 1 of 3 ${SUITNAME[n.s]}, a little stronger than usual.`},
-  blind:{t:'Blind Draw', i:'🂠', map:'Blind Draw', info:'Three face-down cards. You only see their suits. Could be an Ace, could be a 2.'},
+  blind:{t:'Blind Draw', i:'🂠', map:'Blind Draw', info:'Three face-down cards. You only see their suits. Could be an Ace, could be a 3.'},
   trial:{t:'Test', i:'🧪', map:'Test', info:n=>`${TRIALS[n.tr].n}. Pass the test to choose a rare card.`},
   rest:{t:'Charging Station', i:'🔋', map:'Charger', info:'Recharge to heal, or boost a card. Push your luck and it may burn out.',
     text:'The coils hum. You could recharge, or boost a card to make it stronger.',
@@ -1595,6 +1612,7 @@ const NODES = {
     text:'Two transfer pads hum side by side. They can move a mod from one card to another. A mod is a lasting bonus stuck to one card.',
     choices:(run,st)=> st.moving ? [{l:'Choose the new card', d:`Give the ${CHARMS[st.moving].n} mod to a card you pick. ${CHARMS[st.moving].n}: ${CHARMS[st.moving].d}`, pick:'any', go:(r,c,st)=>{ c.ch=st.moving; st.moving=null; return {text:`Your ${lbl(c)} now has the ${CHARMS[c.ch].n} mod: ${CHARMS[c.ch].d}`, good:true}; }}]
       : run.deck.some(c=>c.ch) ? [{l:'Move a mod', d:'Delete one of your modded cards. Its mod moves to another card you pick.', pick:'charmed', filter:c=>!!c.ch, go:(r,c,st)=>{ st.moving=c.ch; removeCard(r,c.id); return {text:`The ${lbl(c)} is deleted. Now pick the card that gets its ${CHARMS[st.moving].n} mod (${CHARMS[st.moving].d.replace(/\.$/,'')}).`, again:true}; }},
+          {l:'Buy a random mod', d:'Pay 15 credits. A card you pick gets a random mod: a lasting bonus on that card, like +3 damage or +2 credits whenever it wins.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`Your ${lbl(c)} got the ${CHARMS[c.ch].n} mod: ${CHARMS[c.ch].d}`, good:true}; }},
           {l:'Leave', d:'Keep your mods where they are.', go:()=>({text:'The humming fades.'})}]
       : [{l:'Buy a random mod', d:'Pay 15 credits. A card you pick gets a random mod: a lasting bonus on that card, like +3 damage or +2 credits whenever it wins.', pick:'any', can:r=>r.gold>=15, go:(r,c)=>{ r.gold-=15; c.ch=pick(Object.keys(CHARMS)); return {text:`Your ${lbl(c)} got the ${CHARMS[c.ch].n} mod: ${CHARMS[c.ch].d}`, good:true}; }},
           {l:'Leave', d:'Nothing to move.', go:()=>({text:'The humming fades.'})}]}
@@ -1606,6 +1624,21 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
 <script>
 (() => {
   const $ = id => document.getElementById(id);
+
+  /* long wars: squeeze the lane's cards so the pile always fits the table */
+  (() => {
+    const fit = l => {
+      const cs = [...l.children].filter(c => c.classList.contains('card'));
+      l.style.removeProperty('--squeeze');
+      if (cs.length < 2 || !l.clientWidth) return;
+      let tot = cs[0].offsetWidth;
+      for (let i = 1; i < cs.length; i++) tot += cs[i].offsetWidth + parseFloat(getComputedStyle(cs[i]).marginLeft);
+      const over = tot - l.clientWidth + 8;
+      if (over > 0) l.style.setProperty('--squeeze', (over / (cs.length - 1)).toFixed(1) + 'px');
+    };
+    ['oLane', 'yLane'].forEach(id => { const l = document.getElementById(id); if (l) new MutationObserver(() => fit(l)).observe(l, { childList: true }); });
+    addEventListener('resize', () => ['oLane', 'yLane'].forEach(id => { const l = document.getElementById(id); if (l) fit(l); }));
+  })();
 
   /* your own art: every icon is a picture in the art folder, art/<folder>/<name>.png. Draw over any file (keep the same
      name) and the game uses yours. If a file is missing, the built-in icon shows instead. See art/README.txt. */
@@ -2032,7 +2065,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
   function cardEl(c, { size = 'full', down = false } = {}) {
     const el = document.createElement('div');
     const art = c && !c.sk && MY_CARDS.has(artFile(c));
-    el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}${art ? ' art' : ''}${c && c.sk ? ' skill' : ''}`;
+    el.className = `card${size !== 'full' ? ' ' + size : ''}${down ? ' down' : ''}${c && (c.s === 'H' || c.s === 'D') ? ' red' : ''}${art ? ' art' : ''}${c && c.sk ? ' skill' : ''}${c && c.ch === 'gilded' && !down ? ' gilded' : ''}`;
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', down || !c ? 'Face-down card' : full(c));
     el.innerHTML = `<div class="fc front">${art ? artImg(artFile(c)) + `<span class="art-fallback" hidden>${faceHTML(c, size)}</span>` : c ? faceHTML(c, size) : ''}${c && c.ch && CHARMS[c.ch] ? `<span class="charm-badge">${CHARMS[c.ch].i}</span>` : ''}${c && c.sl && SEALS[c.sl] ? `<span class="seal-badge">${SEALS[c.sl].i}</span>` : ''}${c ? `<span class="val-badge">${c.v}</span>` : ''}</div><div class="fc backf"></div>`;
@@ -2505,6 +2538,12 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
   $('handRow').addEventListener('click', e => { const ring = e.target.closest('[data-ring]'); if (!ring) return; e.stopImmediatePropagation(); e.preventDefault(); const b = ring.closest('[data-hi]'); showBuffTip(+ring.dataset.ring, b || ring); Snd.tap(); }, true);
   document.addEventListener('pointerdown', e => { if (buffTipEl && !e.target.closest('[data-ring]')) hideBuffTip(); }, true);
   // a line under the hand that explains the low-card bonuses while one is active
+  // Overheated perk: show when its forced war comes (every 4th round), so nobody has to count
+  function heatHint() {
+    if (!B || B.over || !hasPerk(run, 'hot')) return '';
+    const n = 4 - (B.round % 4);
+    return `<div class="heat-hint${n === 1 ? ' now' : ''}">🌡️ <b>Overheated:</b> ${n === 1 ? 'this round is a <b>WAR</b>, whatever you play. Your war card gets +2.' : `next forced war in <b>${n}</b> rounds.`}</div>`;
+  }
   function lowHint() {
     if (!B.hand.some((c, i) => lowBonus(B, i).n)) return '';
     const n = B.hand.filter(isLow).length, st = B.streak || 0, sb = Math.min(STREAK_MAX, st), sw = n > 1;
@@ -2520,7 +2559,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
     const pn = peek(B, 'p'), hand = handMode();
     $('youPeek').innerHTML = pn && !hand ? `${cardHTML(pn, 'mini')}<span>Next</span>` : '';
     $('handRow').hidden = !hand; $('flipBtn').hidden = hand;
-    if (hand) $('handRow').innerHTML = B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}${lowTag(i)}</button>`).join('') + lowHint();
+    if (hand) $('handRow').innerHTML = B.hand.map((c, i) => `<button class="hand-card" type="button" data-hi="${i}" aria-label="Play the ${full(c)}"${busy || B.over ? ' disabled' : ''}>${cardHTML(c, 'mini')}${lowTag(i)}</button>`).join('') + lowHint() + heatHint();
     $('foeQuirk').textContent = quirkLine();
     const sight = foeSight(run, B), en = sight ? peekN(B, 'e', sight) : [];
     $('foePeek').innerHTML = en.length ? `<div class="peek-stack">${en.map(c => cardHTML(c, 'mini')).join('')}</div><span>${en.length > 1 ? 'Next two' : 'Next'}</span>`
@@ -2958,17 +2997,18 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
   const TC = (v, s) => ({ v, s, id: nid() });
   const TUT_STEPS = [
     { pages: ['<b>Welcome to War!</b> Each round you play <b>one card from your hand</b> against the enemy\'s next card. The <b>higher card wins</b> and hits the loser for the difference in rank.',
+        '<b>Card values:</b> number cards are worth their number. <b>Jack = 11, Queen = 12, King = 13, Ace = 14.</b> The small number badge on every card shows its value.',
         'Up top is the <b>Training Bot</b> and its health bar. Down below is your health and your <b>hand of 3 cards</b>. The card at the right of the table is the <b>enemy\'s next card</b>, so you always know what you are playing against.'],
       only: [9, 'S'], doText: 'Their next card is a <b>5</b>. Play your <b>9♠</b>: 9 − 5 = <b>4 damage</b>.' },
     { pages: ['Hit for 4! Tip: you don\'t need your biggest card every time. Keep your <b>Queen</b> for something big.',
         'Their next card is a <b>7</b>, the same as your 7♦. A <b>tie starts a WAR</b>.',
         '<b>How a war works:</b> both sides lay <b>3 cards face down</b> (the war pile), then flip <b>one more card</b>. The higher of those two flipped cards wins the whole war. If they tie again, it is another war on top.',
-        '<b>War damage:</b> the winner hits for the <b>gap between the last two flipped cards</b>, plus <b>3 for every war</b>. One war won with an Ace against a 10 is 4 + 3 = <b>7 damage</b>. Two wars would be gap + 6.',
+        '<b>War damage:</b> the winner hits for the <b>gap between the last two flipped cards</b>, plus <b>3 for every war</b>. Example: you win one war with an <b>Ace (14)</b> against a <b>10</b>. The gap is 14 − 10 = <b>4</b>, plus <b>3</b> for the war = <b>7 damage</b>. Two wars in a row would be the gap + 6.',
         '<b>The prize:</b> the winner takes the loser\'s <b>best card from the war pile</b> and keeps it for the rest of the run. Lose a war and they take <b>your</b> best card, until you win the fight and get it back.'],
       only: [7, 'D'], doText: 'Play your <b>7♦</b> to start a war.' },
     { pages: ['You won the war! Your <b>Ace</b> beat their <b>10</b>: <b>4</b> for the gap (14 − 10) <b>+ 3</b> for the war = <b>7 damage</b>.',
         '<b>The card you won:</b> their 10♦ was the best card in their war pile, so it is <b>yours now</b>. It joins <b>your deck</b> for the rest of the run, so you can draw it and play it in later fights. (Lose a war and they take <b>your</b> best card the same way, until you win the fight.)',
-        'Their next card is a <b>Jack</b>. Your <b>Queen</b> beats it by 1. Small wins still count.'],
+        'Their next card is a <b>Jack (11)</b>. Your <b>Queen (12)</b> beats it by 1. Small wins still count.'],
       only: [12, 'C'], doText: 'Play your <b>Queen ♣</b> against their Jack.' },
     { pages: ['Now your hand is all low cards: <b>2, 3 and 4</b>. Low cards are not junk. They team up.',
         '<b>🐜 Swarm:</b> a card of <b>6 or under</b> gets <b>+2 for each other low card</b> in your hand. You hold three low cards, so whichever one you play has two partners: 2 + 2 = <b>+4</b>. That is the number in the circle on each card: what it really plays as.',
@@ -3200,7 +3240,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
   let pickCb = null;
   function openCardPick({ title, desc, onPick, cancel, filter }) {
     pickCb = onPick;
-    $('charmTitle').textContent = title;
+    $('charmTitle').innerHTML = title;
     $('charmDesc').textContent = desc;
     $('pickCancel').hidden = !cancel;
     const g = $('charmGrid'); g.innerHTML = '';
@@ -3227,6 +3267,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
     if (it.k === 'relic') { const R = RELICS[it.r]; return { vis: `<span class="icon">${R.i}</span>`, t: R.n, d: R.d }; }
     if (it.k === 'charm') { const C = CHARMS[it.ch]; return { vis: `<span class="icon">${C.i}</span>`, t: `${C.n} mod`, d: `${C.d} Goes on a card you pick.` }; }
     if (it.k === 'tonic') { const T = TONICS[it.t]; return { vis: `<span class="icon">${T.i}</span>`, t: T.n, d: `${T.d} ${run.tonics.length >= tonicCap(run) ? 'Your script slots are full.' : ''}` }; }
+    if (it.k === 'heal') return { vis: '<span class="icon">🔋</span>', t: 'Recharge (free)', d: 'The last stop before the boss: heal 30% of your max HP, on the house.' };
     return { vis: '<span class="icon">✂️</span>', t: 'Remove a card', d: 'Take a card you pick out of your deck. Costs more each time.' };
   }
   function showStore() {
@@ -3243,7 +3284,7 @@ if(typeof module!=='undefined') module.exports={lowBonus,isLow,LOW,STREAK_MAX,fo
       const blocked = it.k === 'tonic' && run.tonics.length >= tonicCap(run);
       b.type = 'button'; b.className = `ware${it.sold ? ' sold' : run.gold < it.price || blocked ? ' poor' : ''}`; b.style.setProperty('--d', `${i * 50}ms`);
       if (it.sold) b.disabled = true;
-      b.innerHTML = `<div class="vis">${v.vis}</div><b>${v.t}</b><small>${v.d}</small><span class="price">${PRIZE_ICON.gold} ${it.price}</span>`;
+      b.innerHTML = `<div class="vis">${v.vis}</div><b>${v.t}</b><small>${v.d}</small><span class="price">${it.price ? `${PRIZE_ICON.gold} ${it.price}` : 'Free'}</span>`;
       b.addEventListener('click', () => buy(i, b));
       $('wares').append(b);
     });
